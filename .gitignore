@@ -99,3 +99,10 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# dmstudio generated files
+dmdir.py
+__init__.py
+
+# Keep notebook in examples only
+/dmstudio_tutorial.ipynb

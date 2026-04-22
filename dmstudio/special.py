@@ -176,3 +176,28 @@ def text_importer(oScript, scenario_file):
     """
     oScript.ActiveProject.RunTextImporter(scenario_file)
 
+
+def create_isoshells(oScript, **kwargs):
+    """
+    Create isoshells via ParseCommand with name-value parameter pairs.
+    Available for automation in Studio RM 3.1+.
+
+    Parameters:
+    -----------
+    oScript: COM object
+        Active Studio COM application object.
+    **kwargs: dict
+        Name-value parameter pairs for the Create Isoshells command.
+        Common parameters include: model, field, value, out, etc.
+
+    Example:
+    --------
+    >>> from dmstudio import initialize, special
+    >>> oScript = initialize.studio('StudioRM')
+    >>> special.create_isoshells(oScript, model="blockmod", field="AU", value="1.0", out="isoshell")
+    """
+    command = "create-isoshells"
+    for key, value in kwargs.items():
+        command += " @{}={}".format(key, value)
+    oScript.ParseCommand(command)
+

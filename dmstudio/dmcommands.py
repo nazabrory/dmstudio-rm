@@ -45257,3 +45257,69 @@ class init(object):
 
         self.run_command(command)
 
+    def intext(self,
+               out_o="required",
+               indd_i="optional",
+               settings_i="optional",
+               arguments='optional',
+               retrieval='optional'):
+
+        """
+        INTEXT
+        ------
+
+        Convert text data to Datamine binary format.
+        As of Studio RM 3.1, INTEXT can process data using either an INDD
+        (data definition) file, a SETTINGS file, or neither.
+
+        Output Files:
+        -------------
+
+        out: Table
+            Output Datamine binary file.
+            Required=Yes
+
+        Input Files:
+        ------------
+
+        indd: Input
+            Data definition file. Optional in Studio RM 3.1+.
+            Required=No
+
+        settings: Input
+            Settings file. Optional in Studio RM 3.1+.
+            Required=No
+
+        Parameters:
+        -----------
+
+        arguments: str
+            Additional arguments string.
+            Required=No
+
+        retrieval: str
+            Retrieval criteria.
+            Required=No
+        """
+
+        command = "intext "
+
+        if out_o == "required":
+            raise ValueError("out_o is required.")
+
+        command += " &out=" + out_o
+
+        if indd_i != "optional":
+            command += " &indd=" + indd_i
+
+        if settings_i != "optional":
+            command += " &settings=" + settings_i
+
+        if arguments != "optional":
+            command += " " + arguments + " "
+
+        if retrieval != "optional":
+            command += "{" + retrieval + "}"
+
+        self.run_command(command)
+

@@ -29,23 +29,27 @@ def studio(version):
     studio
     ------
 
-    Datamine Studio Initialization. Versions Studio3, StudioRM and StudioEM supported
+    Datamine Studio Initialization. Versions Studio3, StudioRM, StudioRM 3.1 and StudioEM supported.
 
     Parameters:
     -----------
 
     version: str
-        Datamine studio version
+        Datamine studio version. Supported values: 'Studio3', 'StudioRM', 'StudioRM3.1', 'StudioEM'.
+        If None, will try StudioRM first, then Studio3, then StudioEM.
 
-    Tries to connect to studio RM first.
-    Need a better way to do this.
+    Notes:
+    ------
+    Studio RM 3.1 introduces safer scripting practices. When writing scripts for 3.1+,
+    avoid using new ActiveXObject() patterns. Python win32com.client.Dispatch() remains
+    the standard COM initialization method for Python automation.
     '''
 
     oScript = None
 
     _make_dmdir()
 
-    if version == 'StudioRM':
+    if version == 'StudioRM' or version == 'StudioRM3.1':
         oScript = _scriptinit("Datamine.StudioRM.Application")
     elif version == 'Studio3':
         oScript = _scriptinit("Datamine.Studio.Application")
@@ -62,11 +66,9 @@ def studio(version):
                 try:
                     oScript = _scriptinit("Datamine.StudioEM.Application")
                 except:
-                    assert False, "No valid Studio version is active"
+                    raise RuntimeError("No valid Studio version is active")
 
-    # print 'Connected to Datamine:', oScript
-
-    return oScript;
+    return oScript
 
 def dmFile():
 
@@ -124,7 +126,7 @@ def _make_dmdir():
     dmdir_f.write("\n")
 
     for infile in glob.glob("*.dm"):
-        outname = np.str.split(infile, '.')[0]
+        outname = infile.rsplit('.', 1)[0]
         dmdir_f.write('_'+ outname + "_='" + outname + "'\n")
 
     dmdir_f.close()

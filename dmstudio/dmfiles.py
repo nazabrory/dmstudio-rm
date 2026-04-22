@@ -146,7 +146,7 @@ class init(object):
 
         command += " &reserve=" + reserve_o
 
-        if zone != "optional":
+        if zone_f != "optional":
             command += " *zone=" + zone_f
 
         if arguments != "optional":

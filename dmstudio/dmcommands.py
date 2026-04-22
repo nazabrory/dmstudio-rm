@@ -3844,6 +3844,15 @@ class init(object):
                coreloss_f="optional",
                corerec_f="optional",
                zone_f="optional",
+               zone2_f="optional",
+               zone3_f="optional",
+               zone4_f="optional",
+               zone5_f="optional",
+               dom1_f="optional",
+               dom2_f="optional",
+               dom3_f="optional",
+               dom4_f="optional",
+               dom5_f="optional",
                interval_p="optional",
                mingap_p="optional",
                maxgap_p=0,
@@ -3906,6 +3915,12 @@ class init(object):
             exists in the IN and will be copied to the OUT file. If specified then new composites will be
             each time the value of ZONE changes.
             Default=Undefined
+            Required=No
+        zone2 to zone5: Undefined : Undefined
+            Additional zone fields for compositing within. Supported in Studio RM 3.1+.
+            Required=No
+        dom1 to dom5: Undefined : Undefined
+            Optional dominant categorical value fields. Supported in Studio RM 3.1+.
             Required=No
 
         Parameters:
@@ -4004,6 +4019,33 @@ class init(object):
 
         if zone_f != "optional":
             command += " *zone=" + zone_f
+
+        if zone2_f != "optional":
+            command += " *zone2=" + zone2_f
+
+        if zone3_f != "optional":
+            command += " *zone3=" + zone3_f
+
+        if zone4_f != "optional":
+            command += " *zone4=" + zone4_f
+
+        if zone5_f != "optional":
+            command += " *zone5=" + zone5_f
+
+        if dom1_f != "optional":
+            command += " *dom1=" + dom1_f
+
+        if dom2_f != "optional":
+            command += " *dom2=" + dom2_f
+
+        if dom3_f != "optional":
+            command += " *dom3=" + dom3_f
+
+        if dom4_f != "optional":
+            command += " *dom4=" + dom4_f
+
+        if dom5_f != "optional":
+            command += " *dom5=" + dom5_f
 
             # Required parameter error check
 
@@ -17023,8 +17065,8 @@ class init(object):
                  modelin_i="required",
                  wiretr_i="required",
                  wirept_i="required",
-                 modelout_o="required",
-                 fullmod_o="required",
+                 modelout_o="optional",
+                 fullmod_o="optional",
                  zone_f="optional",
                  addf1_f="optional",
                  addf2_f="optional",
@@ -17051,6 +17093,8 @@ class init(object):
         --------
         This is auto-generated documentation. For more command information visit the Datamine help file.
 
+        Note: As of Studio RM 3.1, MODSPLIT can output MODELOUT, FULLMOD, or both.
+
         Input Files:
         ------------
 
@@ -17070,12 +17114,12 @@ class init(object):
         modelout: Block Model
             Output model file to be created that contains only cells constrained (and split) by the input
             Which cells are written to this model depends on the @MODLTYPE parameter.
-            Required=Yes
+            Required=No (Studio RM 3.1+)
         fullmod: Block Model
             Output full model file to be created. This model covers the same volume as the input model but it
             split cells where the original cells intersect the input wireframes. Cells constrained by the
             are flagged with a ZONE value depending on field value of *ZONE and the parameter @ZONE.
-            Required=Yes
+            Required=No (Studio RM 3.1+)
 
         Fields:
         -------
@@ -17217,19 +17261,11 @@ class init(object):
 
         command += " &wirept=" + wirept_i
 
-        # Required output error check
+        if modelout_o != "optional":
+            command += " &modelout=" + modelout_o
 
-        if modelout_o == "required":
-            raise ValueError("modelout_o is required.")
-
-        command += " &modelout=" + modelout_o
-
-        # Required output error check
-
-        if fullmod_o == "required":
-            raise ValueError("fullmod_o is required.")
-
-        command += " &fullmod=" + fullmod_o
+        if fullmod_o != "optional":
+            command += " &fullmod=" + fullmod_o
 
         if zone_f != "optional":
             command += " *zone=" + zone_f
@@ -44967,6 +45003,101 @@ class init(object):
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
+
+        self.run_command(command)
+
+    # ---------------------------------------------------------------------------
+    # Studio RM 3.1 New and Updated Commands
+    # ---------------------------------------------------------------------------
+
+    def copymod(self,
+                in_i="required",
+                out_o="required",
+                retrieval="optional"):
+
+        """
+        COPYMOD
+        -------
+
+        Copy block model. As of Studio RM 3.1, COPYMOD now supports retrieval criteria.
+
+        Input Files:
+        ------------
+
+        in: Input
+            Input block model file.
+            Required=Yes
+
+        Output Files:
+        -------------
+
+        out: Block Model
+            Output block model file.
+            Required=Yes
+
+        Parameters:
+        -----------
+
+        retrieval: str
+            Retrieval criteria for selective copying.
+            Required=No
+        """
+
+        command = "copymod "
+
+        if in_i == "required":
+            raise ValueError("in_i is required.")
+
+        command += " &in=" + in_i
+
+        if out_o == "required":
+            raise ValueError("out_o is required.")
+
+        command += " &out=" + out_o
+
+        if retrieval != "optional":
+            command += "{" + retrieval + "}"
+
+        self.run_command(command)
+
+    def update_scripts(self,
+                       path_p="optional",
+                       backup_p=1,
+                       recursive_p=0):
+
+        """
+        UPDATE-SCRIPTS
+        --------------
+
+        Runs the Script Updater utility to batch-convert scripts to safer syntax
+        compatible with Studio RM 3.1+.
+
+        Parameters:
+        -----------
+
+        path: str
+            Path to script file or folder containing scripts to update.
+            Required=No
+
+        backup: int
+            =1 to create .bak backup files (default). =0 to skip backups.
+            Required=No
+
+        recursive: int
+            =1 to process subfolders recursively. =0 for current folder only (default).
+            Required=No
+        """
+
+        command = "update-scripts "
+
+        if path_p != "optional":
+            command += " @path=\"" + str(path_p) + "\""
+
+        if backup_p != "optional":
+            command += " @backup=" + str(backup_p)
+
+        if recursive_p != "optional":
+            command += " @recursive=" + str(recursive_p)
 
         self.run_command(command)
 

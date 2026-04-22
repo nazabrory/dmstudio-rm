@@ -17,7 +17,23 @@ Versions supported are:
 
 * Datamine Studio version 3
 * Datamine Studio version RM
+* Datamine Studio version RM 3.1
 * Datamine Studio version EM
+
+What's New (v0.0.2-beta)
+------------------------
+
+Updates to align with Studio RM 3.1 capabilities:
+
+* Added ``copymod`` command (now supports retrieval criteria in 3.1)
+* Added ``update_scripts`` command for batch script conversion to safer syntax
+* Updated ``compdh`` with up to 5 ZONE fields and 5 DOM fields (3.1 enhancement)
+* Updated ``modsplit`` to allow optional ``modelout`` and/or ``fullmod`` outputs (3.1 enhancement)
+* Added ``print_plot_sheet_to_pdf`` automation helper for PDF output via COM
+* Fixed ``dmfiles.comres`` zone field reference bug
+* Fixed deprecated ``pandas.DataFrame.append()`` usage for pandas 2.0+ compatibility
+* Fixed deprecated ``numpy.str.split`` usage for numpy 1.20+ compatibility
+* Updated initialization to recognise Studio RM 3.1 and document safer scripting practices
 
 The package is made up of the following modules:
 
@@ -77,6 +93,6 @@ The COM object is intialized using ``win32client`` package and is passed to a va
 Installation
 ------------
 
-For those starting out in python, the easiest option for windows is downloading [Anaconda](https://www.anaconda.com/download/) for python 3.7. This has all the basic packages that will be required.
+For those starting out in python, the easiest option for windows is downloading [Anaconda](https://www.anaconda.com/download/) for python 3.10 or later. This has all the basic packages that will be required.
 
 A pip install version of dmstudio will be available shortly. For the time being a pre-release version is available on github.

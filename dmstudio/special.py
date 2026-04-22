@@ -67,7 +67,7 @@ class dmfile_def(object):
         dmtemp = pd.DataFrame(data)
         field_order = ['Field Name', 'Field Type', 'Length', 'Keep', 'Default']
         dmtemp = dmtemp[field_order]
-        self.definition = self.definition.append(dmtemp).reset_index(drop=True)
+        self.definition = pd.concat([self.definition, dmtemp], ignore_index=True)
 
 def inpfil(csv=None, out_o=None, definition=None):
 
@@ -125,9 +125,35 @@ def pd_to_definition(df):
     definition['Keep']='Y'
     definition['Default']=''
 
-    return definition;
-    
-    
+    return definition
+
+
+# -----------------------------------------------------------------------------------#
+# Studio RM 3.1 Automation Helpers
+# -----------------------------------------------------------------------------------#
+
+def print_plot_sheet_to_pdf(oScript, plot_sheet_name, output_path, options=""):
+    """
+    Print a plot sheet to PDF using the Studio RM 3.1+ DmProject.PrintPlotSheetToPDF() method.
+
+    Parameters:
+    -----------
+    oScript: COM object
+        Active Studio COM application object (e.g. from dmstudio.initialize.studio())
+    plot_sheet_name: str
+        Name of the plot sheet to print.
+    output_path: str
+        Full file path for the output PDF.
+    options: str
+        Optional print options string.
+
+    Example:
+    --------
+    >>> from dmstudio import initialize
+    >>> oScript = initialize.studio('StudioRM')
+    >>> print_plot_sheet_to_pdf(oScript, "From 3D", "C:\\Path\\To\\Output.pdf")
+    """
+    oScript.ActiveProject.PrintPlotSheetToPDF(plot_sheet_name, output_path, options)
 
 
 

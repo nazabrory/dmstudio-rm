@@ -54,8 +54,8 @@ class dmfile_def(object):
         else:
             for col in columns:
                 if col not in definition.columns:
-                    raise "Column "  + col + " not found in definition. Columns 'Field Name', 'Field Type', 'Length'," \
-                                             " 'Keep', 'Default' are required"
+                    raise ValueError("Column " + col + " not found in definition. Columns 'Field Name', 'Field Type', 'Length'," \
+                                             " 'Keep', 'Default' are required")
             self.definition = definition
 
 

@@ -59,8 +59,8 @@ class init(object):
 
         try:
             self.oScript.Parsecommand(command)
-        except:
-            print("Unexpected error:")
+        except Exception as e:
+            print("Unexpected error:", e)
 
     def parse_infields_list(self, prefix, fields):
         '''

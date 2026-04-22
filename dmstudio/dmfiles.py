@@ -630,7 +630,7 @@ class init(object):
 
         command += " &out=" + out_o
 
-        if file != "optional":
+        if file_f != "optional":
             command += " *file=" + file_f
 
         if append_p != "optional":
@@ -830,10 +830,10 @@ class init(object):
 
         command = "scrfmt "
 
-        if out != "optional":
+        if out_o != "optional":
             command += " &out=" + out_o
 
-        if text != "optional":
+        if text_f != "optional":
             command += " *text=" + text_f
 
         if arguments != "optional":
@@ -1054,9 +1054,6 @@ class init(object):
 
         if arguments != "optional":
             command += " " + arguments + " "
-            
-        if retrieval != "optional":
-            command += "{" + retrieval + "}"
 
         self.run_command(command)
 

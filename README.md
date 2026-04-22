@@ -93,9 +93,68 @@ The COM object is intialized using ``win32client`` package and is passed to a va
 Installation
 ------------
 
-For those starting out in python, the easiest option for windows is downloading [Anaconda](https://www.anaconda.com/download/) for python 3.10 or later. This has all the basic packages that will be required.
+### Prerequisites
 
-A pip install version of dmstudio will be available shortly. For the time being a pre-release version is available on github.
+- **Windows OS** (required for COM automation with Datamine Studio)
+- **Python 3.9 or later** - Download from [python.org](https://www.python.org/downloads/)
+- **Active Datamine Studio license** (required at runtime)
+
+### Quick Start (Recommended)
+
+The easiest way to set up the environment is using the provided setup scripts:
+
+**Option 1: Using Command Prompt**
+```batch
+setup_env.bat
+```
+
+**Option 2: Using PowerShell**
+```powershell
+.\setup_env.ps1
+```
+
+These scripts will:
+1. Create a Python virtual environment (``.venv``)
+2. Install all dependencies from ``requirements.txt``
+3. Install dmstudio in development mode
+
+### Manual Installation
+
+If you prefer to set up manually:
+
+```bash
+# Create virtual environment
+python -m venv .venv
+
+# Activate (Windows Command Prompt)
+.venv\Scripts\activate.bat
+
+# Activate (Windows PowerShell)
+.venv\Scripts\Activate.ps1
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install dmstudio in development mode
+pip install -e .
+```
+
+### Anaconda/Conda Alternative
+
+For Anaconda users:
+
+```bash
+conda create -n dmstudio python=3.10
+conda activate dmstudio
+pip install -r requirements.txt
+pip install -e .
+```
+
+### Verify Installation
+
+```python
+python -c "from dmstudio import dmcommands; print('dmstudio installed successfully')"
+```
 
 Examples
 --------

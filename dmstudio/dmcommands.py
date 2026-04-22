@@ -1153,7 +1153,7 @@ class init(object):
 
         command += " &out=" + out_o
 
-        if datflds_f[0] != "optional":
+        if dataflds_f[0] != "optional":
             command += self.parse_infields_list("datafld", dataflds_f, 5, "*")
 
         if attribs_f != "optional":
@@ -1823,7 +1823,7 @@ class init(object):
 
         command += " &wirept=" + wirept_o
 
-        if class_ != "optional":
+        if class_f != "optional":
             command += " *class=" + class_f
 
         if modcol_f != "optional":
@@ -2359,7 +2359,7 @@ class init(object):
 
         command += " &conf_tbl=" + conf_tbl_o
 
-        if conf_plt != "optional":
+        if conf_plt_o != "optional":
             command += " &conf_plt=" + conf_plt_o
 
         if cutint_p != "optional":
@@ -3127,13 +3127,13 @@ class init(object):
         command += " *bhid=" + bhid_f
 
         if z1_f != "optional":
-            command += " *z=" + z_f
+            command += " *z1=" + z1_f
 
         if y_f != "optional":
             command += " *y=" + y_f
 
         if z2_f != "optional":
-            command += " *z=" + z_f
+            command += " *z2=" + z2_f
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -3555,7 +3555,7 @@ class init(object):
         if bhid_f != "optional":
             command += " *bhid=" + bhid_f
 
-        if from_ != "optional":
+        if from_f != "optional":
             command += " *from=" + from_f
 
         if to_f != "optional":
@@ -3776,7 +3776,7 @@ class init(object):
         if bhid_f != "optional":
             command += " *bhid=" + bhid_f
 
-        if from_ != "optional":
+        if from_f != "optional":
             command += " *from=" + from_f
 
         if to_f != "optional":
@@ -5400,8 +5400,8 @@ class init(object):
 
         # Required field error check
 
-        if key1_f == "required":
-            raise ValueError("key1_f is required.")
+        if keys_f[0] == "required":
+            raise ValueError("keys_f is required.")
 
         command += self.parse_infields_list("key", keys_f, 10, "*")
 
@@ -6802,7 +6802,7 @@ class init(object):
         if zcollar_f != "optional":
             command += " *zcollar=" + zcollar_f
 
-        if from_ != "optional":
+        if from_f != "optional":
             command += " *from=" + from_f
 
         if to_f != "optional":
@@ -7585,9 +7585,6 @@ class init(object):
 
         if print_p != "optional":
             command += " @print=" + str(print_p)
-
-        if arguments != "optional":
-            command += " " + arguments + " "
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -16108,7 +16105,7 @@ class init(object):
 
         command += " &conf_tbl=" + conf_tbl_o
 
-        if conf_plt != "optional":
+        if conf_plt_o != "optional":
             command += " &conf_plt=" + conf_plt_o
 
         if cutint_p != "optional":
@@ -17823,7 +17820,7 @@ class init(object):
         if trandist_o != "optional":
             command += " &trandist=" + trandist_o
 
-        if stat_tbl != "optional":
+        if stat_tbl_o != "optional":
             command += " &stat_tbl=" + stat_tbl_o
 
             # Required field error check
@@ -19580,7 +19577,7 @@ class init(object):
             command += " @dfltfile=" + str(dfltfile_p)
 
         if num_pens_p != "optional":
-            command += " @num.pens=" + str(num.pens_p)
+            command += " @num.pens=" + str(num_pens_p)
 
         if hatchwid_p != "optional":
             command += " @hatchwid=" + str(hatchwid_p)
@@ -30731,7 +30728,7 @@ class init(object):
         if primary_o != "optional":
             command += " &primary=" + primary_o
 
-        if print_ != "optional":
+        if print_p != "optional":
             command += " &print=" + print_o
 
             # Required field error check
@@ -38438,7 +38435,7 @@ class init(object):
 
         command += " *grade=" + grade_f
 
-        if weight != "optional":
+        if weight_f != "optional":
             command += " *weight=" + weight_f
 
         self.run_command(command)
@@ -43044,8 +43041,8 @@ class init(object):
 
         command += " &out=" + out_o
 
-        if ave_dist != "optional":
-            command += " *ave.dist=" + ave.dist_f
+        if ave_dist_f != "optional":
+            command += " *ave.dist=" + ave_dist_f
 
         if vgram_f != "optional":
             command += " *vgram=" + vgram_f

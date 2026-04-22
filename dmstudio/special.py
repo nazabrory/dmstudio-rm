@@ -64,7 +64,7 @@ class dmfile_def(object):
         data = {'Field Name': field_name, 'Field Type': field_type, 'Length': length, 'Keep': keep,
                 'Default': default}
 
-        dmtemp = pd.DataFrame(data)
+        dmtemp = pd.DataFrame([data])
         field_order = ['Field Name', 'Field Type', 'Length', 'Keep', 'Default']
         dmtemp = dmtemp[field_order]
         self.definition = pd.concat([self.definition, dmtemp], ignore_index=True)

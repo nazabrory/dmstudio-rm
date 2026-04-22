@@ -45098,3 +45098,162 @@ class init(object):
 
         self.run_command(command)
 
+    def digitise_doughnut(self,
+                          perimeter_i="required",
+                          voids_i="required",
+                          out_o="required",
+                          storage_switch_p=1):
+
+        """
+        DIGITISE-DOUGHNUT
+        -----------------
+
+        Creates closed string data with internal voids (doughnut shapes).
+        Available in Studio RM 3.1+.
+
+        Input Files:
+        ------------
+
+        perimeter: Input
+            Outer perimeter closed string file.
+            Required=Yes
+
+        voids: Input
+            Internal void closed string file(s).
+            Required=Yes
+
+        Output Files:
+        -------------
+
+        out: String
+            Output doughnut string file.
+            Required=Yes
+
+        Parameters:
+        -----------
+
+        storage_switch: int
+            =1 to generate new string data (default). =0 to modify existing perimeter.
+            Required=No
+        """
+
+        command = "digitise-doughnut "
+
+        if perimeter_i == "required":
+            raise ValueError("perimeter_i is required.")
+
+        command += " &perimeter=" + perimeter_i
+
+        if voids_i == "required":
+            raise ValueError("voids_i is required.")
+
+        command += " &voids=" + voids_i
+
+        if out_o == "required":
+            raise ValueError("out_o is required.")
+
+        command += " &out=" + out_o
+
+        if storage_switch_p != "optional":
+            command += " @storage-switch=" + str(storage_switch_p)
+
+        self.run_command(command)
+
+    def smooth_gradient(self,
+                        in_i="required",
+                        out_o="required",
+                        mode_p=1,
+                        retrieval="optional"):
+
+        """
+        SMOOTH-GRADIENT
+        ---------------
+
+        Smooth string gradient. As of Studio RM 3.1, can fully smooth
+        preselected strings from start to end.
+
+        Input Files:
+        ------------
+
+        in: Input
+            Input string file.
+            Required=Yes
+
+        Output Files:
+        -------------
+
+        out: String
+            Output smoothed string file.
+            Required=Yes
+
+        Parameters:
+        -----------
+
+        mode: int
+            Smoothing mode. =1 for full smooth (start to end) in 3.1+.
+            Required=No
+
+        retrieval: str
+            Retrieval criteria for selective smoothing.
+            Required=No
+        """
+
+        command = "smooth-gradient "
+
+        if in_i == "required":
+            raise ValueError("in_i is required.")
+
+        command += " &in=" + in_i
+
+        if out_o == "required":
+            raise ValueError("out_o is required.")
+
+        command += " &out=" + out_o
+
+        if mode_p != "optional":
+            command += " @mode=" + str(mode_p)
+
+        if retrieval != "optional":
+            command += "{" + retrieval + "}"
+
+        self.run_command(command)
+
+    def set_view_fov(self,
+                     angle_p=45):
+
+        """
+        SET-VIEW-FOV
+        ------------
+
+        Set the default field of view angle for new projects.
+        Available in Studio RM 3.1+.
+
+        Parameters:
+        -----------
+
+        angle: int
+            Field of view angle in degrees. Default is 45.
+            Required=No
+        """
+
+        command = "set-view-fov "
+
+        if angle_p != "optional":
+            command += " @angle=" + str(angle_p)
+
+        self.run_command(command)
+
+    def switch_drillhole_points_traces(self):
+
+        """
+        SWITCH-DRILLHOLE-POINTS-TRACES
+        ------------------------------
+
+        Switch between drillhole points and traces display mode.
+        Available on the Format ribbon in Studio RM 3.1+.
+        """
+
+        command = "switch-drillhole-points-traces"
+
+        self.run_command(command)
+

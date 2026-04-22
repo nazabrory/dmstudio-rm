@@ -156,4 +156,23 @@ def print_plot_sheet_to_pdf(oScript, plot_sheet_name, output_path, options=""):
     oScript.ActiveProject.PrintPlotSheetToPDF(plot_sheet_name, output_path, options)
 
 
+def text_importer(oScript, scenario_file):
+    """
+    Run the Text Importer using a saved scenario file (.dminsv).
+    Available for automation in Studio RM 3.1+.
+
+    Parameters:
+    -----------
+    oScript: COM object
+        Active Studio COM application object.
+    scenario_file: str
+        Full path to the Text Importer scenario file (.dminsv).
+
+    Example:
+    --------
+    >>> from dmstudio import initialize, special
+    >>> oScript = initialize.studio('StudioRM')
+    >>> special.text_importer(oScript, "C:\\Path\\To\\import.dminsv")
+    """
+    oScript.ActiveProject.RunTextImporter(scenario_file)
 

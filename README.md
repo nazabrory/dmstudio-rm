@@ -100,4 +100,7 @@ A pip install version of dmstudio will be available shortly. For the time being 
 Examples
 --------
 
-See the ``examples/`` folder for sample scripts demonstrating Studio RM 3.1 capabilities.
+See the ``examples/`` folder for sample scripts and tutorials:
+
+* ``studio_rm_31_example.py`` - Python script demonstrating Studio RM 3.1 features
+* ``dmstudio_tutorial.ipynb`` - Interactive Jupyter notebook tutorial with 50 cells covering setup, basic operations, new commands, automation helpers, DataFrame workflows, batch operations, advanced pipelines, and best practices

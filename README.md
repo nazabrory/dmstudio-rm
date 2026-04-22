@@ -96,3 +96,8 @@ Installation
 For those starting out in python, the easiest option for windows is downloading [Anaconda](https://www.anaconda.com/download/) for python 3.10 or later. This has all the basic packages that will be required.
 
 A pip install version of dmstudio will be available shortly. For the time being a pre-release version is available on github.
+
+Examples
+--------
+
+See the ``examples/`` folder for sample scripts demonstrating Studio RM 3.1 capabilities.

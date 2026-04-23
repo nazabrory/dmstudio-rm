@@ -3,7 +3,7 @@ DMSTUDIO
 
 Python package for Datamine Studio scripting. 
 
-Originally created by Sean Horan, Principal Geologist/Geostatistician, RPA Consulting.
+Originally created by Sean Horan.
 
 The package provides an easy to use interface between Python and Datamine Studio packages for the creation of concise, highly readable, and powerful Datamine scripts. The package is setup such that it should (hopefully) be intuitive for people familiar with Datamine commands and scripts but also offers a comparitevly easy entry for those looking to learn Datamine scripting.
 

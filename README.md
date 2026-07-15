@@ -18,52 +18,50 @@ If you have a Datamine working folder and want to use this scripting framework, 
 2. Load your project. If you are starting fresh, create a new project and save it to a folder on your drive (e.g., `C:\DatamineProjects\MyMineProject`).
 3. Make sure you know the absolute path of this working directory.
 
-### Step 2: Copy this Repository into Your Project Folder
-To keep your project self-contained and tidy:
-1. Clone or download this repository.
-2. Copy the contents of this repository (including the `dmstudio` folder, `mcp_server.py`, etc.) directly into your project's working directory (`C:\DatamineProjects\MyMineProject`).
-3. Your project directory should look like this (with all tutorial and project files organized neatly under the `tutorials/` subdirectory):
+### Step 2: Keep the Repository in a Single Separate Folder
+To prevent cluttering your actual project folder with library source code, configuration files, and setup scripts:
+1. Clone or download this repository into a separate folder on your machine (e.g., `C:\DatamineTools\dmstudio-rm3`).
+2. Keep your own Datamine project files and actual geological database inside your own clean project folder (e.g., `C:\DatamineProjects\MyMineProject`).
+3. This ensures your project folder remains clean, like this:
    ```
-   C:\DatamineProjects\MyMineProject\
-   ├── tutorials\               (Tutorials and Datamine project files)
-   │   ├── Project.rmproj       (Your Datamine project file)
-   │   ├── Holes3D_Tutorial.ipynb  (Tutorial Notebook)
-   │   └── Database\            (Raw tutorial database files)
-   ├── dmstudio\                (This scripting library folder)
-   ├── mcp_server.py            (MCP Server script)
-   └── ...
+   C:\DatamineProjects\MyMineProject\   <-- Your actual project folder (pristine & tidy)
+   ├── MyProject.rmproj                 (Your Datamine project file)
+   ├── high_grade_assays.dm             (Your output/input data files)
+   └── sorted_assays.dm
    ```
 
-### Step 3: Configure Your Python Environment
-You can set up your python environment using either standard virtual environments (`venv`) or Anaconda/Miniconda.
+### Step 3: Install the Package in Your Environment
+By installing the library in "editable mode" (`-e`), the Python environment will know how to load `dmstudio` from any directory without needing to copy the package folder into your project folder.
+
+1. Open your terminal or Command Prompt.
+2. Navigate to the folder where you cloned this repository:
+   ```cmd
+   cd C:\DatamineTools\dmstudio-rm3
+   ```
+3. Choose one of the environment options below to set up and install the package:
 
 #### Option A: Using Conda (Recommended)
-1. Open your Anaconda Prompt or terminal.
-2. Navigate to your project folder:
-   ```cmd
-   cd C:\DatamineProjects\MyMineProject
-   ```
-3. Create and activate a new Conda environment:
-   ```cmd
-   conda create --name dmstudio python=3.9 -y
-   conda activate dmstudio
-   ```
-4. Install dependencies and the local package:
-   ```cmd
-   conda install -y pandas numpy nbformat -c conda-forge
-   pip install pywin32 mcp
-   pip install -e .
-   ```
+```cmd
+# Create and activate environment
+conda create --name dmstudio python=3.9 -y
+conda activate dmstudio
+
+# Install dependencies and install package in editable mode
+conda install -y pandas numpy nbformat -c conda-forge
+pip install pywin32 mcp
+pip install -e .
+```
 
 #### Option B: Using Pip and Virtual Environments (Standard)
-1. Double-click or run `setup_env.bat` in your project folder, **OR** run the following in CMD:
-   ```cmd
-   cd C:\DatamineProjects\MyMineProject
-   python -m venv .venv
-   .venv\Scripts\activate
-   pip install -r requirements.txt
-   pip install -e .
-   ```
+```cmd
+# Create and activate virtual environment
+python -m venv .venv
+.venv\Scripts\activate
+
+# Install dependencies and install package in editable mode
+pip install -r requirements.txt
+pip install -e .
+```
 
 ### Step 4: Run the Connection Diagnostic
 Before scripting, verify that Python can talk to your running Studio RM session:

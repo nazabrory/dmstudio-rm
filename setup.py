@@ -11,11 +11,9 @@ version = __version__
 
 setup(name='dmstudio',
       version=version,
-      description='Python module for Datamine Studio scripting',
+      description='Python module for Datamine Studio RM scripting with AI agent capabilities',
       url='https://github.com/nazabrory/dmstudio',
       download_url='https://github.com/nazabrory/dmstudio/archive/2.0-beta.tar.gz',
-      author='Sean Horan',
-      author_email='sean.horan@rpacan.com',
       license='MIT',
       packages=['dmstudio'],
       include_package_data=True,

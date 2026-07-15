@@ -5,12 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "dmstudio"
 version = "2.0-beta"
-description = "Python module for Datamine Studio scripting"
+description = "Python module for Datamine Studio RM scripting with AI agent capabilities"
 readme = "README.md"
 license = {text = "MIT"}
-authors = [
-    {name = "Sean Horan", email = "sean.horan@rpacan.com"}
-]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
@@ -27,6 +24,8 @@ dependencies = [
     "pywin32",
     "numpy",
     "pandas",
+    "nbformat",
+    "mcp>=1.0.0",
 ]
 
 [project.urls]

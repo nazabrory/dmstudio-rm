@@ -1,5 +1,5 @@
 # dmstudio Python Package Requirements
-# Core dependencies for Datamine Studio scripting
+# Core dependencies for Datamine Studio RM scripting
 
 # Windows COM automation (required for Studio connection)
 pywin32>=227
@@ -9,3 +9,9 @@ numpy>=1.20.0
 
 # Data manipulation and CSV import support
 pandas>=1.3.0
+
+# Jupyter Notebook generation (for auditable agent workflows)
+nbformat>=5.0.0
+
+# Model Context Protocol support for AI agents
+mcp>=1.0.0

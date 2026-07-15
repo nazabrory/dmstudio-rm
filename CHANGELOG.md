@@ -1,6 +1,40 @@
 # Changelog
 
-## 2.0-beta (2026-07-15 Update)
+## 2.0-beta (AI Agent & MCP Upgrade)
+
+### Studio RM 3.3+ Compatibility
+- `initialize.studio()` now dynamically resolves any `StudioRM3.x` version string (e.g. `StudioRM3.3`, `StudioRM3.4`), future-proofing version support beyond the previously hard-coded 3.2.
+- Replaced bare `except:` blocks in `initialize.py` with `except Exception:` (PEP-8 best practice).
+
+### AI Agent Module (`dmstudio/agent.py`) — new file
+- `list_commands()` — Returns all dmcommands wrappers as a JSON-serialisable list.
+- `get_command_schema(cmd_name)` — Returns full parameter schema for a command.
+- `search_commands(query)` — Fuzzy keyword search over command names and docstrings.
+- `read_datamine(filepath)` — Reads `.dm`/`.dmx` binary files into pandas DataFrames using `DmFile.DmTableADO` COM object — no proprietary dependencies.
+- `dialog_dismiss_context()` — Opt-in context manager that auto-dismisses blocking `#32770` Studio RM modal dialogs in a background thread.
+
+### Jupyter Notebook Builder (`dmstudio/notebook_builder.py`) — new file
+- `NotebookBuilder(filename, title)` — Programmatically builds auditable Jupyter Notebooks.
+- Methods: `add_markdown(text)`, `add_code(code)`, `save()`.
+- AI agents should write all workflows to notebooks (via `NotebookBuilder`) for full auditability, then execute with `jupyter nbconvert --to notebook --execute --inplace`.
+
+### MCP Server (`mcp_server.py`) — new file
+- FastMCP stdio server exposing 4 tools: `list_commands`, `get_command_schema`, `read_datamine_file`, `create_jupyter_workflow`.
+- Compatible with Claude Desktop, Google Antigravity, and any MCP-capable client.
+
+### Cleanup: Removed SLR / Sean Horan References
+- `README.md` — Removed author attribution, updated copyright to generic, added AI/MCP documentation.
+- `pyproject.toml` — Removed `authors` entry (Sean Horan / rpacan.com).
+- `setup.py` — Removed `author` / `author_email` fields.
+- `dmstudio/superprocess.py` — Removed `pyrpa` import and "only available to SLR employees" messages. Rewrote `display_ellipsoids` to use `agent.read_datamine()`.
+- `Holes3D_Tutorial.ipynb` — Stripped SLR employee stdout from output cells.
+
+### Package Updates
+- `dmstudio/__init__.py` — Exports new `agent` and `notebook_builder` submodules.
+- `requirements.txt` — Added `nbformat>=5.0.0`, updated `mcp>=1.0.0`.
+- `pyproject.toml` — Added `nbformat` and `mcp` to package dependencies.
+
+
 
 ### Studio RM 3.2 Support
 - Added explicit support for Datamine Studio RM 3.2 via the `'StudioRM3.2'` version string in `initialize.py`.

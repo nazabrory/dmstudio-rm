@@ -29,27 +29,38 @@ def studio(version):
     studio
     ------
 
-    Datamine Studio Initialization. Versions Studio3, StudioRM, StudioRM 3.1, StudioRM 3.2 and StudioEM supported.
+    Datamine Studio Initialization.
+
+    Supports: 'Studio3', 'StudioRM', 'StudioRM3.1', 'StudioRM3.2', 'StudioRM3.3',
+    and any future 'StudioRM3.x' string, plus 'StudioEM'.
 
     Parameters:
     -----------
 
     version: str
-        Datamine studio version. Supported values: 'Studio3', 'StudioRM', 'StudioRM3.1', 'StudioRM3.2', 'StudioEM'.
-        If None, will try StudioRM first, then Studio3, then StudioEM.
+        Datamine studio version. Supported values:
+          - 'Studio3'       : Datamine Studio version 3
+          - 'StudioRM'      : Datamine Studio RM (latest registered)
+          - 'StudioRM3.x'   : Datamine Studio RM 3.1, 3.2, 3.3 and any future 3.x release
+          - 'StudioEM'      : Datamine Studio EM
+          - None            : Auto-detect (tries StudioRM, then Studio3, then StudioEM)
 
     Notes:
     ------
-    Studio RM 3.1 & 3.2 introduce safer scripting practices. When writing scripts for 3.1+,
-    avoid using new ActiveXObject() patterns. Python win32com.client.Dispatch() remains
-    the standard COM initialization method for Python automation.
+    Studio RM 3.1+ introduces safer scripting practices. Python win32com.client.Dispatch()
+    is unaffected by Studio RM 3.1+ "safer scripting" restrictions and remains the standard
+    COM initialization method for all Python automation.
+
+    All StudioRM3.x variants (3.1, 3.2, 3.3, ...) share the same COM ProgID:
+    Datamine.StudioRM.Application. The version string is used for documentation and
+    logging only, not for COM dispatch selection.
     '''
 
     oScript = None
 
     _make_dmdir()
 
-    if version == 'StudioRM' or version == 'StudioRM3.1' or version == 'StudioRM3.2':
+    if version == 'StudioRM' or (isinstance(version, str) and version.startswith('StudioRM3.')):
         oScript = _scriptinit("Datamine.StudioRM.Application")
     elif version == 'Studio3':
         oScript = _scriptinit("Datamine.Studio.Application")
@@ -59,13 +70,13 @@ def studio(version):
         # no version given, will try to find a valid version
         try:
             oScript = _scriptinit("Datamine.StudioRM.Application")
-        except:
+        except Exception:
             try:
                 oScript = _scriptinit("Datamine.Studio.Application")
-            except:
+            except Exception:
                 try:
                     oScript = _scriptinit("Datamine.StudioEM.Application")
-                except:
+                except Exception:
                     raise RuntimeError("No valid Studio version is active")
 
     return oScript

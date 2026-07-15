@@ -106,3 +106,18 @@ __init__.py
 
 # Keep notebook in examples only
 /dmstudio_tutorial.ipynb
+
+
+# Documentation
+datamine help/
+Database/
+
+# Datamine Studio RM project binaries
+*.rmproj
+*.dat
+*.dmx
+*.dm
+*.key
+
+# Scratch folder
+scratch/

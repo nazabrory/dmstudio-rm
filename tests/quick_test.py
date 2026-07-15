@@ -7,6 +7,11 @@ This does NOT require an active Datamine Studio license.
 """
 
 import sys
+import os
+
+# Add parent directory to path so dmstudio is importable when run from tests/
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 print(f"Python: {sys.executable}")
 print(f"Version: {sys.version}")
 print()

@@ -1,5 +1,9 @@
 import sys
 import os
+
+# Add parent directory to path so dmstudio is importable when run from tests/
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import pandas as pd
 import traceback
 from dmstudio import dmcommands, dmfiles, initialize
@@ -100,7 +104,7 @@ def run_stress_test():
         temp_files.append(basename + '.dmx')
         temp_files.append(basename + '.dm.key')
         temp_files.append(basename + '.dmx.key')
-    
+        
     try:
         # 3. Copy database file to project workspace
         print("\n3. Running COPY command...")

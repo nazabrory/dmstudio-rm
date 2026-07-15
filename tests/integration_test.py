@@ -10,6 +10,9 @@ import sys
 import os
 import traceback
 
+# Add parent directory to path so dmstudio is importable when run from tests/
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 print("="*60)
 print("DMSTUDIO INTEGRATION TEST")
 print("="*60)

@@ -5,6 +5,11 @@ Run this AFTER Studio RM is open with a project loaded.
 """
 
 import sys
+import os
+
+# Add parent directory to path so dmstudio is importable when run from tests/
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from dmstudio import initialize
 
 print("Studio RM Project Diagnostic")

@@ -718,7 +718,7 @@ def generate_python_function(info):
     return sig + docstring + "\n" + full_body
 
 # Setup Directories and glob markdown files
-help_dir = r"D:\OnGoing Project\dmstudio-rm3\datamine help\StudioRM\Process_Help_XML"
+help_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "datamine help", "StudioRM", "Process_Help_XML")
 files = glob.glob(os.path.join(help_dir, "*.md"))
 
 commands_funcs = []
@@ -833,7 +833,8 @@ class init(object):
         return field_string;
 """
 
-with open("dmstudio/dmcommands.py", "w", encoding="utf-8") as f:
+commands_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dmstudio", "dmcommands.py")
+with open(commands_path, "w", encoding="utf-8") as f:
     f.write(commands_boilerplate)
     f.write("\n")
     for name, code in commands_funcs:
@@ -943,7 +944,8 @@ class init(object):
         return field_string;
 """
 
-with open("dmstudio/dmfiles.py", "w", encoding="utf-8") as f:
+files_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dmstudio", "dmfiles.py")
+with open(files_path, "w", encoding="utf-8") as f:
     f.write(files_boilerplate)
     f.write("\n")
     for name, code in files_funcs:

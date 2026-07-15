@@ -122,11 +122,9 @@ datamine help/
 Database/
 
 # ---------------------------------------------------------------------------
-# dmstudio — scratch/ folder
-# Developer/agent scratch scripts and temporary notebooks.
-# These are not part of the public package but are preserved locally.
+# dmstudio — temporary test notebook outputs
 # ---------------------------------------------------------------------------
-scratch/
+tests/test_generated_workflow.ipynb
 
 # ---------------------------------------------------------------------------
 # mkdocs / documentation build

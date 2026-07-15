@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0-beta (2026-07-15 Update)
+
+### Jupyter Notebook Interface
+- Added `Holes3D_Tutorial.ipynb` implementing the complete drillhole de-surveying workflow from the Datamine scripting tutorial.
+- Configured local environment integration to execute Datamine processes interactively in Jupyter.
+- Included export of final drillhole database table to CSV and reading in Pandas.
+
+### Improvements & Bug Fixes
+- Modified `_make_dmdir()` in `dmstudio/initialize.py` to match both `.dm` and `.dmx` extensions to correctly map XML database files in the project workspace.
+- Copied tutorial database files (`_vb_assays.dmx`, `_vb_collars.dmx`, `_vb_lithology.dmx`, `_vb_surveys.dmx`) to the project folder to enable direct Datamine access.
+
 ## 2.0-beta
 
 ### New Commands (Studio RM 3.1)

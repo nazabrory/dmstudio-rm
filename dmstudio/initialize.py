@@ -125,8 +125,13 @@ def _make_dmdir():
     dmdir_f.write("'''\n")
     dmdir_f.write("\n")
 
-    for infile in glob.glob("*.dm"):
-        outname = infile.rsplit('.', 1)[0]
+    filenames = set()
+    for ext in ("*.dm", "*.dmx"):
+        for infile in glob.glob(ext):
+            outname = infile.rsplit('.', 1)[0]
+            filenames.add(outname)
+
+    for outname in sorted(filenames):
         dmdir_f.write('_'+ outname + "_='" + outname + "'\n")
 
     dmdir_f.close()

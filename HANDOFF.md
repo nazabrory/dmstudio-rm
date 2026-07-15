@@ -7,6 +7,12 @@ The Datamine Studio RM COM Automation package (`dmstudio`) has been fully refact
 
 ## 1. Change Log (Session Summary)
 
+### 2026-07-15: Jupyter Notebook & .dmx Database Support
+* **Jupyter Notebook Interface**: Created `Holes3D_Tutorial.ipynb` implementing the drillhole de-surveying workflow from the Datamine scripting tutorial.
+* **Conda Env Integration**: Installed/configured `dmstudio` in editable mode in the existing `ptvi_mri` Conda environment (path: `D:\Resources\App\miniconda3\envs\ptvi_mri`) which contains Jupyter, Pandas, and win32com.
+* **XML File support (`.dmx`)**: Upgraded `_make_dmdir()` in `dmstudio/initialize.py` to match `*.dmx` files as well as `*.dm` files.
+* **Copied Tutorial Datasets**: Copied `_vb_collars.dmx`, `_vb_assays.dmx`, `_vb_lithology.dmx`, and `_vb_surveys.dmx` to the project root for local accessibility in Datamine.
+
 ### Parser & Wrapper Generation
 * **Nested Option Tables Parsing**: Fixed a major bug in [generate_wrappers.py](file:///D:/OnGoing%20Project/dmstudio-rm3/generate_wrappers.py) where the `is_option_start` detection checked all columns. It now checks only required/default fields, resolving false-positive nested table states that previously resulted in parameter default values being set to long descriptions (e.g. `pcntiles_p` in `STATS`).
 * **Regenerated Libraries**: Rebuilt [dmstudio/dmcommands.py](file:///D:/OnGoing%20Project/dmstudio-rm3/dmstudio/dmcommands.py) (263 processes) and [dmstudio/dmfiles.py](file:///D:/OnGoing%20Project/dmstudio-rm3/dmstudio/dmfiles.py) (37 processes). Cleaned docstrings, strict validation rules, and wildcard expansions are fully compile-safe.
@@ -49,3 +55,11 @@ python quick_test.py
 ```bash
 python stress_test.py
 ```
+
+### 3. Run Jupyter Notebook Workflow
+To launch the Jupyter Notebook with the active Datamine connection, run:
+```bash
+# In the D:\OnGoing Project\dmstudio-rm3 workspace:
+D:\Resources\App\miniconda3\envs\ptvi_mri\Scripts\jupyter-notebook.exe Holes3D_Tutorial.ipynb
+```
+

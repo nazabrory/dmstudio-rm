@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dmstudio"
-version = "2.0-beta"
+version = "2.0.0b1"
 description = "Python module for Datamine Studio RM scripting with AI agent capabilities"
 readme = "README.md"
 license = {text = "MIT"}

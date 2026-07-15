@@ -35,7 +35,7 @@ To run tests or examples, the environment must be configured as follows:
 dmstudio-rm3/                     ← Project root (working directory for scripts)
 ├── dmstudio/                     ← Python package source
 │   ├── __init__.py               ← Package entrypoint exporting all submodules
-│   ├── version.py                ← Version string ('2.0-beta')
+│   ├── version.py                ← Version string ('2.0.0b1')
 │   ├── initialize.py             ← COM initialization; supports StudioRM3.x dynamically
 │   ├── dmcommands.py             ← ~265 auto-generated command wrappers
 │   ├── dmfiles.py                ← File-generation commands (INPFIL etc.)
@@ -240,3 +240,16 @@ Always keep these in mind when extending COM automation:
 5. **COM ProgID is version-agnostic** — all `StudioRM3.x` versions share `Datamine.StudioRM.Application`. The version string in `initialize.studio()` is metadata only.
 6. **`DmFile.DmTableADO` fields are 1-indexed** — `Schema.GetFieldName(1)` is the first field.
 7. **`dmdir.py` and root `__init__.py`** are generated at runtime by `_make_dmdir()`. Do not commit them to Git.
+
+---
+
+## 🏷️ Versioning Policy (PEP 440 Compliance)
+
+When modifying or releasing this package, future AI agents and developers must strictly follow standard PEP 440 version rules:
+1. **Pre-release Naming**: Avoid non-standard descriptors like `2.0-beta-patch` or `2.0.0-beta.1` in configuration scripts. Instead, use normalized PEP 440 pre-release notation:
+   - First beta: `2.0.0b0` (or `2.0b0`)
+   - Patch / update on that beta: `2.0.0b1` (or `2.0b1`), `2.0.0b2`, etc.
+2. **Release Naming**: Standard semantic version tags for production releases: `2.0.0`, `2.0.1` (patch), `2.1.0` (minor), etc.
+3. **Locations**: Whenever the package version is updated, update both:
+   - `dmstudio/version.py` (`__version__ = 'X.Y.Z'`)
+   - `CHANGELOG.md` heading (e.g. `## X.Y.Z (Title) - YYYY-MM-DD`)

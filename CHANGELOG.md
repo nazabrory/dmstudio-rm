@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0-beta-patch (Conda Support, VS Code Agents & Root Cleanup) - 2026-07-15
+## 2.0.0b1 (Conda Support, VS Code Agents & Root Cleanup) - 2026-07-15
 
 ### Clean Workspace
 - Centralized all project files (`Project.rmproj`), tutorial databases (`Database/`), tutorial notebooks (`Holes3D_Tutorial.ipynb`, `Studio_RM_3.1_Examples.ipynb`), and scratch `.dmx` tables into a clean `tutorials/` subdirectory.

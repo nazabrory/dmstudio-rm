@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.0-beta-patch (Conda Support, VS Code Agents & Root Cleanup) - 2026-07-15
+
+### Clean Workspace
+- Centralized all project files (`Project.rmproj`), tutorial databases (`Database/`), tutorial notebooks (`Holes3D_Tutorial.ipynb`, `Studio_RM_3.1_Examples.ipynb`), and scratch `.dmx` tables into a clean `tutorials/` subdirectory.
+- Removed deprecated/temporary run-time files (`dmdir.py`, root `__init__.py`) and empty `examples/` directory from the root directory to maintain a tidy project workspace.
+
+### Conda Integration
+- Added full support and instructions for Anaconda/Miniconda environments (`conda create -n dmstudio python=3.9`).
+- Configured Conda environment setup details in both `README.md` and `AGENTS.md`.
+
+### VS Code & Direct AI Agent Guidelines
+- Documented how VS Code coding agents (like Cursor, Github Copilot, Roo Code, Claude Code) can natively interact with the repository without the need for an MCP server, utilizing direct workspace access and reading `.dm` data files via `agent.read_datamine`.
+- Added detailed steps on configuring Jupyter Notebook kernels inside VS Code to directly edit and execute the generated notebooks.
+
+### Disclaimer & License Terms
+- Added an official disclaimer in `README.md` clarifying that the library is unofficial and community-maintained, and does not violate Datamine terms since it operates on official COM APIs with a valid user license.
+
 ## 2.0-beta (AI Agent & MCP Upgrade)
 
 ### Studio RM 3.3+ Compatibility

@@ -764,7 +764,7 @@ class init(object):
         -----------
 
         version: str
-            optional datamine studio versions ('Studio3', 'StudioRM', 'StudioEM') If no version given, the initializtion
+            optional datamine studio versions ('Studio3', 'StudioRM', 'StudioRM3.1', 'StudioRM3.2', 'StudioEM') If no version given, the initializtion
             will try different versions starting with StudioRM then Studio3 and finally StudioEM.
 
         \"\"\"
@@ -877,7 +877,7 @@ class init(object):
         -----------
 
         version: str
-            optional datamine studio versions ('Studio3', 'StudioRM', 'StudioEM') If no version given, the initializtion
+            optional datamine studio versions ('Studio3', 'StudioRM', 'StudioRM3.1', 'StudioRM3.2', 'StudioEM') If no version given, the initializtion
             will try different versions starting with StudioRM then Studio3 and finally StudioEM.
 
         '''

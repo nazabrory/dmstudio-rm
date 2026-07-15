@@ -7,6 +7,12 @@ The Datamine Studio RM COM Automation package (`dmstudio`) has been fully refact
 
 ## 1. Change Log (Session Summary)
 
+### 2026-07-15 (Studio RM 3.2 Support Update):
+* **Studio RM 3.2 Support**: Added explicit support for Datamine Studio RM 3.2 via the `'StudioRM3.2'` version string in `initialize.py`.
+* **Generator Templates & Re-compilation**: Updated boilerplate templates in `generate_wrappers.py` and regenerated both `dmcommands.py` and `dmfiles.py`.
+* **COM Method Casing Fix**: Corrected dynamic COM execution syntax in `dmstudio/special.py` by replacing `oScript.ParseCommand(command)` with `oScript.Parsecommand(command)` to match the lowercase spelling used by the underlying COM object.
+* **UI Command Automation Guidelines**: Documented that UI-based commands (like `update-scripts`) run interactive screens and must be called using the generic `.run_command("update-scripts")` interface. Updated `examples/studio_rm_31_example.py` and `AGENTS.md` to reflect this.
+
 ### 2026-07-15: Jupyter Notebook & .dmx Database Support
 * **Jupyter Notebook Interface**: Created `Holes3D_Tutorial.ipynb` implementing the drillhole de-surveying workflow from the Datamine scripting tutorial.
 * **Conda Env Integration**: Installed/configured `dmstudio` in editable mode in the existing `ptvi_mri` Conda environment (path: `D:\Resources\App\miniconda3\envs\ptvi_mri`) which contains Jupyter, Pandas, and win32com.

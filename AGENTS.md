@@ -126,8 +126,8 @@ When building command strings for `oScript.Parsecommand()`:
 
 ### COM Automation
 - Initialize once via `dmstudio.initialize.studio('StudioRM')` and reuse
-- Supported versions: `'Studio3'`, `'StudioRM'`, `'StudioRM3.1'`, `'StudioEM'`
-- Python `win32com.client.Dispatch()` is unaffected by Studio RM 3.1's "safer scripting" restrictions (those only block JavaScript `new ActiveXObject()` patterns)
+- Supported versions: `'Studio3'`, `'StudioRM'`, `'StudioRM3.1'`, `'StudioRM3.2'`, `'StudioEM'`
+- Python `win32com.client.Dispatch()` is unaffected by Studio RM 3.1 & 3.2's "safer scripting" restrictions (those only block JavaScript `new ActiveXObject()` patterns)
 
 ## File Structure
 ```

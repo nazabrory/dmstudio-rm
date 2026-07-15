@@ -94,10 +94,8 @@ special.text_importer(
 # ---------------------------------------------------------------------------
 # 8. Update legacy scripts to safer syntax (Studio RM 3.1+)
 # ---------------------------------------------------------------------------
-cmd.update_scripts(
-    path_p="C:\\Scripts\\legacy",
-    backup_p=1,
-    recursive_p=1
-)
+# Note: 'update-scripts' is an interactive UI command.
+# To trigger it, use the generic run_command interface:
+# cmd.run_command("update-scripts")
 
 print("Studio RM 3.1 example script completed successfully.")

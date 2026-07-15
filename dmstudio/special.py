@@ -199,5 +199,5 @@ def create_isoshells(oScript, **kwargs):
     command = "create-isoshells"
     for key, value in kwargs.items():
         command += " @{}={}".format(key, value)
-    oScript.ParseCommand(command)
+    oScript.Parsecommand(command)
 

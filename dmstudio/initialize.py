@@ -29,18 +29,18 @@ def studio(version):
     studio
     ------
 
-    Datamine Studio Initialization. Versions Studio3, StudioRM, StudioRM 3.1 and StudioEM supported.
+    Datamine Studio Initialization. Versions Studio3, StudioRM, StudioRM 3.1, StudioRM 3.2 and StudioEM supported.
 
     Parameters:
     -----------
 
     version: str
-        Datamine studio version. Supported values: 'Studio3', 'StudioRM', 'StudioRM3.1', 'StudioEM'.
+        Datamine studio version. Supported values: 'Studio3', 'StudioRM', 'StudioRM3.1', 'StudioRM3.2', 'StudioEM'.
         If None, will try StudioRM first, then Studio3, then StudioEM.
 
     Notes:
     ------
-    Studio RM 3.1 introduces safer scripting practices. When writing scripts for 3.1+,
+    Studio RM 3.1 & 3.2 introduce safer scripting practices. When writing scripts for 3.1+,
     avoid using new ActiveXObject() patterns. Python win32com.client.Dispatch() remains
     the standard COM initialization method for Python automation.
     '''
@@ -49,7 +49,7 @@ def studio(version):
 
     _make_dmdir()
 
-    if version == 'StudioRM' or version == 'StudioRM3.1':
+    if version == 'StudioRM' or version == 'StudioRM3.1' or version == 'StudioRM3.2':
         oScript = _scriptinit("Datamine.StudioRM.Application")
     elif version == 'Studio3':
         oScript = _scriptinit("Datamine.Studio.Application")

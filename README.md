@@ -94,6 +94,7 @@ To run the library's built-in tutorials and explore sample Datamine database fil
    jupyter lab
    ```
 5. **Run Tutorial**: Open the `tutorials/` folder in the JupyterLab sidebar and double-click **`Holes3D_Tutorial.ipynb`** (Recommended) to run a drillhole de-surveying workflow.
+6. **Explore Process Examples Collection**: Inside `tutorials/collections/`, you can find dedicated subfolders for each of the 300 Datamine processes (such as `copy`, `holes3d`, `estima`). Each process folder is a self-contained workspace containing its own `Project.rmproj` and a template notebook (`*_example.ipynb`) with pre-copied databases for frictionless execution.
 
 ### 2. Scripting in your own Project Folder
 To write and run notebooks for your own geological databases:

@@ -42,10 +42,10 @@ To run tests or examples, the environment must be configured as follows:
 dmstudio-rm3/                     ← Project root (working directory for scripts)
 ├── dmstudio/                     ← Python package source
 │   ├── __init__.py               ← Package entrypoint exporting all submodules
-│   ├── version.py                ← Version string ('2.0.0b1')
+│   ├── version.py                ← Version string ('2.0.0b3')
 │   ├── initialize.py             ← COM initialization; supports StudioRM3.x dynamically
-│   ├── dmcommands.py             ← ~265 auto-generated command wrappers
-│   ├── dmfiles.py                ← File-generation commands (INPFIL etc.)
+│   ├── dmcommands.py             ← ~270 auto-generated command wrappers
+│   ├── dmfiles.py                ← ~30 file-generation command wrappers (INPFIL etc.)
 │   ├── special.py                ← COM automation helpers
 │   ├── superprocess.py           ← Multi-command workflows (dxf_to_dm, display_ellipsoids)
 │   ├── agent.py                  ← AI agent helpers (schema, file reader, dialog dismissal)
@@ -55,6 +55,14 @@ dmstudio-rm3/                     ← Project root (working directory for script
 │   ├── Project.rmproj            ← Your Datamine project file
 │   ├── Holes3D_Tutorial.ipynb    ← Drillhole de-survey workflow notebook
 │   ├── Studio_RM_3.1_Examples.ipynb ← Jupyter examples notebook
+│   ├── collections/              ← Subdirectories for each of the 300 Datamine processes
+│   │   ├── copy/
+│   │   │   ├── Project.rmproj
+│   │   │   └── copy_example.ipynb
+│   │   ├── holes3d/
+│   │   │   ├── Project.rmproj
+│   │   │   └── holes3d_example.ipynb
+│   │   └── ... (297 other process folders)
 │   └── Database/                 ← Raw tutorial database files
 ├── tests/                        ← Centralized developer test and helper scripts
 │   ├── quick_test.py             ← Smoke test (no Studio license needed)

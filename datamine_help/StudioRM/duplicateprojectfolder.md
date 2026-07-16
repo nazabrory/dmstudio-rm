@@ -1,0 +1,2 @@
+# _MineTrust_DuplicateFolderExists
+

@@ -1,0 +1,2 @@
+# move-str-cen-annot
+

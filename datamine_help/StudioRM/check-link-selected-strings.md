@@ -1,0 +1,2 @@
+# check-link-selected-strings
+

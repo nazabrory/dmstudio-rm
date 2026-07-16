@@ -1,0 +1,45 @@
+# toggle-desurvey-report-bar ("tdrb")
+
+See this command in the [**command table**.](<COMMAND%20TABLE_T.md#toggle-desurvey-report-bar>)
+
+To access this command:
+
+  * Home ribbon >> Show >> Desurvey Report Bar
+
+  *   * Using the **[command line](<../COMMON/Command_Toolbar.md>)** , "toggle-desurvey-report-bar".
+
+  * Use the quick key combination "tdrb".
+
+  *   * Display the **[Find Command](<../COMMON/findcommand.md>)** screen, locate **toggle-desurvey-report-bar** and click **Run**.
+
+## Command Overview
+
+Show or hide the [Desurvey Report](<../COMMON/Desurvey%20Report%20Control%20Bar%20Overview.md>) control bar.
+
+Related topics and activities:
+
+  * [Desurvey Report Control Bar](<../COMMON/Desurvey%20Report%20Control%20Bar%20Overview.md>)
+
+  * toggle-desurvey-report-bar ("tdrb")
+
+  * [toggle-compositor-bar ("tcpb")](<toggle-compositor-bar.md>)
+
+  * [toggle-customisation-bar ("tcub")](<toggle-customisation-bar.md>)
+
+  * [toggle-data-properties-bar ("tdpb")](<toggle-data-properties-bar.md>)
+
+  * [toggle-holes-bar ("thb")](<toggle-holes-bar.md>)
+
+  * [toggle-loaded-data-bar ("tldb")](<toggle-loaded-data-bar.md>)
+
+  * [toggle-output-bar ("tob")](<toggle-output-bar.md>)
+
+  * [toggle-project-data-bar ("tpdb")](<toggle-project-data-bar.md>)
+
+  * [toggle-project-files-bar ("tpfb")](<toggle-project-files-bar.md>)
+
+  * [toggle-properties-bar ("tpb")](<toggle-properties-bar.md>)
+
+  * [toggle-quick-filter-bar ("tqpb")](<toggle-quick-filter-bar.md>)
+
+  * [toggle-sheets-bar ("tsb")](<toggle-sheets-bar.md>)

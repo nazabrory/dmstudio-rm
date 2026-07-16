@@ -83,7 +83,7 @@ AI agent helper module. Import: `from dmstudio import agent`
 
 | Function | Description |
 |----------|-------------|
-| `agent.list_commands()` | Returns all 265 Datamine commands as `[{name, doc}]` |
+| `agent.list_commands()` | Returns all 300 Datamine commands as `[{name, doc}]` |
 | `agent.get_command_schema(cmd)` | Returns full parameter schema for a command |
 | `agent.search_commands(query)` | Fuzzy keyword search across command names/docs |
 | `agent.read_datamine(filepath)` | Reads `.dm`/`.dmx` binary into pandas DataFrame via `DmFile.DmTableADO` COM |

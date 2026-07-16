@@ -1,0 +1,2 @@
+# wf-merge-line-switch
+

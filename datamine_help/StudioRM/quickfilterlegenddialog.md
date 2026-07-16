@@ -1,0 +1,2 @@
+# Quick Filter Legend Dialog
+

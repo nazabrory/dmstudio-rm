@@ -1,0 +1,2 @@
+# Ellipsoids Properties Dialog
+

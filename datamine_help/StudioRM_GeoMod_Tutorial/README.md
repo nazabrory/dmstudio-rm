@@ -1,0 +1,113 @@
+# Studiorm Geomod Tutorial
+
+Welcome to the markdown version of the **StudioRM_GeoMod_Tutorial** help documentation. Converted for LLM context.
+
+## Table of Contents
+
+- [Introduction](Studio_3_Geological_Modeling_Tutorial/Introduction.md)
+- [The Geological Modeling Data Set](Studio_3_Geological_Modeling_Tutorial/The_Geological_Modeling_Data_Set.md)
+- [Tutorial Files List](Studio_3_Geological_Modeling_Tutorial/Tutorial_Files_List.md)
+- Principles
+  - [Geological Modeling Methodology](Studio_3_Geological_Modeling_Tutorial/Geological_Modeling_Methodology.md)
+  - [Working with Drillholes](Studio_3_Geological_Modeling_Tutorial/Working_with_Drillholes.md)
+  - [Working with Block Models](Studio_3_Geological_Modeling_Tutorial/Working_with_Block_Models.md)
+  - [Creating Isoshells](Studio_3_Geological_Modeling_Tutorial/Create_Isoshells.md)
+- Exercises
+  - Getting Started
+    - [Creating a New Project](Studio_3_Geological_Modeling_Tutorial/Creating_a_New_Project.md)
+    - [Defining Geological Modeling Settings](Studio_3_Geological_Modeling_Tutorial/Defining_Geological_Modeling_Settings.md)
+  - Importing Topography Contours
+    - [Importing CAD Format Contours](Studio_3_Geological_Modeling_Tutorial/Importing_Topography_Contours.md)
+    - [Conditioning Imported Topography Contours](Studio_3_Geological_Modeling_Tutorial/Conditioning_the_Imported_Contours_Strings.md)
+    - [Changing Color Values - Table Editor](Studio_3_Geological_Modeling_Tutorial/Changing_the_Color_Values_-_Table_Editor.md)
+  - Generating Drillholes
+    - Static Drillholes
+      - [Importing Drillhole Data Tables](Studio_3_Geological_Modeling_Tutorial/Importing_Drillhole_Data_Tables.md)
+      - [Creating Static Drillholes](Studio_3_Geological_Modeling_Tutorial/Creating_Static_Drillholes.md)
+      - [Validating Static Drillholes](Studio_3_Geological_Modeling_Tutorial/Validating_Static_Drillholes.md)
+      - [Visually Validating Static Drillholes](Studio_3_Geological_Modeling_Tutorial/Visually_Validating_Static_Drillholes.md)
+      - [Compositing Drillholes](Studio_3_Geological_Modeling_Tutorial/Compositing_Drillholes.md)
+    - Dynamic Drillholes
+      - [Creating Dynamic Drillholes](Studio_3_Geological_Modeling_Tutorial/Creating_Dynamic_Drillholes.md)
+      - [Validating Dynamic Drillholes](Studio_3_Geological_Modeling_Tutorial/Validating_Dynamic_Drillholes.md)
+  - Loading 3D Reference Data
+    - [Using CAD Drawings](Studio_3_Geological_Modeling_Tutorial/Using_CAD_Drawings.md)
+  - Visual Modeling Aids
+    - Legends
+      - [Applying Legends to Geological Models](Studio_3_Geological_Modeling_Tutorial/Applying_Legends_to_Geological_Modeling.md)
+      - [Using Filter Legends](Studio_3_Geological_Modeling_Tutorial/Formatting_Static_Drillholes_using_FilterLegends.md)
+    - Visual Formatting
+      - [Displaying Wireframes as Intersections](Studio_3_Geological_Modeling_Tutorial/Displaying_Wireframes_as_Intersections.md)
+    - Managing Viewplanes
+      - [Using Section Definition Files](Studio_3_Geological_Modeling_Tutorial/Using_Section_Definition_Files.md)
+    - Filtering Data
+      - [Filtering Modeling Data](Studio_3_Geological_Modeling_Tutorial/Filtering_Ore_Body_Strings_using_the_DataObjectManager.md)
+    - Drillhole Logs
+      - [Creating and Viewing Log Sheets](Studio_3_Geological_Modeling_Tutorial/Creating_and_Navigating_Log_Sheets.md)
+  - String Modeling
+    - Modeling and Data Selection Boundaries
+      - [Creating a Rectangular Modeling Boundary](Studio_3_Geological_Modeling_Tutorial/Creating_a_Modeling_Boundary.md)
+      - [Creating a Modeling Boundary](Studio_RM_Only/StudioRM_Creating%20a%20Modeling%20Boundary.md)
+    - Using Background Images
+      - [Interpretation Using a Background Image](Studio_RM_Only/Geological_Interpretation_Using_a_Background_Image.md)
+    - Using Vertical Sections
+      - [Digitizing Vertical Section Strings](Studio_3_Geological_Modeling_Tutorial/Digitizing_Vertical_Section_Strings.md)
+      - [Digitizing Vertical Section Strings](Studio_RM_Only/Using%20Locked%20Sections.md)
+      - [Extrapolating Section Strings](Studio_3_Geological_Modeling_Tutorial/Extrapolating_Section_Strings.md)
+      - [Adding Tag Strings](Studio_3_Geological_Modeling_Tutorial/Adding_Tag_Strings.md)
+      - [Conditioning Section Strings](Studio_3_Geological_Modeling_Tutorial/Conditioning_Section_Strings.md)
+    - Adding Attributes to a Strings Model
+      - [Adding a ZONE Attribute - Interactive](Studio_3_Geological_Modeling_Tutorial/Adding_a_ZONE_Attribute_to_the_String_Model_-_Design_Window.md)
+      - [Adding a ZONE Attribute - EXTRA](Studio_3_Geological_Modeling_Tutorial/Adding_a_ZONE_Attribute_to_the_String_Model_-_EXTRA.md)
+      - [Adding a ZONE Attribute - Table Editor](Studio_3_Geological_Modeling_Tutorial/Adding_a_ZONE_Attribute_to_the_String_Model_-_Table_Editor.md)
+    - Extracting and Combining Objects
+      - [Extracting Parts of a Strings Model](Studio_3_Geological_Modeling_Tutorial/Extracting_Parts_of_the_String_Model.md)
+      - [Combining Different Strings Models](Studio_3_Geological_Modeling_Tutorial/Combining_the_Different_String_Models.md)
+  - Wireframe Modeling
+    - Digital Terrain Models
+      - [Creating Surfaces using DTM Techniques](Studio_3_Geological_Modeling_Tutorial/Creating_Surfaces_using_DTM_Techniques.md)
+      - [Creating Surfaces from Grids](Studio_3_Geological_Modeling_Tutorial/creating_surfaces_from_grids.md)
+    - Closed Volumes
+      - [Creating Closed Volumes Using String Linking Techniques](Studio_3_Geological_Modeling_Tutorial/Creating_Closed_Volumes_Using_String_Linking_Techniques.md)
+    - Checking Wireframes
+      - [Verifying Wireframe Models](Studio_3_Geological_Modeling_Tutorial/Verifying_the_Wireframe_Models.md)
+      - [Calculating Wireframe Model VolumesSTART](Studio_3_Geological_Modeling_Tutorial/Calculating_Wireframe_Model_Volumes.md)
+  - Block Modeling
+    - Defining Prototypes
+      - [Creating a Prototype Block Model](Studio_3_Geological_Modeling_Tutorial/Creating_a_Prototype_Block_Model.md)
+    - Block Modeling Using Wireframes
+      - [Creating a Waste Block Model Below the Topography Surface Wireframe](Studio_3_Geological_Modeling_Tutorial/Creating_a_Waste_Block_Model_Below_the_Topography_Surface_Wireframe.md)
+      - [Creating an Ore Body Block Model from a Closed Volume Wireframe](Studio_3_Geological_Modeling_Tutorial/Creating_an_Ore_Body_Block_Model_from_a_Closed_Volume_Wireframe.md)
+      - [Creating a Combined Ore Body and Waste Block Model](Studio_3_Geological_Modeling_Tutorial/Creating_a_Combined_Ore_Body_and_Waste_Block_Model.md)
+    - Checking Block Models
+      - [Visual Methods](Studio_3_Geological_Modeling_Tutorial/Visually_Checking_the_Ore_Body_Block_Model.md)
+      - [Using Summary Statistics](Studio_3_Geological_Modeling_Tutorial/Checking_the_Ore_Body_Block_Model_using_Summary_Statistics.md)
+    - Manipulating Block Models
+      - [Combining the Waste and Ore Block Models](Studio_3_Geological_Modeling_Tutorial/Combining_the_Waste_and_Ore_Block_Models.md)
+      - [Optimizing a Block Model](Studio_3_Geological_Modeling_Tutorial/Optimizing_a_Block_Model.md)
+  - Creating Isoshells
+    - [Isoshell Data Preparation](Studio_3_Geological_Modeling_Tutorial/CreateIsoshells_AddData.md)
+    - Categorical Isoshells
+      - [Creating Categorical Isoshells](Studio_3_Geological_Modeling_Tutorial/CreateIsoshells_CatValues.md)
+      - [Viewing Categorical Isoshells](Studio_3_Geological_Modeling_Tutorial/ConfigCatIsoshells.md)
+    - Continuous Isoshells
+      - [Creating Continuous Isoshells](Studio_3_Geological_Modeling_Tutorial/CreateIsoshells_ContValues.md)
+    - Output Settings
+      - [Specifying Isoshell Output Settings](Studio_3_Geological_Modeling_Tutorial/IShellOutputSettings.md)
+
+## Additional Reference Pages
+
+The following pages are included in the documentation package but not listed in the main sitemap navigation:
+
+- [Rm Introduction](RM_Introduction.md)
+- [Configcontisoshells](Studio_3_Geological_Modeling_Tutorial/ConfigContIsoshells.md)
+- [Rm Geological Interpretation Using A Background Image](Studio_3_Geological_Modeling_Tutorial/RM_Geological Interpretation Using a Background Image.md)
+- [Saving And Loading 3D Views](Studio_RM_Only/Saving and Loading 3D Views.md)
+- [Studiorm Creating A Modeling Boundary](Studio_RM_Only/StudioRM_Creating a Modeling Boundary.md)
+- [Using Locked Sections](Studio_RM_Only/Using Locked Sections.md)
+- [Using Section Widgets](Studio_RM_Only/Using Section Widgets.md)
+- [Visual Block Models](Studio_RM_Only/Visual_Block Models.md)
+- [Visual Strings And Points](Studio_RM_Only/Visual_Strings and Points.md)
+- [Visual Wireframes](Studio_RM_Only/Visual_Wireframes.md)
+- [Working With Multiple Sections](Studio_RM_Only/Working with Multiple Sections.md)
+- [Global Dummy Page](global_dummy_page.md)

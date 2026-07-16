@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.0b3 (Process Example Notebook Collection & Introspection Upgrade) - 2026-07-16
+
+### Features
+- **Unified Introspection for `dmfiles`:** Extended [dmstudio/agent.py](file:///D:/Active/dmstudio/dmstudio/agent.py) to inspect both `dmcommands.init` and `dmfiles.init` classes. This ensures all 300 Datamine commands (including `protom` and `inpfil`) are discoverable, searchable, and their schemas extractable.
+- **Process Example Notebook Collection:** Created [generate_collections.py](file:///D:/Active/dmstudio/tests/generate_collections.py) to programmatically generate 297 process example notebooks and directories under `tutorials/collections/`.
+  - **Frictionless Portability:** Uses relative resolution paths to automatically locate the Datamine help database from the collections directory, ensuring zero setup issues when cloned.
+  - **Case-Insensitive Windows Pathing:** Normalized ActiveProject folder comparisons using `.lower()` to prevent drive letter case mismatches on Windows.
+  - **Docstring-Aware parameter requirement logic:** Evaluates whether a list or scalar input file is marked as compulsory (`Required=Yes`) inside the process's docstring and uncomments it automatically (e.g. `samples_i` in `holes3d` or `inmods_i` in `desurv` are now active).
+  - **Thorough Workspace Cleanup:** Upgraded the notebooks' final cell to remove generated `dmdir.py`, `__init__.py`, and `__pycache__` artifacts in addition to `t_` prefix files, restoring directory layouts to "as new" states.
+  - **Interactive HTML Results Verification:** Output cells read and display previews of actual computed output files using `agent.read_datamine`.
+
 ## 2.0.0b2 (Interactive Visualization & COM Fixes) - 2026-07-16
 
 ### Bug Fixes

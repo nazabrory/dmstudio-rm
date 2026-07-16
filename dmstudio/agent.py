@@ -22,19 +22,27 @@ import contextlib
 import pandas as pd
 import win32com.client
 
-from dmstudio import dmcommands
+from dmstudio import dmcommands, dmfiles
 
 
 # ---------------------------------------------------------------------------
 # Command discovery helpers
 # ---------------------------------------------------------------------------
 
-def _get_init_class():
-    '''Return the dmcommands.init class (the object that holds all command methods).'''
+def _get_init_classes():
+    '''Return the list of init classes to inspect (both dmcommands and dmfiles).'''
+    classes = []
+    # dmcommands
     if inspect.isclass(dmcommands.init):
-        return dmcommands.init
-    # init may be a function returning an instance; get the class from the return type
-    return type(dmcommands.init)
+        classes.append(dmcommands.init)
+    else:
+        classes.append(type(dmcommands.init))
+    # dmfiles
+    if inspect.isclass(dmfiles.init):
+        classes.append(dmfiles.init)
+    else:
+        classes.append(type(dmfiles.init))
+    return classes
 
 
 def list_commands():
@@ -43,7 +51,7 @@ def list_commands():
     -------------
 
     Return a list of all available Datamine command wrapper names exposed
-    by dmstudio.dmcommands.init. Each entry is a dict with 'name' and 'doc' keys.
+    by dmstudio.dmcommands.init and dmstudio.dmfiles.init. Each entry is a dict with 'name' and 'doc' keys.
 
     Returns:
     --------
@@ -51,20 +59,25 @@ def list_commands():
         [{'name': 'copy', 'doc': 'COPY ...'}, ...]
     '''
     results = []
-    cls = _get_init_class()
+    seen = set()
+    classes = _get_init_classes()
 
-    # Walk the init class for all callable, non-dunder methods
-    for name in dir(cls):
-        if name.startswith('_'):
-            continue
-        try:
-            attr = getattr(cls, name)
-        except Exception:
-            continue
-        if callable(attr):
-            doc = inspect.getdoc(attr) or ''
-            first_line = doc.split('\n')[0].strip()
-            results.append({'name': name, 'doc': first_line})
+    for cls in classes:
+        # Walk the init class for all callable, non-dunder methods
+        for name in dir(cls):
+            if name.startswith('_') or name in ('run_command', 'parse_infields_list'):
+                continue
+            if name in seen:
+                continue
+            try:
+                attr = getattr(cls, name)
+            except Exception:
+                continue
+            if callable(attr):
+                doc = inspect.getdoc(attr) or ''
+                first_line = doc.split('\n')[0].strip()
+                results.append({'name': name, 'doc': first_line})
+                seen.add(name)
 
     return sorted(results, key=lambda x: x['name'])
 
@@ -79,7 +92,7 @@ def get_command_schema(cmd_name):
     Parameters:
     -----------
     cmd_name: str
-        Name of the command (case-insensitive), e.g. 'copy', 'COPY'.
+        Name of the command (case-insensitive), e.g. 'copy', 'COPY', 'protom'.
 
     Returns:
     --------
@@ -96,26 +109,40 @@ def get_command_schema(cmd_name):
         If the command is not found.
     '''
     cmd_name_lower = cmd_name.lower()
-    cls = _get_init_class()
+    classes = _get_init_classes()
     func = None
 
     # Search init class methods first (where all wrappers live)
-    for name in dir(cls):
-        if name.lower() == cmd_name_lower:
-            try:
-                func = getattr(cls, name)
-                if callable(func):
-                    break
-            except Exception:
-                pass
-            func = None
+    for cls in classes:
+        for name in dir(cls):
+            if name.lower() == cmd_name_lower:
+                try:
+                    func = getattr(cls, name)
+                    if callable(func):
+                        break
+                except Exception:
+                    pass
+        if func is not None:
+            break
 
-    # Fallback: search module-level names
+    # Fallback 1: search module-level names in dmcommands
     if func is None:
         for name in dir(dmcommands):
             if name.lower() == cmd_name_lower:
                 try:
                     attr = getattr(dmcommands, name)
+                    if callable(attr):
+                        func = attr
+                        break
+                except Exception:
+                    pass
+
+    # Fallback 2: search module-level names in dmfiles
+    if func is None:
+        for name in dir(dmfiles):
+            if name.lower() == cmd_name_lower:
+                try:
+                    attr = getattr(dmfiles, name)
                     if callable(attr):
                         func = attr
                         break
@@ -148,6 +175,7 @@ def get_command_schema(cmd_name):
         'doc': doc,
         'parameters': params,
     }
+
 
 
 def search_commands(query):

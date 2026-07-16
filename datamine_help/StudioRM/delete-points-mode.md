@@ -1,0 +1,2 @@
+# delete-points-mode
+

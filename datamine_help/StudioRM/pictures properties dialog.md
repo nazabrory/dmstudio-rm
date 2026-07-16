@@ -1,0 +1,2 @@
+# Pictures Properties Dialog
+

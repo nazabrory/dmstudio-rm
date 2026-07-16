@@ -89,11 +89,22 @@ def inpfil(csv=None, out_o=None, definition=None):
             definition['Default'].iloc[i] = df[definition['Field Name'].iloc[i]].iloc[0]
 
         for column in definition.columns:
+            if column == 'Length' and definition['Field Type'].iloc[i] == 'N':
+                continue
             arguments += " '" + (str(definition[column].iloc[i])).strip()[:8] + "' "
 
-    arguments += "'!' 'Y' " + csv
+    # Create a temporary CSV file without headers to prevent Datamine from trying to parse the headers as data
+    import os
+    temp_csv = csv + ".temp_no_header"
+    df.to_csv(temp_csv, header=False, index=False)
 
-    dmf.inpfil(out_o=out_o, arguments=arguments)
+    arguments += "'!' 'Y' " + temp_csv
+
+    try:
+        dmf.inpfil(out_o=out_o, arguments=arguments)
+    finally:
+        if os.path.exists(temp_csv):
+            os.remove(temp_csv)
 
 def csv_to_definition(csv):
 

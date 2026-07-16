@@ -94,6 +94,7 @@ class init(object):
                 keys_f=['optional'],
                 allrecs_p=0,
                 unsorted_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -198,6 +199,9 @@ Important: the input file should be sorted on the keyfields beforehand. If it is
         if unsorted_p != "optional":
             command += " @unsorted=" + str(unsorted_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -206,6 +210,7 @@ Important: the input file should be sorted on the keyfields beforehand. If it is
     def adddd(self,
                 in_i="required",
                 out_o="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -255,6 +260,9 @@ A FORTRAN read format can be supplied at the File Description prompt of **ADDDD*
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -264,6 +272,7 @@ A FORTRAN read format can be supplied at the File Description prompt of **ADDDD*
                 inmods_i=['optional'],
                 out_o="required",
                 tolernce_p=0.001,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -333,14 +342,17 @@ The @**TOLERNCE** parameter is used to define the smallest sub cell that will be
         if tolernce_p != "optional":
             try:
                 val = float(tolernce_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"tolernce_p value {tolernce_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.001:
+                    raise ValueError(f"tolernce_p value {tolernce_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(tolernce_p, (int, float)):
                     raise e
 
         if tolernce_p != "optional":
             command += " @tolernce=" + str(tolernce_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -352,6 +364,7 @@ The @**TOLERNCE** parameter is used to define the smallest sub cell that will be
                 wirepts_i=['optional'],
                 wiretrou_o="required",
                 wireptou_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -420,6 +433,9 @@ Normally, a ZONE field in the input triangle files will exist, so that the struc
         if wirepts_i[0] != "optional":
             command += self.parse_infields_list("wirept", wirepts_i, 2, "&")
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -430,6 +446,7 @@ Normally, a ZONE field in the input triangle files will exist, so that the struc
                 defn_i="optional",
                 apphlp_i="optional",
                 out_o="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -488,6 +505,9 @@ AED operates by displaying on the screen a series of 'pads', which provide a 'vi
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -499,6 +519,7 @@ AED operates by displaying on the screen a series of 'pads', which provide a 'vi
                 out_o="required",
                 fields_f=['optional'],
                 fieldnam_f="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -568,6 +589,9 @@ A minimum of one explicit alphanumeric field must be in the input file for conve
         if fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 5, "*")
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -581,6 +605,7 @@ A minimum of one explicit alphanumeric field must be in the input file for conve
                 field_f="optional",
                 nfield_f="optional",
                 inverse_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -711,6 +736,9 @@ The output dictionary file is created when generating alpha values from numeric 
         if inverse_p != "optional":
             command += " @inverse=" + str(inverse_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -726,6 +754,9 @@ The output dictionary file is created when generating alpha values from numeric 
                 rotation_i="optional",
                 points_o="required",
                 zone_f="optional",
+                srcparm_f="optional",
+                plnflds_f=['optional'],
+                sctflds_f=['optional'],
                 tripts_p=1,
                 planmode_p=1,
                 sectmode_p=1,
@@ -744,6 +775,7 @@ The output dictionary file is created when generating alpha values from numeric 
                 srefnum_p=1,
                 vrefnum_p=1,
                 flat_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -925,6 +957,21 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
             matching rotation will be used for determining dynamic ANGLE3 field. SREFNUM or VREFNUM
             is used for identifying a rotation for unmatched data.
             Default=
+            Required=No
+
+        srcparm:  : Any
+            No
+            Default=
+            Required=No
+
+        plnflds: Undefined : Undefined
+            Attribute field in **PLANSTR** file to be added to **POINTS** file
+            Default=Undefined
+            Required=No
+
+        sctflds: Undefined : Undefined
+            Attribute field in **SECTSTR** file to be added to **POINTS** file
+            Default=Undefined
             Required=No
 
         Parameters:
@@ -1129,6 +1176,15 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
         if zone_f != "optional":
             command += " *zone=" + zone_f
 
+        if srcparm_f != "optional":
+            command += " *srcparm=" + srcparm_f
+
+        if plnflds_f[0] != "optional":
+            command += self.parse_infields_list("plnfld", plnflds_f, 5, "*")
+
+        if sctflds_f[0] != "optional":
+            command += self.parse_infields_list("sctfld", sctflds_f, 5, "*")
+
         if tripts_p != "optional":
             try:
                 val = float(tripts_p)
@@ -1156,8 +1212,8 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
         if sectmode_p != "optional":
             try:
                 val = float(sectmode_p)
-                if val not in [2.0]:
-                    raise ValueError(f"sectmode_p value {sectmode_p} is not in allowed values: [2]")
+                if val not in [2.0, 1.0]:
+                    raise ValueError(f"sectmode_p value {sectmode_p} is not in allowed values: [2, 1]")
             except ValueError as e:
                 if isinstance(sectmode_p, (int, float)):
                     raise e
@@ -1168,8 +1224,8 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
         if mindip_p != "optional":
             try:
                 val = float(mindip_p)
-                if not (-90.0 <= val <= 90.0):
-                    raise ValueError(f"mindip_p value {mindip_p} is not in allowed range: [-90.0, 90.0]")
+                if not (-90.0 <= val <= 90.0) and val != -90.0:
+                    raise ValueError(f"mindip_p value {mindip_p} is not in allowed range: [-90.0, [90.0]")
             except ValueError as e:
                 if isinstance(mindip_p, (int, float)):
                     raise e
@@ -1180,8 +1236,8 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
         if maxdip_p != "optional":
             try:
                 val = float(maxdip_p)
-                if not (-90.0 <= val <= 90.0):
-                    raise ValueError(f"maxdip_p value {maxdip_p} is not in allowed range: [-90.0, 90.0]")
+                if not (-90.0 <= val <= 90.0) and val != 90.0:
+                    raise ValueError(f"maxdip_p value {maxdip_p} is not in allowed range: [-90.0, [90.0]")
             except ValueError as e:
                 if isinstance(maxdip_p, (int, float)):
                     raise e
@@ -1193,7 +1249,7 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
             try:
                 val = float(mindirn_p)
                 if not (0.0 <= val <= 360.0):
-                    raise ValueError(f"mindirn_p value {mindirn_p} is not in allowed range: [0.0, 360.0]")
+                    raise ValueError(f"mindirn_p value {mindirn_p} is not in allowed range: [0.0, [360.0]")
             except ValueError as e:
                 if isinstance(mindirn_p, (int, float)):
                     raise e
@@ -1205,7 +1261,7 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
             try:
                 val = float(maxdirn_p)
                 if not (0.0 <= val <= 360.0):
-                    raise ValueError(f"maxdirn_p value {maxdirn_p} is not in allowed range: [0.0, 360.0]")
+                    raise ValueError(f"maxdirn_p value {maxdirn_p} is not in allowed range: [0.0, [360.0]")
             except ValueError as e:
                 if isinstance(maxdirn_p, (int, float)):
                     raise e
@@ -1228,8 +1284,8 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
         if plansymb_p != "optional":
             try:
                 val = float(plansymb_p)
-                if not (201.0 <= val <= 276.0):
-                    raise ValueError(f"plansymb_p value {plansymb_p} is not in allowed range: [201.0, 276.0]")
+                if not (201.0 <= val <= 276.0) and val != 216.0:
+                    raise ValueError(f"plansymb_p value {plansymb_p} is not in allowed range: [201.0, [276.0]")
             except ValueError as e:
                 if isinstance(plansymb_p, (int, float)):
                     raise e
@@ -1240,8 +1296,8 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
         if sectsymb_p != "optional":
             try:
                 val = float(sectsymb_p)
-                if not (201.0 <= val <= 276.0):
-                    raise ValueError(f"sectsymb_p value {sectsymb_p} is not in allowed range: [201.0, 276.0]")
+                if not (201.0 <= val <= 276.0) and val != 216.0:
+                    raise ValueError(f"sectsymb_p value {sectsymb_p} is not in allowed range: [201.0, [276.0]")
             except ValueError as e:
                 if isinstance(sectsymb_p, (int, float)):
                     raise e
@@ -1252,8 +1308,8 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
         if wfsymb_p != "optional":
             try:
                 val = float(wfsymb_p)
-                if not (201.0 <= val <= 276.0):
-                    raise ValueError(f"wfsymb_p value {wfsymb_p} is not in allowed range: [201.0, 276.0]")
+                if not (201.0 <= val <= 276.0) and val != 224.0:
+                    raise ValueError(f"wfsymb_p value {wfsymb_p} is not in allowed range: [201.0, [276.0]")
             except ValueError as e:
                 if isinstance(wfsymb_p, (int, float)):
                     raise e
@@ -1264,8 +1320,8 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
         if plancol_p != "optional":
             try:
                 val = float(plancol_p)
-                if not (1.0 <= val <= 64.0):
-                    raise ValueError(f"plancol_p value {plancol_p} is not in allowed range: [1.0, 64.0]")
+                if not (1.0 <= val <= 64.0) and val != 1.0:
+                    raise ValueError(f"plancol_p value {plancol_p} is not in allowed range: [1.0, [64.0]")
             except ValueError as e:
                 if isinstance(plancol_p, (int, float)):
                     raise e
@@ -1276,8 +1332,8 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
         if sectcol_p != "optional":
             try:
                 val = float(sectcol_p)
-                if not (1.0 <= val <= 64.0):
-                    raise ValueError(f"sectcol_p value {sectcol_p} is not in allowed range: [1.0, 64.0]")
+                if not (1.0 <= val <= 64.0) and val != 2.0:
+                    raise ValueError(f"sectcol_p value {sectcol_p} is not in allowed range: [1.0, [64.0]")
             except ValueError as e:
                 if isinstance(sectcol_p, (int, float)):
                     raise e
@@ -1288,8 +1344,8 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
         if wfcol_p != "optional":
             try:
                 val = float(wfcol_p)
-                if not (1.0 <= val <= 64.0):
-                    raise ValueError(f"wfcol_p value {wfcol_p} is not in allowed range: [1.0, 64.0]")
+                if not (1.0 <= val <= 64.0) and val != 3.0:
+                    raise ValueError(f"wfcol_p value {wfcol_p} is not in allowed range: [1.0, [64.0]")
             except ValueError as e:
                 if isinstance(wfcol_p, (int, float)):
                     raise e
@@ -1300,8 +1356,8 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
         if symsize_p != "optional":
             try:
                 val = float(symsize_p)
-                if not (0.0 <= val <= 50.0):
-                    raise ValueError(f"symsize_p value {symsize_p} is not in allowed range: [0.0, 50.0]")
+                if not (0.0 <= val <= 50.0) and val != 2.0:
+                    raise ValueError(f"symsize_p value {symsize_p} is not in allowed range: [0.0, [50.0]")
             except ValueError as e:
                 if isinstance(symsize_p, (int, float)):
                     raise e
@@ -1327,6 +1383,9 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
         if flat_p != "optional":
             command += " @flat=" + str(flat_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -1336,6 +1395,7 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
                 in_i="required",
                 value_f="optional",
                 keys_f=['optional'],
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -1388,6 +1448,9 @@ All results are output as an analysis of variance (ANOVA) table. This lists the 
         if keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 10, "*")
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -1399,6 +1462,7 @@ All results are output as an analysis of variance (ANOVA) table. This lists the 
                 sequence_p=0,
                 protodd_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -1525,6 +1589,9 @@ If the optional parameter @SEQUENCE is set to 1, then a field 'FILENAME' is adde
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -1537,6 +1604,7 @@ If the optional parameter @SEQUENCE is set to 1, then a field 'FILENAME' is adde
                 trdipdir_f="optional",
                 trdip_f="optional",
                 apdipdir_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -1621,14 +1689,17 @@ The process takes as input the file IN containing fields **APDIP** (apparent dip
         if apdipdir_p != "optional":
             try:
                 val = float(apdipdir_p)
-                if not (0.0 <= val <= 360.0):
-                    raise ValueError(f"apdipdir_p value {apdipdir_p} is not in allowed range: [0.0, 360.0]")
+                if not (0.0 <= val <= 360.0) and val != 0.0:
+                    raise ValueError(f"apdipdir_p value {apdipdir_p} is not in allowed range: [0.0, [360.0]")
             except ValueError as e:
                 if isinstance(apdipdir_p, (int, float)):
                     raise e
 
         if apdipdir_p != "optional":
             command += " @apdipdir=" + str(apdipdir_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -1637,11 +1708,13 @@ The process takes as input the file IN containing fields **APDIP** (apparent dip
 
     def astran(self,
                 in_i="optional",
+                xref_i="optional",
                 sampleid_f="optional",
                 sprefix_p=2,
                 sdigits_p=6,
                 maxerrs_p="optional",
                 update_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -1677,6 +1750,13 @@ The second value gives the format of the command to be used to rename a fully ma
 
         in: 
             Input database file.
+            Required=No
+
+        xref: 
+            Required assay name cross-reference file. This file is used to link the names of assay
+            fields in the database file to fields in the assay transfer {SIF} file. It is also used
+            to convert results from the assay file to database units. Required fields in the XREF
+            file are:
             Required=No
 
         Output Files:
@@ -1733,6 +1813,9 @@ The second value gives the format of the command to be used to rename a fully ma
         if in_i != "optional":
             command += " &in=" + in_i
 
+        if xref_i != "optional":
+            command += " &xref=" + xref_i
+
         if sampleid_f != "optional":
             command += " *sampleid=" + sampleid_f
 
@@ -1775,6 +1858,9 @@ The second value gives the format of the command to be used to rename a fully ma
         if update_p != "optional":
             command += " @update=" + str(update_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -1784,6 +1870,7 @@ The second value gives the format of the command to be used to rename a fully ma
                 in_i="optional",
                 out_o="optional",
                 error_o="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -1853,6 +1940,9 @@ Alphanumeric range fields for which a blank is intentionally to be specified sho
         if error_o != "optional":
             command += " &error=" + error_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -1866,6 +1956,7 @@ Alphanumeric range fields for which a blank is intentionally to be specified sho
                 attribs_f=['optional'],
                 mode_p=0,
                 inrange_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2003,6 +2094,9 @@ During data entry in **[AED](<aed.md>)** or a similar input process, blank (spac
         if inrange_p != "optional":
             command += " @inrange=" + str(inrange_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -2015,6 +2109,7 @@ During data entry in **[AED](<aed.md>)** or a similar input process, blank (spac
                 fields_f=['optional'],
                 sampdist_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2110,6 +2205,9 @@ Anomalous samples related to lag or sample distance (**LAG** or **DISTANCE**) ar
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -2132,6 +2230,7 @@ Anomalous samples related to lag or sample distance (**LAG** or **DISTANCE**) ar
                 majordip_p="optional",
                 semimazi_p="optional",
                 semimdip_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2305,8 +2404,8 @@ Retrieval Criteria can be used and applies to all inputs.
         if minnugpc_p != "optional":
             try:
                 val = float(minnugpc_p)
-                if not (0.0 <= val <= 30.0):
-                    raise ValueError(f"minnugpc_p value {minnugpc_p} is not in allowed range: [0.0, 30.0]")
+                if not (0.0 <= val <= 30.0) and val != 1.0:
+                    raise ValueError(f"minnugpc_p value {minnugpc_p} is not in allowed range: [0.0, [30.0]")
             except ValueError as e:
                 if isinstance(minnugpc_p, (int, float)):
                     raise e
@@ -2320,8 +2419,8 @@ Retrieval Criteria can be used and applies to all inputs.
         if minsilpc_p != "optional":
             try:
                 val = float(minsilpc_p)
-                if not (1.0 <= val <= 9.0):
-                    raise ValueError(f"minsilpc_p value {minsilpc_p} is not in allowed range: [1.0, 9.0]")
+                if not (1.0 <= val <= 9.0) and val != 5.0:
+                    raise ValueError(f"minsilpc_p value {minsilpc_p} is not in allowed range: [1.0, [9.0]")
             except ValueError as e:
                 if isinstance(minsilpc_p, (int, float)):
                     raise e
@@ -2383,6 +2482,9 @@ Retrieval Criteria can be used and applies to all inputs.
         if semimdip_p != "optional":
             command += " @semimdip=" + str(semimdip_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -2404,6 +2506,7 @@ Retrieval Criteria can be used and applies to all inputs.
                 lopar_p=1,
                 uptail_p=1,
                 uppar_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2607,6 +2710,9 @@ The SGSIM process includes an option that carries out a normal transformation pr
         if uppar_p != "optional":
             command += " @uppar=" + str(uppar_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -2617,6 +2723,7 @@ The SGSIM process includes an option that carries out a normal transformation pr
                 sampin_i="required",
                 modelout_o="required",
                 key_f="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2711,6 +2818,9 @@ The output model from BHCOUNT will be the same as the input model, but with the 
         if key_f != "optional":
             command += " *key=" + key_f
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -2724,8 +2834,9 @@ The output model from BHCOUNT will be the same as the input model, but with the 
                 stize_p="required",
                 numplane_p="required",
                 smooth_p=0,
-                connect_p='Create only internal perimeters.',
+                connect_p=1,
                 bradjust_p=0.0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2794,10 +2905,10 @@ The output model from BHCOUNT will be the same as the input model, but with the 
         connect:
             Controls internal and external perimeter connections. Options: 0: Do not connect
             internal and external perimeter connections.; 1: Connect internal perimeters to external
-            perimeters as a single perimeter.
-            Range=
-            Values=
-            Default=Create only internal perimeters.
+            perimeters as a single perimeter.; 2: Create only internal perimeters.
+            Range=0,2
+            Values=0,2
+            Default=1
             Required=No
 
         bradjust:
@@ -2869,10 +2980,22 @@ The output model from BHCOUNT will be the same as the input model, but with the 
             command += " @smooth=" + str(smooth_p)
 
         if connect_p != "optional":
+            try:
+                val = float(connect_p)
+                if val not in [0.0, 2.0, 1.0]:
+                    raise ValueError(f"connect_p value {connect_p} is not in allowed values: [0, 2, 1]")
+            except ValueError as e:
+                if isinstance(connect_p, (int, float)):
+                    raise e
+
+        if connect_p != "optional":
             command += " @connect=" + str(connect_p)
 
         if bradjust_p != "optional":
             command += " @bradjust=" + str(bradjust_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -2892,6 +3015,7 @@ The output model from BHCOUNT will be the same as the input model, but with the 
                 order_p=0,
                 surface_p="required",
                 colour_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -3116,6 +3240,9 @@ Another option is to make use of the Isosurfaces wireframe function, resulting i
         if colour_p != "optional":
             command += " @colour=" + str(colour_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -3136,6 +3263,7 @@ Another option is to make use of the Isosurfaces wireframe function, resulting i
                 wire2on_p=1,
                 wire2out_p=1,
                 usenorm_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -3390,6 +3518,9 @@ Determining the 'inside' or 'outside' of input wireframes, in most cases, is sim
         if usenorm_p != "optional":
             command += " @usenorm=" + str(usenorm_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -3402,6 +3533,7 @@ Determining the 'inside' or 'outside' of input wireframes, in most cases, is sim
                 fields_f=['optional'],
                 nleft_p=1,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -3486,8 +3618,8 @@ Canonical scores may be sent to an optional output file (&**SCORES**) which can 
         if nleft_p != "optional":
             try:
                 val = float(nleft_p)
-                if not (0.0 <= val <= 64.0):
-                    raise ValueError(f"nleft_p value {nleft_p} is not in allowed range: [0.0, 64.0]")
+                if not (0.0 <= val <= 64.0) and val != 1.0:
+                    raise ValueError(f"nleft_p value {nleft_p} is not in allowed range: [0.0, [64.0]")
             except ValueError as e:
                 if isinstance(nleft_p, (int, float)):
                     raise e
@@ -3506,6 +3638,9 @@ Canonical scores may be sent to an optional output file (&**SCORES**) which can 
 
         if print_p != "optional":
             command += " @print=" + str(print_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -3533,6 +3668,7 @@ Canonical scores may be sent to an optional output file (&**SCORES**) which can 
                 factor_p=1,
                 inverse_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -3846,6 +3982,9 @@ If the optional @**FACTOR** parameter is set, then the units of the points in th
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -3860,6 +3999,7 @@ If the optional @**FACTOR** parameter is set, then the units of the points in th
                 cutmax_p=10,
                 plot_tbl_p=0,
                 display_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -3998,8 +4138,8 @@ Otherwise:
         if cutint_p != "optional":
             try:
                 val = float(cutint_p)
-                if not (1e-05 <= val <= 9999999.0):
-                    raise ValueError(f"cutint_p value {cutint_p} is not in allowed range: [1e-05, 9999999.0]")
+                if not (1e-05 <= val <= 9999999.0) and val != 1.0:
+                    raise ValueError(f"cutint_p value {cutint_p} is not in allowed range: [1e-05, [9999999.0]")
             except ValueError as e:
                 if isinstance(cutint_p, (int, float)):
                     raise e
@@ -4010,8 +4150,8 @@ Otherwise:
         if cutmax_p != "optional":
             try:
                 val = float(cutmax_p)
-                if not (2e-05 <= val <= 9999999.0):
-                    raise ValueError(f"cutmax_p value {cutmax_p} is not in allowed range: [2e-05, 9999999.0]")
+                if not (2e-05 <= val <= 9999999.0) and val != 10.0:
+                    raise ValueError(f"cutmax_p value {cutmax_p} is not in allowed range: [2e-05, [9999999.0]")
             except ValueError as e:
                 if isinstance(cutmax_p, (int, float)):
                     raise e
@@ -4034,14 +4174,17 @@ Otherwise:
         if display_p != "optional":
             try:
                 val = float(display_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"display_p value {display_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 1.0:
+                    raise ValueError(f"display_p value {display_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(display_p, (int, float)):
                     raise e
 
         if display_p != "optional":
             command += " @display=" + str(display_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -4062,6 +4205,7 @@ Otherwise:
                 to_f="optional",
                 extend_p=1,
                 endpoint_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -4245,6 +4389,9 @@ The output from the CHANNL3D process is in the standard Drillhole format which i
         if endpoint_p != "optional":
             command += " @endpoint=" + str(endpoint_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -4299,6 +4446,7 @@ The output from the CHANNL3D process is in the standard Drillhole format which i
                 yscale_p="optional",
                 progress_p=1,
                 display_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -4841,8 +4989,8 @@ The output plot file **PLOT** is created using the batch graphics processes and 
         if logmin_p != "optional":
             try:
                 val = float(logmin_p)
-                if not (1e-07 <= val <= 999999.0):
-                    raise ValueError(f"logmin_p value {logmin_p} is not in allowed range: [1e-07, 999999.0]")
+                if not (1e-07 <= val <= 999999.0) and val != 0.01:
+                    raise ValueError(f"logmin_p value {logmin_p} is not in allowed range: [1e-07, [999999.0]")
             except ValueError as e:
                 if isinstance(logmin_p, (int, float)):
                     raise e
@@ -4853,8 +5001,8 @@ The output plot file **PLOT** is created using the batch graphics processes and 
         if frametyp_p != "optional":
             try:
                 val = float(frametyp_p)
-                if not (0.0 <= val <= 2.0):
-                    raise ValueError(f"frametyp_p value {frametyp_p} is not in allowed range: [0.0, 2.0]")
+                if not (0.0 <= val <= 2.0) and val != 2.0:
+                    raise ValueError(f"frametyp_p value {frametyp_p} is not in allowed range: [0.0, [2.0]")
             except ValueError as e:
                 if isinstance(frametyp_p, (int, float)):
                     raise e
@@ -4946,8 +5094,8 @@ The output plot file **PLOT** is created using the batch graphics processes and 
         if igrid_p != "optional":
             try:
                 val = float(igrid_p)
-                if not (-20.0 <= val <= 20.0):
-                    raise ValueError(f"igrid_p value {igrid_p} is not in allowed range: [-20.0, 20.0]")
+                if not (-20.0 <= val <= 20.0) and val != 3.0:
+                    raise ValueError(f"igrid_p value {igrid_p} is not in allowed range: [-20.0, [20.0]")
             except ValueError as e:
                 if isinstance(igrid_p, (int, float)):
                     raise e
@@ -5009,6 +5157,9 @@ The output plot file **PLOT** is created using the batch graphics processes and 
         if display_p != "optional":
             command += " @display=" + str(display_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -5016,6 +5167,7 @@ The output plot file **PLOT** is created using the batch graphics processes and 
 
     def checkit(self,
                 in_i="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -5056,6 +5208,9 @@ The process **[PROPER](<proper.md>)** also carries out checks on string files.
         if in_i != "optional":
             command += " &in=" + in_i
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -5067,6 +5222,7 @@ The process **[PROPER](<proper.md>)** also carries out checks on string files.
                 wiretrou_o="required",
                 wireptou_o="required",
                 remdupid_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -5150,6 +5306,9 @@ The process first reorders the **PID** value in the point file, while removing a
         if remdupid_p != "optional":
             command += " @remdupid=" + str(remdupid_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -5164,6 +5323,7 @@ The process first reorders the **PID** value in the point file, while removing a
                 ptsstr_o="optional",
                 bhid_f="optional",
                 distance_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -5262,6 +5422,9 @@ It is useful to check for and remove closely spaced samples to avoid potential p
         if distance_p != "optional":
             command += " @distance=" + str(distance_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -5275,6 +5438,7 @@ It is useful to check for and remove closely spaced samples to avoid potential p
                 fields_f=['optional'],
                 mattype_p=0,
                 ztran_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -5409,6 +5573,9 @@ _Kleiner-Hartigan tree of the same data displayed in Figure 1. The decreasing an
         if ztran_p != "optional":
             command += " @ztran=" + str(ztran_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -5423,6 +5590,7 @@ _Kleiner-Hartigan tree of the same data displayed in Figure 1. The decreasing an
                 vertex_p=0,
                 symbol_p=216,
                 symsize_p=2,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -5561,8 +5729,8 @@ The point data file can also be used as input when creating [Stereonet Charts](<
         if symbol_p != "optional":
             try:
                 val = float(symbol_p)
-                if not (0.0 <= val <= 400.0):
-                    raise ValueError(f"symbol_p value {symbol_p} is not in allowed range: [0.0, 400.0]")
+                if not (0.0 <= val <= 400.0) and val != 216.0:
+                    raise ValueError(f"symbol_p value {symbol_p} is not in allowed range: [0.0, [400.0]")
             except ValueError as e:
                 if isinstance(symbol_p, (int, float)):
                     raise e
@@ -5573,14 +5741,231 @@ The point data file can also be used as input when creating [Stereonet Charts](<
         if symsize_p != "optional":
             try:
                 val = float(symsize_p)
-                if not (0.0 <= val <= 100.0):
-                    raise ValueError(f"symsize_p value {symsize_p} is not in allowed range: [0.0, 100.0]")
+                if not (0.0 <= val <= 100.0) and val != 2.0:
+                    raise ValueError(f"symsize_p value {symsize_p} is not in allowed range: [0.0, [100.0]")
             except ValueError as e:
                 if isinstance(symsize_p, (int, float)):
                     raise e
 
         if symsize_p != "optional":
             command += " @symsize=" + str(symsize_p)
+
+        if arguments != "optional":
+            command += " " + arguments
+
+        if retrieval != "optional":
+            command += "{" + retrieval + "}"
+
+        self.run_command(command)
+
+    def cokrig(self,
+                samples_i="required",
+                proto_i="required",
+                fields_i="required",
+                epar_i="required",
+                spar_i="required",
+                vmodel_i="optional",
+                zpar_i="optional",
+                string_i="optional",
+                unfold_i="optional",
+                outmodel_o="required",
+                sampout_o="optional",
+                xpt_f="optional",
+                ypt_f="optional",
+                zpt_f="optional",
+                zone1_f_f="optional",
+                zone2_f_f="optional",
+                key_f="optional",
+                mergest_p=1,
+                arguments="optional",
+                retrieval="optional"):
+
+        r"""
+        COKRIG
+        ------
+        COKRIG performs grade estimation using univariate and multivariate methods, including ordinary, simple kriging, inverse distance weighting and nearest neighbour. 
+
+This process is used as part of the [Advanced Estimation](<../STUDIO_RM/Multivariate_Introduction.md>) wizard, although it can also be accessed independently via the command line as a standalone process.
+
+        Input Files:
+        ------------
+
+        samples: Table
+            Input sample data file containing X, Y, Z coordinates and grade fields.
+            Required=Yes
+
+        proto: Block Model
+            Prototype block model into which estimates will be made.
+            Required=Yes
+
+        fields: Table
+            Estimation fields list file specifying grades to be estimated and output fields.
+            Required=Yes
+
+        epar: Table
+            Estimation parameters file defining methods, search and variogram volumes.
+            Required=Yes
+
+        spar: Table
+            Search parameter file defining search volumes and sample counts.
+            Required=Yes
+
+        vmodel: Table
+            Variogram model parameter file (required for kriging methods).
+            Required=No
+
+        zpar: Table
+            Custom zone/soft boundary parameter file.
+            Required=No
+
+        string: String
+            Input boundary string file for unfolding option.
+            Required=No
+
+        unfold: Table
+            Input unfolding parameter file.
+            Required=No
+
+        Output Files:
+        -------------
+
+        outmodel: Block Model
+            Output model containing estimated grades, variance, etc.
+            Required=Yes
+
+        sampout: Table
+            Output sample file containing weights details.
+            Required=No
+
+        Fields:
+        -------
+
+        xpt: Numeric : Undefined
+            X coordinate field in sample data.
+            Default=XPT
+            Required=No
+
+        ypt: Numeric : Undefined
+            Y coordinate field in sample data.
+            Default=YPT
+            Required=No
+
+        zpt: Numeric : Undefined
+            Z coordinate field in sample data.
+            Default=ZPT
+            Required=No
+
+        zone1_f: Any : Undefined
+            First zone control field name.
+            Default=Undefined
+            Required=No
+
+        zone2_f: Any : Undefined
+            Second zone control field name.
+            Default=Undefined
+            Required=No
+
+        key: Numeric : Undefined
+            Key field for limiting sample counts.
+            Default=Undefined
+            Required=No
+
+        Parameters:
+        -----------
+
+        mergest:
+            Flag to control merging of consistent search/variogram parameters.
+            Range=0,1
+            Values=0,1
+            Default=1
+            Required=No
+
+        """
+        command = "cokrig "
+
+        if samples_i == "required":
+            raise ValueError("samples_i is required.")
+
+        if samples_i != "optional":
+            command += " &samples=" + samples_i
+
+        if proto_i == "required":
+            raise ValueError("proto_i is required.")
+
+        if proto_i != "optional":
+            command += " &proto=" + proto_i
+
+        if fields_i == "required":
+            raise ValueError("fields_i is required.")
+
+        if fields_i != "optional":
+            command += " &fields=" + fields_i
+
+        if epar_i == "required":
+            raise ValueError("epar_i is required.")
+
+        if epar_i != "optional":
+            command += " &epar=" + epar_i
+
+        if spar_i == "required":
+            raise ValueError("spar_i is required.")
+
+        if spar_i != "optional":
+            command += " &spar=" + spar_i
+
+        if vmodel_i != "optional":
+            command += " &vmodel=" + vmodel_i
+
+        if zpar_i != "optional":
+            command += " &zpar=" + zpar_i
+
+        if string_i != "optional":
+            command += " &string=" + string_i
+
+        if unfold_i != "optional":
+            command += " &unfold=" + unfold_i
+
+        if outmodel_o == "required":
+            raise ValueError("outmodel_o is required.")
+
+        if outmodel_o != "optional":
+            command += " &outmodel=" + outmodel_o
+
+        if sampout_o != "optional":
+            command += " &sampout=" + sampout_o
+
+        if xpt_f != "optional":
+            command += " *xpt=" + xpt_f
+
+        if ypt_f != "optional":
+            command += " *ypt=" + ypt_f
+
+        if zpt_f != "optional":
+            command += " *zpt=" + zpt_f
+
+        if zone1_f_f != "optional":
+            command += " *zone1_f=" + zone1_f_f
+
+        if zone2_f_f != "optional":
+            command += " *zone2_f=" + zone2_f_f
+
+        if key_f != "optional":
+            command += " *key=" + key_f
+
+        if mergest_p != "optional":
+            try:
+                val = float(mergest_p)
+                if val not in [0.0, 1.0]:
+                    raise ValueError(f"mergest_p value {mergest_p} is not in allowed values: [0, 1]")
+            except ValueError as e:
+                if isinstance(mergest_p, (int, float)):
+                    raise e
+
+        if mergest_p != "optional":
+            command += " @mergest=" + str(mergest_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -5592,6 +5977,7 @@ The point data file can also be used as input when creating [Stereonet Charts](<
                 inmods_i=['optional'],
                 modelout_o="required",
                 tolernce_p=0.001,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -5761,6 +6147,9 @@ The @**TOLERNCE** parameter is used to define the smallest subcell that will be 
         if tolernce_p != "optional":
             command += " @tolernce=" + str(tolernce_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -5771,6 +6160,7 @@ The @**TOLERNCE** parameter is used to define the smallest subcell that will be 
                 wirepts_i=['optional'],
                 outtr_o="required",
                 outpt_o="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -5980,6 +6370,9 @@ Note: **COMBTRI** does not check for interpenetration of the two wireframes, but
         if wirepts_i[0] != "optional":
             command += self.parse_infields_list("wirept", wirepts_i, 20, "&")
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -6003,6 +6396,7 @@ Note: **COMBTRI** does not check for interpenetration of the two wireframes, but
                 maxcomp_p="optional",
                 loss_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -6240,6 +6634,9 @@ If however @LOSS=1 then the lost core will be assumed to have default grades, de
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -6265,6 +6662,7 @@ If however @LOSS=1 then the lost core will be assumed to have default grades, de
                 maxcomp_p="optional",
                 loss_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -6514,6 +6912,9 @@ If @LOSS>=2 then the lost core will be treated as cavity (zero density and grade
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -6546,6 +6947,7 @@ If @LOSS>=2 then the lost core will be treated as cavity (zero density and grade
                 density_p="optional",
                 reverse_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -6803,7 +7205,7 @@ By default, a dominant field value must reach a minimum proportion of the total 
             raise ValueError("in_i is required.")
 
         if in_i != "optional":
-            command += " &in=" + in_i
+            command += " &**in**=" + in_i
 
         if out_o == "required":
             raise ValueError("out_o is required.")
@@ -6913,6 +7315,9 @@ By default, a dominant field value must reach a minimum proportion of the total 
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -6932,6 +7337,7 @@ By default, a dominant field value must reach a minimum proportion of the total 
                 dilute_p="optional",
                 narwaste_p="required",
                 anyore2_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -7179,8 +7585,8 @@ Flag all samples as either ore or waste according to cutoff. Samples with a valu
         if minasfr_p != "optional":
             try:
                 val = float(minasfr_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"minasfr_p value {minasfr_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.95:
+                    raise ValueError(f"minasfr_p value {minasfr_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(minasfr_p, (int, float)):
                     raise e
@@ -7221,6 +7627,9 @@ Flag all samples as either ore or waste according to cutoff. Samples with a valu
         if anyore2_p != "optional":
             command += " @anyore2=" + str(anyore2_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -7234,6 +7643,7 @@ Flag all samples as either ore or waste according to cutoff. Samples with a valu
                 maxlen_p="optional",
                 extdis_p="optional",
                 checkdup_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -7330,6 +7740,9 @@ To prevent large areas within the polygon having no data, a maximum chord length
         if checkdup_p != "optional":
             command += " @checkdup=" + str(checkdup_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -7359,6 +7772,7 @@ To prevent large areas within the polygon having no data, a maximum chord length
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -7614,7 +8028,7 @@ The required contour is chosen by specifying the appropriate parameter(s) from t
             try:
                 val = float(hi_p)
                 if not (1.0 <= val <= 64.0):
-                    raise ValueError(f"hi_p value {hi_p} is not in allowed range: [1.0, 64.0]")
+                    raise ValueError(f"hi_p value {hi_p} is not in allowed range: [1.0, [64.0]")
             except ValueError as e:
                 if isinstance(hi_p, (int, float)):
                     raise e
@@ -7658,6 +8072,9 @@ The required contour is chosen by specifying the appropriate parameter(s) from t
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -7682,6 +8099,7 @@ The required contour is chosen by specifying the appropriate parameter(s) from t
                 hilight_p="optional",
                 hicolour_p=2,
                 colour_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -7891,8 +8309,8 @@ The required contour is chosen by specifying the appropriate parameter(s) from t
         if smfactor_p != "optional":
             try:
                 val = float(smfactor_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"smfactor_p value {smfactor_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.5:
+                    raise ValueError(f"smfactor_p value {smfactor_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(smfactor_p, (int, float)):
                     raise e
@@ -7921,8 +8339,8 @@ The required contour is chosen by specifying the appropriate parameter(s) from t
         if hicolour_p != "optional":
             try:
                 val = float(hicolour_p)
-                if not (1.0 <= val <= 64.0):
-                    raise ValueError(f"hicolour_p value {hicolour_p} is not in allowed range: [1.0, 64.0]")
+                if not (1.0 <= val <= 64.0) and val != 2.0:
+                    raise ValueError(f"hicolour_p value {hicolour_p} is not in allowed range: [1.0, [64.0]")
             except ValueError as e:
                 if isinstance(hicolour_p, (int, float)):
                     raise e
@@ -7933,14 +8351,17 @@ The required contour is chosen by specifying the appropriate parameter(s) from t
         if colour_p != "optional":
             try:
                 val = float(colour_p)
-                if not (1.0 <= val <= 64.0):
-                    raise ValueError(f"colour_p value {colour_p} is not in allowed range: [1.0, 64.0]")
+                if not (1.0 <= val <= 64.0) and val != 1.0:
+                    raise ValueError(f"colour_p value {colour_p} is not in allowed range: [1.0, [64.0]")
             except ValueError as e:
                 if isinstance(colour_p, (int, float)):
                     raise e
 
         if colour_p != "optional":
             command += " @colour=" + str(colour_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -7950,6 +8371,7 @@ The required contour is chosen by specifying the appropriate parameter(s) from t
     def copy(self,
                 in_i="required",
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -7996,6 +8418,9 @@ If retrieval criteria are in force, the output file only contains those records 
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -8008,6 +8433,7 @@ If retrieval criteria are in force, the output file only contains those records 
                 yworld_f="optional",
                 zworld_f="optional",
                 modtype_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -8106,6 +8532,9 @@ In order to add world coordinates to an existing model use **MODTYPE** 4 but do 
         if modtype_p != "optional":
             command += " @modtype=" + str(modtype_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -8116,6 +8545,7 @@ In order to add world coordinates to an existing model use **MODTYPE** 4 but do 
                 out_o="required",
                 base_p="optional",
                 incrment_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -8187,6 +8617,9 @@ No check is made for the existence of the specified output file, which therefore
         if incrment_p != "optional":
             command += " @incrment=" + str(incrment_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -8197,6 +8630,7 @@ No check is made for the existence of the specified output file, which therefore
                 fieldlst_i="optional",
                 fields_f=['optional'],
                 fieldnam_f="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -8270,6 +8704,9 @@ Also see this online [Knowledge Base article](<https://datamine.freshdesk.com/en
         if fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 10, "*")
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -8279,6 +8716,7 @@ Also see this online [Knowledge Base article](<https://datamine.freshdesk.com/en
                 in_i="required",
                 out_o="required",
                 keys_f=['optional'],
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -8336,6 +8774,9 @@ A typical use of COUNT is to find the number of samples in each drillhole (keyed
         if keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 10, "*")
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -8353,6 +8794,7 @@ A typical use of COUNT is to find the number of samples in each drillhole (keyed
                 directn_p='X',
                 ijksort_p=1,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -8544,6 +8986,9 @@ Subcell structures in input and output models
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -8556,6 +9001,7 @@ Subcell structures in input and output models
                 fields_f=['optional'],
                 sampdist_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -8656,6 +9102,9 @@ Anomalous samples related to lag or sample distance (**LAG** or **DISTANCE**) ar
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -8682,6 +9131,7 @@ Anomalous samples related to lag or sample distance (**LAG** or **DISTANCE**) ar
                 tplot_p=0,
                 mplot_p=0,
                 gtplot_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -8938,8 +9388,8 @@ The **CSMODEL** process does the following:
         if xpppc_p != "optional":
             try:
                 val = float(xpppc_p)
-                if not (0.0 <= val <= 200.0):
-                    raise ValueError(f"xpppc_p value {xpppc_p} is not in allowed range: [0.0, 200.0]")
+                if not (0.0 <= val <= 200.0) and val != 0.0:
+                    raise ValueError(f"xpppc_p value {xpppc_p} is not in allowed range: [0.0, [200.0]")
             except ValueError as e:
                 if isinstance(xpppc_p, (int, float)):
                     raise e
@@ -8950,8 +9400,8 @@ The **CSMODEL** process does the following:
         if ypppc_p != "optional":
             try:
                 val = float(ypppc_p)
-                if not (0.0 <= val <= 200.0):
-                    raise ValueError(f"ypppc_p value {ypppc_p} is not in allowed range: [0.0, 200.0]")
+                if not (0.0 <= val <= 200.0) and val != 0.0:
+                    raise ValueError(f"ypppc_p value {ypppc_p} is not in allowed range: [0.0, [200.0]")
             except ValueError as e:
                 if isinstance(ypppc_p, (int, float)):
                     raise e
@@ -8962,8 +9412,8 @@ The **CSMODEL** process does the following:
         if zpppc_p != "optional":
             try:
                 val = float(zpppc_p)
-                if not (0.0 <= val <= 200.0):
-                    raise ValueError(f"zpppc_p value {zpppc_p} is not in allowed range: [0.0, 200.0]")
+                if not (0.0 <= val <= 200.0) and val != 0.0:
+                    raise ValueError(f"zpppc_p value {zpppc_p} is not in allowed range: [0.0, [200.0]")
             except ValueError as e:
                 if isinstance(zpppc_p, (int, float)):
                     raise e
@@ -8977,8 +9427,8 @@ The **CSMODEL** process does the following:
         if quantile_p != "optional":
             try:
                 val = float(quantile_p)
-                if not (2.0 <= val <= 30.0):
-                    raise ValueError(f"quantile_p value {quantile_p} is not in allowed range: [2.0, 30.0]")
+                if not (2.0 <= val <= 30.0) and val != 2.0:
+                    raise ValueError(f"quantile_p value {quantile_p} is not in allowed range: [2.0, [30.0]")
             except ValueError as e:
                 if isinstance(quantile_p, (int, float)):
                     raise e
@@ -9052,6 +9502,9 @@ The **CSMODEL** process does the following:
         if gtplot_p != "optional":
             command += " @gtplot=" + str(gtplot_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -9062,6 +9515,7 @@ The **CSMODEL** process does the following:
                 reserves_o="required",
                 oremod_o="optional",
                 plot_o="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -9140,6 +9594,9 @@ The **CSOWOPT** process carries out the following functions:
         if plot_o != "optional":
             command += " &plot=" + plot_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -9155,6 +9612,7 @@ The **CSOWOPT** process carries out the following functions:
                 factor_p="required",
                 axiss_f=['optional'],
                 centre_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -9325,6 +9783,9 @@ In all cases, output will be a data file of the ellipsoids data type, and can be
         if centre_p != "optional":
             command += " @centre=" + str(centre_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -9333,6 +9794,7 @@ In all cases, output will be a data file of the ellipsoids data type, and can be
     def ddcopy(self,
                 in_i="required",
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -9375,6 +9837,9 @@ In all cases, output will be a data file of the ellipsoids data type, and can be
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -9382,6 +9847,7 @@ In all cases, output will be a data file of the ellipsoids data type, and can be
 
     def ddlist(self,
                 in_i="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -9416,6 +9882,9 @@ In all cases, output will be a data file of the ellipsoids data type, and can be
         if in_i != "optional":
             command += " &in=" + in_i
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -9432,6 +9901,7 @@ In all cases, output will be a data file of the ellipsoids data type, and can be
                 topcut_p=0,
                 tcutoff_p="optional",
                 criteria_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -9560,6 +10030,9 @@ Perform a decile analysis of a set of sample data.
         if criteria_p != "optional":
             command += " @criteria=" + str(criteria_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -9583,6 +10056,7 @@ Perform a decile analysis of a set of sample data.
                 yorig_p=0,
                 zorig_p=0,
                 centre_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -9837,6 +10311,9 @@ The process writes a summary table for each method to the [Output](<../COMMON/Ou
         if centre_p != "optional":
             command += " @centre=" + str(centre_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -9848,6 +10325,7 @@ The process writes a summary table for each method to the [Output](<../COMMON/Ou
                 out_o="required",
                 code_f="optional",
                 text_f="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -9930,6 +10408,9 @@ The dictionary file is first read into your application's virtual array, and is 
         if text_f != "optional":
             command += " *text=" + text_f
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -9938,6 +10419,7 @@ The dictionary file is first read into your application's virtual array, and is 
     def delete(self,
                 in_i="required",
                 confirm_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -10006,6 +10488,9 @@ The following **Output** window messages display on successful completion of fil
         if confirm_p != "optional":
             command += " @confirm=" + str(confirm_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -10027,6 +10512,7 @@ The following **Output** window messages display on successful completion of fil
                 desurvmd_p=1,
                 endpts_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -10298,6 +10784,9 @@ If the **ENDPTS** parameter is set to 1, the sample end points are recorded in t
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -10308,6 +10797,7 @@ If the **ENDPTS** parameter is set to 1, the sample end points are recorded in t
                 out_o="required",
                 keys_f=['optional'],
                 keytol_p=1e-05,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -10381,6 +10871,9 @@ A typical use of the **DIFFRN** process is to delete drillholes from a file by s
         if keytol_p != "optional":
             command += " @keytol=" + str(keytol_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -10396,6 +10889,7 @@ A typical use of the **DIFFRN** process is to delete drillholes from a file by s
                 dilup_p="required",
                 dildown_p="required",
                 thinnest_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -10507,6 +11001,9 @@ A typical use of the **DIFFRN** process is to delete drillholes from a file by s
         if thinnest_p != "optional":
             command += " @thinnest=" + str(thinnest_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -10523,6 +11020,7 @@ A typical use of the **DIFFRN** process is to delete drillholes from a file by s
                 ywidth_p=1,
                 zwidth_p=1,
                 density_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -10718,6 +11216,9 @@ Records 7 and 14 show the tonnes and grades for the total diluted and undiluted 
         if density_p != "optional":
             command += " @density=" + str(density_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -10734,6 +11235,7 @@ Records 7 and 14 show the tonnes and grades for the total diluted and undiluted 
                 resum_p=0,
                 primat_p=0,
                 prisco_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -10887,6 +11389,9 @@ If the user wishes to plot maps of the output scores then the scores file can be
         if prisco_p != "optional":
             command += " @prisco=" + str(prisco_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -10900,6 +11405,7 @@ If the user wishes to plot maps of the output scores then the scores file can be
                 groupid_f="optional",
                 sampid_f="optional",
                 fields_f=['optional'],
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -11004,6 +11510,9 @@ The output file containing the discriminant scores for each sample can be joined
         if fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 10, "*")
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -11017,6 +11526,7 @@ The output file containing the discriminant scores for each sample can be joined
                 yoffset_p=0,
                 pause_p="optional",
                 scale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -11145,6 +11655,9 @@ If the input file is a catalogue file (as produced by the !LISTDR process) then 
         if scale_p != "optional":
             command += " @scale=" + str(scale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -11153,6 +11666,7 @@ If the input file is a catalogue file (as produced by the !LISTDR process) then 
     def dmedit(self,
                 in_i="required",
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -11250,6 +11764,9 @@ If **TO** is entered as 0, a single line is assumed. If **TO** is given beyond t
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -11257,6 +11774,7 @@ If **TO** is entered as 0, a single line is assumed. If **TO** is given beyond t
 
     def dmfd(self,
                 in_i="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -11288,6 +11806,9 @@ If **TO** is entered as 0, a single line is assumed. If **TO** is given beyond t
 
         if in_i != "optional":
             command += " &in=" + in_i
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -11323,6 +11844,7 @@ If **TO** is entered as 0, a single line is assumed. If **TO** is given beyond t
                 density_p=1,
                 scroff1_p=1,
                 delete_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -12023,6 +12545,9 @@ For 2 and 3 **DRILGRID** averages results over all origins and simulations for e
         if delete_p != "optional":
             command += " @delete=" + str(delete_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -12043,6 +12568,7 @@ For 2 and 3 **DRILGRID** averages results over all origins and simulations for e
                 splits_p="required",
                 cutval_p="required",
                 fillval_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -12203,8 +12729,8 @@ The output results file contains all the evaluated tonnages and volumes, split b
         if cutden_p != "optional":
             try:
                 val = float(cutden_p)
-                if not (0.0 <= val <= 99999.0):
-                    raise ValueError(f"cutden_p value {cutden_p} is not in allowed range: [0.0, 99999.0]")
+                if not (0.0 <= val <= 99999.0) and val != 1.0:
+                    raise ValueError(f"cutden_p value {cutden_p} is not in allowed range: [0.0, [99999.0]")
             except ValueError as e:
                 if isinstance(cutden_p, (int, float)):
                     raise e
@@ -12218,8 +12744,8 @@ The output results file contains all the evaluated tonnages and volumes, split b
         if fillden_p != "optional":
             try:
                 val = float(fillden_p)
-                if not (0.0 <= val <= 99999.0):
-                    raise ValueError(f"fillden_p value {fillden_p} is not in allowed range: [0.0, 99999.0]")
+                if not (0.0 <= val <= 99999.0) and val != 1.0:
+                    raise ValueError(f"fillden_p value {fillden_p} is not in allowed range: [0.0, [99999.0]")
             except ValueError as e:
                 if isinstance(fillden_p, (int, float)):
                     raise e
@@ -12233,8 +12759,8 @@ The output results file contains all the evaluated tonnages and volumes, split b
         if splits_p != "optional":
             try:
                 val = float(splits_p)
-                if not (0.0 <= val <= 3.0):
-                    raise ValueError(f"splits_p value {splits_p} is not in allowed range: [0.0, 3.0]")
+                if not (0.0 <= val <= 3.0) and val != 0.0:
+                    raise ValueError(f"splits_p value {splits_p} is not in allowed range: [0.0, [3.0]")
             except ValueError as e:
                 if isinstance(splits_p, (int, float)):
                     raise e
@@ -12253,6 +12779,9 @@ The output results file contains all the evaluated tonnages and volumes, split b
 
         if fillval_p != "optional":
             command += " @fillval=" + str(fillval_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -12274,6 +12803,7 @@ The output results file contains all the evaluated tonnages and volumes, split b
                 splits_p="required",
                 cutval_p="required",
                 fillval_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -12432,8 +12962,8 @@ The output results file contains all the evaluated tonnages and volumes, split b
         if fillden_p != "optional":
             try:
                 val = float(fillden_p)
-                if not (0.0 <= val <= 99999.0):
-                    raise ValueError(f"fillden_p value {fillden_p} is not in allowed range: [0.0, 99999.0]")
+                if not (0.0 <= val <= 99999.0) and val != 1.0:
+                    raise ValueError(f"fillden_p value {fillden_p} is not in allowed range: [0.0, [99999.0]")
             except ValueError as e:
                 if isinstance(fillden_p, (int, float)):
                     raise e
@@ -12447,8 +12977,8 @@ The output results file contains all the evaluated tonnages and volumes, split b
         if splits_p != "optional":
             try:
                 val = float(splits_p)
-                if not (0.0 <= val <= 3.0):
-                    raise ValueError(f"splits_p value {splits_p} is not in allowed range: [0.0, 3.0]")
+                if not (0.0 <= val <= 3.0) and val != 0.0:
+                    raise ValueError(f"splits_p value {splits_p} is not in allowed range: [0.0, [3.0]")
             except ValueError as e:
                 if isinstance(splits_p, (int, float)):
                     raise e
@@ -12468,6 +12998,9 @@ The output results file contains all the evaluated tonnages and volumes, split b
         if fillval_p != "optional":
             command += " @fillval=" + str(fillval_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -12481,6 +13014,7 @@ The output results file contains all the evaluated tonnages and volumes, split b
                 dm_p=0,
                 maxvert_p=2000,
                 layernam_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -12633,6 +13167,9 @@ The broad line thickness is set to produce a line thickness of 0.7.
         if layernam_p != "optional":
             command += " @layernam=" + str(layernam_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -12655,6 +13192,7 @@ The broad line thickness is set to produce a line thickness of 0.7.
                 ycentre_p=0,
                 zcentre_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -12923,6 +13461,9 @@ The coordinates of the centre of the ellipsoid can be defined using the @**XCENT
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -12945,6 +13486,7 @@ The coordinates of the centre of the ellipsoid can be defined using the @**XCENT
                 nonl_p=0,
                 showcode_p="required",
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -13121,8 +13663,8 @@ Report contents are typically:
         if lhmargin_p != "optional":
             try:
                 val = float(lhmargin_p)
-                if not (1.0 <= val <= 79.0):
-                    raise ValueError(f"lhmargin_p value {lhmargin_p} is not in allowed range: [1.0, 79.0]")
+                if not (1.0 <= val <= 79.0) and val != 1.0:
+                    raise ValueError(f"lhmargin_p value {lhmargin_p} is not in allowed range: [1.0, [79.0]")
             except ValueError as e:
                 if isinstance(lhmargin_p, (int, float)):
                     raise e
@@ -13133,8 +13675,8 @@ Report contents are typically:
         if rhmargin_p != "optional":
             try:
                 val = float(rhmargin_p)
-                if not (1.0 <= val <= 79.0):
-                    raise ValueError(f"rhmargin_p value {rhmargin_p} is not in allowed range: [1.0, 79.0]")
+                if not (1.0 <= val <= 79.0) and val != 79.0:
+                    raise ValueError(f"rhmargin_p value {rhmargin_p} is not in allowed range: [1.0, [79.0]")
             except ValueError as e:
                 if isinstance(rhmargin_p, (int, float)):
                     raise e
@@ -13187,8 +13729,8 @@ Report contents are typically:
         if eng_leng_p != "optional":
             try:
                 val = float(eng_leng_p)
-                if not (1.0 <= val <= 79.0):
-                    raise ValueError(f"eng_leng_p value {eng_leng_p} is not in allowed range: [1.0, 79.0]")
+                if not (1.0 <= val <= 79.0) and val != 79.0:
+                    raise ValueError(f"eng_leng_p value {eng_leng_p} is not in allowed range: [1.0, [79.0]")
             except ValueError as e:
                 if isinstance(eng_leng_p, (int, float)):
                     raise e
@@ -13259,6 +13801,9 @@ Report contents are typically:
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -13283,6 +13828,7 @@ Report contents are typically:
                 refy_p="optional",
                 seqopt_p=0,
                 distmeth_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -13569,6 +14115,895 @@ The best mining sequence is reported in the &**OUT** file with pairs of envelope
         if distmeth_p != "optional":
             command += " @distmeth=" + str(distmeth_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
+        if retrieval != "optional":
+            command += "{" + retrieval + "}"
+
+        self.run_command(command)
+
+    def estima(self,
+                proto_i="required",
+                in_i="required",
+                srcparm_i="required",
+                estparm_i="required",
+                vmodparm_i="optional",
+                string_i="optional",
+                model_o="required",
+                sampout_o="optional",
+                x_f="optional",
+                y_f="optional",
+                z_f="optional",
+                zone1_f_f="optional",
+                zone2_f_f="optional",
+                key_f="optional",
+                length_f_f="optional",
+                dens_f_f="optional",
+                section_f="optional",
+                boundary_f="optional",
+                wstag_f="optional",
+                bstag_f="optional",
+                tag_f="optional",
+                discmeth_p=1,
+                xpoints_p=1,
+                ypoints_p=1,
+                zpoints_p=1,
+                xdspace_p="optional",
+                ydspace_p="optional",
+                zdspace_p="optional",
+                parent_p=1,
+                dyankr_p=1,
+                mindisc_p=1,
+                copyval_p=0,
+                fvaltype_p=1,
+                fstep_p="optional",
+                xmin_p="optional",
+                xmax_p="optional",
+                ymin_p="optional",
+                ymax_p="optional",
+                zmin_p="optional",
+                zmax_p="optional",
+                xsubcell_p=1,
+                ysubcell_p=1,
+                zsubcell_p=1,
+                allwgts_p=0,
+                linkmode_p=3,
+                ucsamode_p=2,
+                ucsbmode_p=3,
+                ucscmode_p=2,
+                plane_p=1,
+                hangid_p="optional",
+                footid_p="optional",
+                tolrnc_p=0,
+                ucsalimt_p=1,
+                orgtag_p='-',
+                print_p=0,
+                arguments="optional",
+                retrieval="optional"):
+
+        r"""
+        ESTIMA
+        ------
+        The **ESTIMA** process provides a choice of methods for grade estimation of a block model.
+
+For in-depth conceptual information on the **ESTIMA** process, and grade estimation in general, see [Grade Estimation Introduction](<../STUDIO_RM/Grade%20Estimate%20Overview.md>).
+
+**ESTIMA** provides the following grade estimation methods:
+
+  * Nearest Neighbor (NN).
+
+  * Inverse Power of Distance [IPD].
+
+  * Ordinary Kriging (OK).
+
+  * Simple Kriging.
+
+  * Log Kriging.
+
+  * Sichel's T Estimator.
+
+  * Ordinary Macro Kriging
+
+  * Simple Macro Kriging
+
+  * F-value
+
+  * Lagrange multiplier
+
+Key ESTIMA features:
+
+  * Multiple grades can be estimated in a single run.
+
+  * The same grade can be estimated by different methods.
+
+  * Different search volumes and estimation parameters can be used for the different grades.
+
+  * Rectangular or ellipsoidal search volume with anisotropy.
+
+  * Restriction of number of samples by octant.
+
+  * Restriction of number of samples by key field.
+
+  * Estimation by zone, with separate parameters for each zone.
+
+  * Wide selection of variogram model types for both normal and lognormal kriging.
+
+  * Automatic transformation of data if the &PROTO model is a rotated model.
+
+  * Unfolding option available for all estimation types.
+
+  * Optimization of sample searching to improve processing speed.
+
+  * Parent cell estimation.
+
+  * Selective update of a partial model.
+
+If the input **& PROTO** model contains cells and sub-cells then values are interpolated into the existing cell structure. If **& PROTO** is empty then cells and sub-cells are created if there are sufficient samples within the search volume.
+
+**ESTIMA** requires a search volume to be defined. This is the volume, centered on the cell being estimated, which contains the samples to be used for grade estimation. In fact more than one search volume may be defined, so that different grades can have different search volumes. The parameters describing the search volume(s) are supplied using the Search Volume Parameter file **& SRCPARM**.
+
+**Note** : **ESTIMA** parameter files can be imported and transformed for use in **[COKRIG](<cokrig.md>)** using the Advanced Estimation console's **[Parameters](<../STUDIO_RM/Multivariate_Import_Parameters.md>)** panel).
+
+**ESTIMA** also requires a set of estimation parameters to be defined for each grade to be estimated. These parameters are also supplied to **ESTIMA** using a file - in this case the Estimation Parameter file. It will include items such as the estimation method, the search volume reference number and for example the power, if Inverse Power of Distance is selected.
+
+**Note** : Search volume parameter files exported from the Advanced Estimation console cannot be used as an input to the **ESTIMA** process, or the **[ESTIMATE](<estimate.md>)** screen.
+
+**ESTIMA** estimation methods include Nearest Neighbor, Inverse Power of Distance, and Sichel's t Estimator. MOD also includes Ordinary Kriging with a single structure spherical model variogram. The additional options in EGS are a choice of variogram models, lognormal kriging and Simple Kriging. Please consult your local Datamine office if you would like further information on these modules.
+
+**Note** : When **COKRIG** or **ESTIMA** run Dynamic Anisotropy and less than 3 angles are used, the process replaces the missing angles with angles from the selected search or variogram.
+
+        Input Files:
+        ------------
+
+        proto: Block_Model_File
+            Input model prototype. This is a standard block model file containing the 13 compulsory
+            fields. It may also contain the rotated model fields. If it includes cells then it must
+            be sorted on IJK.
+            Required=Yes
+
+        in: Table
+            **Input sample data**. This must contain X,Y and Z fields and at least one grade field.
+            Required=Yes
+
+        srcparm: Undefined
+            Search volume parameter file. This contains 24 compulsory fields defining the search
+            volume and the number of samples needed for grade estimation. More than one search
+            volume may be defined. All fields are numeric: SREFNUM Search volume reference number.
+            SMETHOD Search volume shape.
+            Required=Yes
+
+        estparm: Undefined
+            Estimation parameter file. Each record in the file describes an estimation method and
+            its associated parameters. The fields are dependent on the estimation methods selected.
+            All fields are optional except for VALUE_IN and SREFNUM. General fields: VALUE_IN 2A4
+            Field to be estimated. SREFNUM N Search volume reference number. VALUE_OU 2A4 Field to
+            be created in MODEL (Default is VALUE_IN). {ZONE1_F} A/N 1st field for zonal estimation.
+            The actual name of the field is given by ZONE1_F on command line eg ZONE1_F(ROCK).
+            {ZONE2_F} A/N 2nd field for zonal estimation. NUMSAM_F 2A4 Field to be created in MODEL
+            for the number of samples. SVOL_F 2A4 Field to be created in MODEL for dynamic search
+            volume number. V VAR_F 2A4 Field to be created in MODEL for variance of estimate.
+            MINDIS_F 2A4 Field to be created in MODEL for distance to nearest sample. IMETHOD N
+            Estimation method.
+            Required=Yes
+
+        vmodparm: Variogram - Model
+            Variogram model parameter file. Each record in this file defines a variogram model type
+            and its parameters. Only the **VREFNUM** field is compulsory. VREFNUM Model variogram
+            reference number. VANGLE1 Variogram anisotropy angle 1. VANGLE2 Variogram anisotropy
+            angle 2. VANGLE3 Variogram anisotropy angle 3. VAXIS1 Model variogram rotation axis 1.
+            VAXIS2 Model variogram rotation axis 2. VAXIS3 Model variogram rotation axis 3. NUGGET
+            Nugget variance. ST1 Variogram model type for structure 1.
+            Required=No
+
+        string: String
+            Input string file holding the boundary strings which define the stratified unit[s] for
+            unfolding. 7 fields are compulsory: SECTION , BOUNDARY , PVALUE , XP , YP , ZP and PTN.
+            3 optional fields are WSTAG , BSTAG and TAG. The file must be sorted on SECTION ,
+            BOUNDARY PTN , with SECTION being the primary keyfield. It is assumed that the section
+            numbering system is such that sorting on SECTION will ensure that physically adjacent
+            sections are adjacent in the STRING file.
+            Required=No
+
+        Output Files:
+        -------------
+
+        model: Block Model File
+            Output model containing estimated grades, variance etc.
+            Required=Yes
+
+        sampout: Undefined
+            Output sample file containing details of weights for each sample for each cell
+            estimated.
+            Required=No
+
+        Fields:
+        -------
+
+        x: Numeric : IN
+            X coordinate of sample data in IN file. If not specified, then X is assumed. If the
+            unfolding option is used, then the X coordinate must be set to the unfolded UCSA
+            coordinate.
+            Default=Undefined
+            Required=No
+
+        y: Numeric : IN
+            Y coordinate of sample data in IN file. If not specified, then Y is assumed. If the
+            unfolding option is used, then the Y coordinate must be set to the unfolded UCSB
+            coordinate.
+            Default=Undefined
+            Required=No
+
+        z: Numeric : IN
+            Z coordinate of sample data in IN file. If not specified, then Z is assumed. If the
+            unfolding option is used, then the Z coordinate must be set to the unfolded UCSC
+            coordinate.
+            Default=Undefined
+            Required=No
+
+        zone1_f: Any : IN
+            First field for zonal control. A maximum of 202 zone combinations is permitted.
+            Default=Undefined
+            Required=No
+
+        zone2_f: Any : IN
+            Second field for zonal control. A maximum of 202 zone combinations is permitted.
+            Default=Undefined
+            Required=No
+
+        key: Numeric : IN
+            Key field used to specify the field limiting the number of samples for estimation. The
+            field must exist in the IN file.
+            Default=Undefined
+            Required=No
+
+        length_f: Numeric : IN
+            Field used for length weighting in IPD. The field must exist in the IN file.
+            Default=Undefined
+            Required=No
+
+        dens_f: Numeric : IN
+            Field used for density weighting in IPD. The field must exist in the IN file.
+            Default=Undefined
+            Required=No
+
+        section: Numeric : STRING
+            The name of the numeric field in the STRING file holding the section identifier; used
+            if the unfolding option is required. The default field name is SECTION.
+            Default=SECTION
+            Required=No
+
+        boundary: Numeric : STRING
+            The name of the numeric field in the STRING file holding the boundary identifier; used
+            if the unfolding option is required. The default field name is BOUNDARY.
+            Default=BOUNDARY
+            Required=No
+
+        wstag: Numeric : STRING
+            Within Section TAG; used if the unfolding option is required. This is a numeric field
+            in the STRING file, defining the stratigraphical links between hangingwall and footwall
+            points on strings within the same section. A value of 0 or - means that the point is not
+            linked. The default field name is WSTAG.
+            Default=Undefined
+            Required=No
+
+        bstag: Numeric : STRING
+            Between Section TAG; used if the unfolding option is required. This is a numeric field
+            in the STRING file, defining the stratigraphical links between 2 points on strings on
+            adjacent sections with the same BOUNDARY. A value of 0 or - means that the point is not
+            linked. The default field name is BSTAG.
+            Default=Undefined
+            Required=No
+
+        tag: Numeric : STRING
+            A numeric tag field in the STRING file; used if the unfolding option is requires. It
+            defines both the stratigraphical links between points on strings within the same
+            section, and between points on adjacent sections with the same BOUNDARY. A value of 0 or
+            - means that the point is not linked. The default field name is TAG.
+            Default=Undefined
+            Required=No
+
+        Parameters:
+        -----------
+
+        discmeth:
+            Cell discretisation method: Options: 1: \- use XPOINTS , YPOINTS , ZPOINTS to define
+            the number of points in the X,Y,Z directions; 2: \- use XDSPACE , YDSPACE , ZDSPACE to
+            define the distance between points. The default is method (1).
+            Range=1,2
+            Values=1,2
+            Default=1
+            Required=No
+
+        xpoints:
+            Number of discretisation points in X. (1)
+            Range=Undefined
+            Values=Undefined
+            Default=1
+            Required=No
+
+        ypoints:
+            Number of discretisation points in Y. (1)
+            Range=Undefined
+            Values=Undefined
+            Default=1
+            Required=No
+
+        zpoints:
+            Number of discretisation points in Z. (1)
+            Range=Undefined
+            Values=Undefined
+            Default=1
+            Required=No
+
+        xdspace:
+            Distance between discretisation points in X if DISCMETH=2. The default gives just one
+            point.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        ydspace:
+            Distance between discretisation points in Y if DISCMETH=2. The default gives just one
+            point.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        zdspace:
+            Distance between discretisation points in Z if DISCMETH=2. The default gives just one
+            point.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        parent:
+            Flag to control parent cell estimation: Options: **0**: \- Estimate into individual
+            subcells.; **1**: \- Represent parent cell by a full 3D matrix of points.; **2**: \-
+            Represent parent cell by a 3D matrix of points, but select only points lying within
+            subcells. The default is (0).
+            Range=0,2
+            Values=0,1,2
+            Default=1
+            Required=No
+
+        dyankr:
+            Flag to select whether the variogram model rotation angles should use the dynamic
+            anisotropy option: Options: **0**: \- Do not use dynamic anisotropy. Use angles VANGLEn
+            as defined in the variogram model parameter file VMODPARM.; **1**: \- If the search
+            volume uses dynamic anisotropy, then the variogram model uses the same set of angles.;
+            **2**: \- Use dynamic anisotropy, but with a different set of angles from the search
+            volume. The names of the corresponding fields are specified by fields VANGLn_F in the
+            estimation parameter file ESTPARM.
+            Range=0,2
+            Values=0,2
+            Default=1
+            Required=No
+
+        mindisc:
+            Minimum number of discretisation points. Only used if PARENT=2. The default is (1).
+            Range=Undefined
+            Values=Undefined
+            Default=1
+            Required=No
+
+        copyval:
+            Flag controlling copying of values from PROTO to MODEL if there is insufficient data to
+            estimate them: Options: **0**: \- Assign absent data value[s] in MODEL.; **1**: \- Copy
+            from PROTO to MODEL. The default is (0).
+            Range=0,1
+            Values=0,1
+            Default=0
+            Required=No
+
+        fvaltype:
+            Flag for cell approximation for F values: Options: **0**: \- The exact dimensions of
+            the cell are used; **1**: \- Each cell is approximated by one of a discrete number of
+            cell sizes. The default is (1).
+            Range=1,2
+            Values=1,2
+            Default=1
+            Required=No
+
+        fstep:
+            Step size for cell approximation. This is only used if FVALTYPE=2.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        xmin:
+            Minimum X value for model updating. The default is the X model origin.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        xmax:
+            Maximum X value for model updating. The default is the maximum X value for PROTO.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        ymin:
+            Minimum Y value for model updating. The default is the Y model origin.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        ymax:
+            Maximum Y value for model updating. The default is the maximum Y value for PROTO.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        zmin:
+            Minimum Z value for model updating. The default is the Z model origin.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        zmax:
+            Maximum Z value for model updating. The default is the maximum Z value for PROTO.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        xsubcell:
+            Number of subcells per parent cell in X if PROTO is empty. The default is (1).
+            Range=Undefined
+            Values=Undefined
+            Default=1
+            Required=No
+
+        ysubcell:
+            Number of subcells per parent cell in Y if PROTO is empty. The default is (1).
+            Range=Undefined
+            Values=Undefined
+            Default=1
+            Required=No
+
+        zsubcell:
+            Number of subcells per parent cell in Z if PROTO is empty. The default is (1).
+            Range=Undefined
+            Values=Undefined
+            Default=1
+            Required=No
+
+        allwgts:
+            Flag controlling which samples are written to the sample output file if IMETHOD=9
+            [correlation factor method]. Options: 0: \- Only samples with non-zero weights are
+            written to the sample output file.; 1: \- All samples in the search volume including
+            those with zero weights are written to the sample output file.
+            Range=0,1
+            Values=0,1
+            Default=0
+            Required=No
+
+        linkmode:
+            The method by which links between strings are created; used if the unfolding option is
+            required. Options: 0: \- Within section links are defined by the WSTAG field, or by the
+            TAG field if WSTAG does not exist. Between section links are defined by the BSTAG field,
+            or by the TAG field if BSTAG does not exist.; 1: Within section links are defined
+            automatically. Between section links are defined by the BSTAG field, or by the TAG field
+            if BSTAG does not exist.; 2: \- Within section links are defined by the WSTAG field, or
+            by the TAG field if WSTAG does not exist. Between section links are defined
+            automatically.; 3: \- Within section links are defined automatically. Between section
+            links are defined automatically. For simple structures it is not essential to define tag
+            points on the strings; using the default value (3) ensures that automatic linking will
+            be applied both within and between sections.
+            Range=0,3
+            Values=0,1,2,3
+            Default=3
+            Required=No
+
+        ucsamode:
+            The type of UCSA coordinate; used if the unfolding option is required. Default (2).
+            Options: **1**: \- Coordinates are normalised.; **2**: \- Coordinates are adjusted.;
+            **3**: \- Coordinates are true length.; **4**: \- Coordinates are world X value.; **5**:
+            \- Coordinates are world Y value.; **6**: \- Coordinates are world Z value.
+            Range=1,6
+            Values=1,2,3,4,5,6
+            Default=2
+            Required=No
+
+        ucsbmode:
+            The type of UCSB coordinate; used if the unfolding option is required. Default (3).
+            Options: **1**: \- Coordinates are normalised.; **2**: \- Coordinates are adjusted.;
+            **3**: \- Coordinates are true length.; **4**: \- Coordinates are world X value.; **5**:
+            \- coordinates are world Y value.; **6**: \- coordinates are world Z value.
+            Range=1,6
+            Values=1,2,3,4,5,6
+            Default=3
+            Required=No
+
+        ucscmode:
+            The type of UCSC coordinate; used if the unfolding option is required. Default (2).
+            Options: **1**: \- Coordinates are normalised.; **2**: \- Coordinates are adjusted.;
+            **3**: \- Coordinates are true length.; **4**: \- Coordinates are world X value.; **5**:
+            \- Coordinates are world Y value.; **6**: \- Coordinates are world Z value.
+            Range=1,6
+            Values=1,2,3,4,5,6
+            Default=2
+            Required=No
+
+        plane:
+            The plane of the structural interpretations defined in the STRING file; used if the
+            unfolding option is required. Default (1). Options: **1**: \- Vertical sectional
+            interpretation.; **2**: \- Interpretation in plan.
+            Range=1,2
+            Values=1,2
+            Default=1
+            Required=No
+
+        hangid:
+            The value of the field BOUNDARY in the STRING file that defines the hangingwall of the
+            unit, used if the unfolding option is required. It will be used if the UNITDEF file is
+            not defined.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        footid:
+            The value of the field BOUNDARY in the STRING file that defines the footwall of the
+            unit, used if the unfolding option is required. It will be used if the UNITDEF file is
+            not defined.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        tolrnc:
+            Tolerance in the calculation of the UCSA coordinate expressed as a proportion of the
+            UCSA width; used if the unfolding option is required. The default is (0).
+            Range=Undefined
+            Values=Undefined
+            Default=0
+            Required=No
+
+        ucsalimt:
+            Flag to define the limits of the UCSA coordinate if UCSAMODE=1 or 2 and TOLRNC>0\. The
+            options below are defined in terms of the Normalized mode [UCSAMODE=1]. Default (1)
+            Options: 1: \- UCSA values can be less than 0 and greater than 1; 2: \- UCSA values can
+            be less than 0. Values calculated as greater than 1 are reset to 1; 3: \- UCSA values
+            calculated as less than 0 are reset to 0. Values can be greater than 1; 4: \- UCSA
+            values calculated as less than 0 are reset to 0. Values calculated as greater than 1 are
+            reset to 1
+            Range=1,4
+            Values=1,2,3,4
+            Default=1
+            Required=No
+
+        orgtag:
+            Tag number of points which define the origin surface from which the UCSB coordinate is
+            measured. The default surface if ORGTAG is undefined (-) is created from the first
+            points on each of the hangingwall and footwall strings.
+            Range=Undefined
+            Values=Undefined
+            Default=-
+            Required=No
+
+        print:
+            Display control: Options: **0**: Minimum output including progress message.; **1**: As
+            0 plus details of input parameters.; **2**: as 1 plus display of each cell value. The
+            default is (0).
+            Range=0,2
+            Values=0,12
+            Default=0
+            Required=No
+
+        """
+        command = "estima "
+
+        if proto_i == "required":
+            raise ValueError("proto_i is required.")
+
+        if proto_i != "optional":
+            command += " &proto=" + proto_i
+
+        if in_i == "required":
+            raise ValueError("in_i is required.")
+
+        if in_i != "optional":
+            command += " &in=" + in_i
+
+        if srcparm_i == "required":
+            raise ValueError("srcparm_i is required.")
+
+        if srcparm_i != "optional":
+            command += " &srcparm=" + srcparm_i
+
+        if estparm_i == "required":
+            raise ValueError("estparm_i is required.")
+
+        if estparm_i != "optional":
+            command += " &estparm=" + estparm_i
+
+        if vmodparm_i != "optional":
+            command += " &vmodparm=" + vmodparm_i
+
+        if string_i != "optional":
+            command += " &string=" + string_i
+
+        if model_o == "required":
+            raise ValueError("model_o is required.")
+
+        if model_o != "optional":
+            command += " &model=" + model_o
+
+        if sampout_o != "optional":
+            command += " &sampout=" + sampout_o
+
+        if x_f != "optional":
+            command += " *x=" + x_f
+
+        if y_f != "optional":
+            command += " *y=" + y_f
+
+        if z_f != "optional":
+            command += " *z=" + z_f
+
+        if zone1_f_f != "optional":
+            command += " *zone1_f=" + zone1_f_f
+
+        if zone2_f_f != "optional":
+            command += " *zone2_f=" + zone2_f_f
+
+        if key_f != "optional":
+            command += " *key=" + key_f
+
+        if length_f_f != "optional":
+            command += " *length_f=" + length_f_f
+
+        if dens_f_f != "optional":
+            command += " *dens_f=" + dens_f_f
+
+        if section_f != "optional":
+            command += " *section=" + section_f
+
+        if boundary_f != "optional":
+            command += " *boundary=" + boundary_f
+
+        if wstag_f != "optional":
+            command += " *wstag=" + wstag_f
+
+        if bstag_f != "optional":
+            command += " *bstag=" + bstag_f
+
+        if tag_f != "optional":
+            command += " *tag=" + tag_f
+
+        if discmeth_p != "optional":
+            try:
+                val = float(discmeth_p)
+                if val not in [1.0, 2.0]:
+                    raise ValueError(f"discmeth_p value {discmeth_p} is not in allowed values: [1, 2]")
+            except ValueError as e:
+                if isinstance(discmeth_p, (int, float)):
+                    raise e
+
+        if discmeth_p != "optional":
+            command += " @discmeth=" + str(discmeth_p)
+
+        if xpoints_p != "optional":
+            command += " @xpoints=" + str(xpoints_p)
+
+        if ypoints_p != "optional":
+            command += " @ypoints=" + str(ypoints_p)
+
+        if zpoints_p != "optional":
+            command += " @zpoints=" + str(zpoints_p)
+
+        if xdspace_p != "optional":
+            command += " @xdspace=" + str(xdspace_p)
+
+        if ydspace_p != "optional":
+            command += " @ydspace=" + str(ydspace_p)
+
+        if zdspace_p != "optional":
+            command += " @zdspace=" + str(zdspace_p)
+
+        if parent_p != "optional":
+            try:
+                val = float(parent_p)
+                if val not in [0.0, 1.0, 2.0]:
+                    raise ValueError(f"parent_p value {parent_p} is not in allowed values: [0, 1, 2]")
+            except ValueError as e:
+                if isinstance(parent_p, (int, float)):
+                    raise e
+
+        if parent_p != "optional":
+            command += " @parent=" + str(parent_p)
+
+        if dyankr_p != "optional":
+            try:
+                val = float(dyankr_p)
+                if val not in [0.0, 2.0, 1.0]:
+                    raise ValueError(f"dyankr_p value {dyankr_p} is not in allowed values: [0, 2, 1]")
+            except ValueError as e:
+                if isinstance(dyankr_p, (int, float)):
+                    raise e
+
+        if dyankr_p != "optional":
+            command += " @dyankr=" + str(dyankr_p)
+
+        if mindisc_p != "optional":
+            command += " @mindisc=" + str(mindisc_p)
+
+        if copyval_p != "optional":
+            try:
+                val = float(copyval_p)
+                if val not in [0.0, 1.0]:
+                    raise ValueError(f"copyval_p value {copyval_p} is not in allowed values: [0, 1]")
+            except ValueError as e:
+                if isinstance(copyval_p, (int, float)):
+                    raise e
+
+        if copyval_p != "optional":
+            command += " @copyval=" + str(copyval_p)
+
+        if fvaltype_p != "optional":
+            try:
+                val = float(fvaltype_p)
+                if val not in [1.0, 2.0]:
+                    raise ValueError(f"fvaltype_p value {fvaltype_p} is not in allowed values: [1, 2]")
+            except ValueError as e:
+                if isinstance(fvaltype_p, (int, float)):
+                    raise e
+
+        if fvaltype_p != "optional":
+            command += " @fvaltype=" + str(fvaltype_p)
+
+        if fstep_p != "optional":
+            command += " @fstep=" + str(fstep_p)
+
+        if xmin_p != "optional":
+            command += " @xmin=" + str(xmin_p)
+
+        if xmax_p != "optional":
+            command += " @xmax=" + str(xmax_p)
+
+        if ymin_p != "optional":
+            command += " @ymin=" + str(ymin_p)
+
+        if ymax_p != "optional":
+            command += " @ymax=" + str(ymax_p)
+
+        if zmin_p != "optional":
+            command += " @zmin=" + str(zmin_p)
+
+        if zmax_p != "optional":
+            command += " @zmax=" + str(zmax_p)
+
+        if xsubcell_p != "optional":
+            command += " @xsubcell=" + str(xsubcell_p)
+
+        if ysubcell_p != "optional":
+            command += " @ysubcell=" + str(ysubcell_p)
+
+        if zsubcell_p != "optional":
+            command += " @zsubcell=" + str(zsubcell_p)
+
+        if allwgts_p != "optional":
+            try:
+                val = float(allwgts_p)
+                if val not in [0.0, 1.0]:
+                    raise ValueError(f"allwgts_p value {allwgts_p} is not in allowed values: [0, 1]")
+            except ValueError as e:
+                if isinstance(allwgts_p, (int, float)):
+                    raise e
+
+        if allwgts_p != "optional":
+            command += " @allwgts=" + str(allwgts_p)
+
+        if linkmode_p != "optional":
+            try:
+                val = float(linkmode_p)
+                if val not in [0.0, 1.0, 2.0, 3.0]:
+                    raise ValueError(f"linkmode_p value {linkmode_p} is not in allowed values: [0, 1, 2, 3]")
+            except ValueError as e:
+                if isinstance(linkmode_p, (int, float)):
+                    raise e
+
+        if linkmode_p != "optional":
+            command += " @linkmode=" + str(linkmode_p)
+
+        if ucsamode_p != "optional":
+            try:
+                val = float(ucsamode_p)
+                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]:
+                    raise ValueError(f"ucsamode_p value {ucsamode_p} is not in allowed values: [1, 2, 3, 4, 5, 6]")
+            except ValueError as e:
+                if isinstance(ucsamode_p, (int, float)):
+                    raise e
+
+        if ucsamode_p != "optional":
+            command += " @ucsamode=" + str(ucsamode_p)
+
+        if ucsbmode_p != "optional":
+            try:
+                val = float(ucsbmode_p)
+                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]:
+                    raise ValueError(f"ucsbmode_p value {ucsbmode_p} is not in allowed values: [1, 2, 3, 4, 5, 6]")
+            except ValueError as e:
+                if isinstance(ucsbmode_p, (int, float)):
+                    raise e
+
+        if ucsbmode_p != "optional":
+            command += " @ucsbmode=" + str(ucsbmode_p)
+
+        if ucscmode_p != "optional":
+            try:
+                val = float(ucscmode_p)
+                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]:
+                    raise ValueError(f"ucscmode_p value {ucscmode_p} is not in allowed values: [1, 2, 3, 4, 5, 6]")
+            except ValueError as e:
+                if isinstance(ucscmode_p, (int, float)):
+                    raise e
+
+        if ucscmode_p != "optional":
+            command += " @ucscmode=" + str(ucscmode_p)
+
+        if plane_p != "optional":
+            try:
+                val = float(plane_p)
+                if val not in [1.0, 2.0]:
+                    raise ValueError(f"plane_p value {plane_p} is not in allowed values: [1, 2]")
+            except ValueError as e:
+                if isinstance(plane_p, (int, float)):
+                    raise e
+
+        if plane_p != "optional":
+            command += " @plane=" + str(plane_p)
+
+        if hangid_p != "optional":
+            command += " @hangid=" + str(hangid_p)
+
+        if footid_p != "optional":
+            command += " @footid=" + str(footid_p)
+
+        if tolrnc_p != "optional":
+            command += " @tolrnc=" + str(tolrnc_p)
+
+        if ucsalimt_p != "optional":
+            try:
+                val = float(ucsalimt_p)
+                if val not in [1.0, 2.0, 3.0, 4.0]:
+                    raise ValueError(f"ucsalimt_p value {ucsalimt_p} is not in allowed values: [1, 2, 3, 4]")
+            except ValueError as e:
+                if isinstance(ucsalimt_p, (int, float)):
+                    raise e
+
+        if ucsalimt_p != "optional":
+            command += " @ucsalimt=" + str(ucsalimt_p)
+
+        if orgtag_p != "optional":
+            command += " @orgtag=" + str(orgtag_p)
+
+        if print_p != "optional":
+            try:
+                val = float(print_p)
+                if val not in [0.0, 12.0]:
+                    raise ValueError(f"print_p value {print_p} is not in allowed values: [0, 12]")
+            except ValueError as e:
+                if isinstance(print_p, (int, float)):
+                    raise e
+
+        if print_p != "optional":
+            command += " @print=" + str(print_p)
+
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -13581,6 +15016,7 @@ The best mining sequence is reported in the &**OUT** file with pairs of envelope
                 end_f="optional",
                 newfield_f="optional",
                 incrment_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -13675,6 +15111,9 @@ The records output are for values of * **START** , * **START** +@**INCRMENT** , 
         if incrment_p != "optional":
             command += " @incrment=" + str(incrment_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -13687,6 +15126,7 @@ The records output are for values of * **START** , * **START** +@**INCRMENT** , 
                 pinc_p=0.1,
                 mode_p=1,
                 nodiag_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -13837,6 +15277,9 @@ Pass 2 through process **EXPMMW** takes as input a file containing both the orig
         if nodiag_p != "optional":
             command += " @nodiag=" + str(nodiag_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -13853,7 +15296,7 @@ Pass 2 through process **EXPMMW** takes as input a file containing both the orig
                 name_f="optional",
                 value_f="optional",
                 density_p=1,
-                wiretype_p='surface - create cells to the west.',
+                wiretype_p="required",
                 cellxmin_p="required",
                 cellymin_p="required",
                 cellzmin_p="required",
@@ -13864,6 +15307,7 @@ Pass 2 through process **EXPMMW** takes as input a file containing both the orig
                 ymax_p="optional",
                 zmax_p="optional",
                 filvol_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -13984,11 +15428,11 @@ If the model includes two or three rotations then the process can still be run s
             Type of wireframe model to be filled with cells. Select one of the following options,
             with the default being 2: Options: 1: solid - create cells inside.; 2: surface - create
             cells below.; 3: surface - create cells above.; 4: surface - create cells to the south.;
-            5: surface - create cells to the north.
-            Range=
-            Values=
-            Default=surface - create cells to the west.
-            Required=No
+            5: surface - create cells to the north.; 6: surface - create cells to the west.
+            Range=1,6
+            Values=1,2,3,4,5,6
+            Default=2
+            Required=Yes
 
         cellxmin:
             Minimum cell size in the X direction. If it is set to zero then seam filling is used -
@@ -14120,6 +15564,18 @@ If the model includes two or three rotations then the process can still be run s
         if density_p != "optional":
             command += " @density=" + str(density_p)
 
+        if wiretype_p == "required":
+            raise ValueError("wiretype_p is required.")
+
+        if wiretype_p != "optional":
+            try:
+                val = float(wiretype_p)
+                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]:
+                    raise ValueError(f"wiretype_p value {wiretype_p} is not in allowed values: [1, 2, 3, 4, 5, 6]")
+            except ValueError as e:
+                if isinstance(wiretype_p, (int, float)):
+                    raise e
+
         if wiretype_p != "optional":
             command += " @wiretype=" + str(wiretype_p)
 
@@ -14171,6 +15627,9 @@ If the model includes two or three rotations then the process can still be run s
         if filvol_p != "optional":
             command += " @filvol=" + str(filvol_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -14178,6 +15637,7 @@ If the model includes two or three rotations then the process can still be run s
 
     def extend(self,
                 in_i="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -14232,6 +15692,9 @@ If no SYSFILE exists, data lines are entered in free format. ! terminates. The r
         if in_i != "optional":
             command += " &in=" + in_i
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -14239,6 +15702,7 @@ If no SYSFILE exists, data lines are entered in free format. ! terminates. The r
 
     def extndf(self,
                 in_i="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -14285,6 +15749,9 @@ Records may not start with the character !. This is because the ! symbol acts as
         if in_i != "optional":
             command += " &in=" + in_i
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -14297,6 +15764,7 @@ Records may not start with the character !. This is because the ! symbol acts as
                 seed_p="optional",
                 fldfail_p=1,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -14421,6 +15889,9 @@ See [EXTRA examples](<../COMMON/Expression%20Translator%20Examples.md>).
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -14439,6 +15910,7 @@ See [EXTRA examples](<../COMMON/Expression%20Translator%20Examples.md>).
                 numeigen_p=0,
                 promaxcf_p=3,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -14595,8 +16067,8 @@ If the user wishes to plot maps of the output scores then the scores files can b
         if promaxcf_p != "optional":
             try:
                 val = float(promaxcf_p)
-                if not (1.0 <= val <= 9.0):
-                    raise ValueError(f"promaxcf_p value {promaxcf_p} is not in allowed range: [1.0, 9.0]")
+                if not (1.0 <= val <= 9.0) and val != 3.0:
+                    raise ValueError(f"promaxcf_p value {promaxcf_p} is not in allowed range: [1.0, [9.0]")
             except ValueError as e:
                 if isinstance(promaxcf_p, (int, float)):
                     raise e
@@ -14616,6 +16088,9 @@ If the user wishes to plot maps of the output scores then the scores files can b
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -14625,6 +16100,7 @@ If the user wishes to plot maps of the output scores then the scores files can b
                 in_i="required",
                 tolton_p=0.5,
                 format_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -14736,6 +16212,9 @@ You can choose whether multiple sub-cells of the same rock type code within a ce
         if format_p != "optional":
             command += " @format=" + str(format_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -14749,6 +16228,7 @@ You can choose whether multiple sub-cells of the same rock type code within a ce
                 ipoints_p=6,
                 jpoints_p=6,
                 kpoints_p=6,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -14860,6 +16340,9 @@ By estimating the F-function for two block sizes, the theoretical Dispersion Var
         if kpoints_p != "optional":
             command += " @kpoints=" + str(kpoints_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -14868,6 +16351,7 @@ By estimating the F-function for two block sizes, the theoretical Dispersion Var
     def filcom(self,
                 in_i="required",
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -14914,6 +16398,9 @@ This is of particular use for simple text files, such as those established by th
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -14922,6 +16409,7 @@ This is of particular use for simple text files, such as those established by th
     def filexp(self,
                 in_i="required",
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -14968,6 +16456,9 @@ This process is used when it is necessary to give different values to a field in
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -14980,6 +16471,7 @@ This process is used when it is necessary to give different values to a field in
                 y_f="optional",
                 z_f="optional",
                 radius_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -15065,6 +16557,9 @@ If a filter file is used then points from the &**IN1** file are copied to the &*
         if radius_p != "optional":
             command += " @radius=" + str(radius_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -15085,6 +16580,7 @@ If a filter file is used then points from the &**IN1** file are copied to the &*
                 sysfile_p=0,
                 print_p=1,
                 pause_p=-1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -15412,6 +16908,9 @@ Where:
         if pause_p != "optional":
             command += " @pause=" + str(pause_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -15423,6 +16922,7 @@ Where:
                 format_p=0,
                 element_p="required",
                 zonefld_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -15602,6 +17102,9 @@ The user can choose whether multiple sub-cells of the same rock type code within
         if zonefld_p != "optional":
             command += " @zonefld=" + str(zonefld_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -15610,9 +17113,11 @@ The user can choose whether multiple sub-cells of the same rock type code within
     def gausan(self,
                 in_i="required",
                 polyno_o="optional",
+                trans_o="optional",
                 value_f="optional",
                 numpoly_p="required",
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -15642,6 +17147,11 @@ The results can be:
 
         polyno: Undefined
             Optional output file containing polynomial coefficients. It includes the following
+            fields:
+            Required=No
+
+        trans: Undefined
+            Optional output file containing transformed values. It includes the following explicit
             fields:
             Required=No
 
@@ -15684,6 +17194,9 @@ The results can be:
         if polyno_o != "optional":
             command += " &polyno=" + polyno_o
 
+        if trans_o != "optional":
+            command += " &trans=" + trans_o
+
         if value_f != "optional":
             command += " *value=" + value_f
 
@@ -15694,7 +17207,7 @@ The results can be:
             try:
                 val = float(numpoly_p)
                 if not (1.0 <= val <= 30.0):
-                    raise ValueError(f"numpoly_p value {numpoly_p} is not in allowed range: [1.0, 30.0]")
+                    raise ValueError(f"numpoly_p value {numpoly_p} is not in allowed range: [1.0, [30.0]")
             except ValueError as e:
                 if isinstance(numpoly_p, (int, float)):
                     raise e
@@ -15704,6 +17217,9 @@ The results can be:
 
         if print_p != "optional":
             command += " @print=" + str(print_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -15716,6 +17232,7 @@ The results can be:
                 stats_o="optional",
                 grade_f="optional",
                 weight_f="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -15791,6 +17308,9 @@ The Gaussian Anamorphosis Modelling functionality is designed to:
         if weight_f != "optional":
             command += " *weight=" + weight_f
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -15799,6 +17319,7 @@ The Gaussian Anamorphosis Modelling functionality is designed to:
     def gentra(self,
                 in_i="required",
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -15947,6 +17468,9 @@ SUBS |  Return the substring of alpha OLDFIELD that begins at position FROM and 
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -15958,6 +17482,7 @@ SUBS |  Return the substring of alpha OLDFIELD that begins at position FROM and 
                 f1_f="optional",
                 f2_f30_f="optional",
                 csvout_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -16049,6 +17574,728 @@ The resulting downhole sample file can then be merged with existing drillhole sa
         if csvout_p != "optional":
             command += " @csvout=" + str(csvout_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
+        if retrieval != "optional":
+            command += "{" + retrieval + "}"
+
+        self.run_command(command)
+
+    def grade(self,
+                proto_i="required",
+                in_i="required",
+                model_o="required",
+                x_f="optional",
+                y_f="optional",
+                z_f="optional",
+                value_f="optional",
+                numsam_f="optional",
+                variance_f="optional",
+                zone_f="optional",
+                length_f="optional",
+                sdists_f=['optional'],
+                sangles_f=['optional'],
+                saxiss_f=['optional'],
+                minnum_p=3,
+                maxnum_p=20,
+                minoct_p=0,
+                minperoc_p=1,
+                maxperoc_p=0,
+                imethod_p=2,
+                power_p=2,
+                nstruct_p=1,
+                nugget_p=0,
+                st1var_p=1,
+                st1rang1_p=100,
+                st1rang2_p=100,
+                st1rang3_p=100,
+                st2var_p=1,
+                st2rang1_p=100,
+                st2rang2_p=100,
+                st2rang3_p=100,
+                parent_p=0,
+                xpoints_p=3,
+                ypoints_p=3,
+                zpoints_p=3,
+                xsubcell_p=1,
+                ysubcell_p=1,
+                zsubcell_p=1,
+                print_p=0,
+                arguments="optional",
+                retrieval="optional"):
+
+        r"""
+        GRADE
+        -----
+        **Note** : This is a _superprocess_ and running it may have an effect on other Datamine files in the project.
+
+Interpolate a single grade into a block model using basic interpolation methods:
+
+  * Nearest Neighbour
+
+The Nearest Neighbour interpolation method simply assigns to the subcell the grade of the nearest sample. The definition of 'nearest' takes into account the anisotropy and orientation of the search ellipsoid. The Inverse Power of Distance method also takes account of the anisotropy and orientation of the search volume when assigning weights to the samples.
+
+  * Inverse Power of Distance
+
+For Inverse Power of Distance and Ordinary Kriging you may record the number of samples which are used to make each estimate. This is done by specifying a **NUMSAM** field. 
+
+  * Ordinary Kriging
+
+If you select Ordinary Kriging then you must also define a one or two structure spherical model variogram. It is assumed that any anisotropy in the variogram ranges has the same orientation as the search volume, but the actual values of the ranges are independent of the dimensions of the search volume. For Ordinary Kriging you may also record the kriged variance of the estimate by specifying a **VARIANCE** field.
+
+Note: Only one grade field can be interpolated at a time. **[COKRIG](<cokrig.md>)** should be used when multiple grade fields need to be interpolated at a time.
+
+For any method, you must specify an [input prototype block model](<../COMMON/filetype.md#BlockMod>), and an input sample data file. If the input prototype model contains cells and subcells then values are interpolated into the existing cell structure. If the prototype model is empty then cells and subcells are created if there are sufficient samples within the search volume.  
+  
+For kriging, a search volume is defined by a 3D ellipsoid which is centered on each subcell of the model in turn, and is used to select the samples for interpolating that subcell. You must define the lengths for the three axes of the ellipsoid, which may be different if you want an anisotropic volume. If you want a spherical search volume then set all three axes equal to the radius of the required sphere. You may orientate the search ellipsoid by specifying three sets of rotation angles and axes. The definition of the rotation angles and axes is described in section 3 of the Grade Estimation User Guide.  
+  
+You may select to use the zone control option by specifying a **ZONE** field. This will restrict the samples that are used for making the estimate to have the same **ZONE** value as the prototype model subcell. For example if both the prototype model and sample data files include a numeric rocktype field **ROCK** , then specifying **ZONE**(ROCK) will ensure that subcells which are rocktype N will be estimated using samples which are rocktype N.
+
+The samples from the input sample file &**IN** can be weighted by specifying a **LENGTH** field.
+
+**Note** : It frequently happens that samples are not evenly distributed around the subcell being estimated, but are clustered together. One way of minimizing this problem is to divide the search volume into octants and ensure that a minimum number of octants have samples in them. This is defined using the **MINOCT** , **MINPEROC** and **MAXPEROC** parameters.
+
+        Input Files:
+        ------------
+
+        proto: Block Model prototype
+            Input prototype model. This must contain at least the fields **XC** , **YC** , **ZC** ,
+            **XINC** , **YINC** , **ZINC** , **XMORIG** , **YMORIG** , **ZMORIG** , **NX** , **NY**
+            , **NZ** , **IJK**. If the file contains cells and subcells, then these cells and
+            subcells will be copied to the output model with the new grade field added. If the file
+            does not contain cells and subcells then they will be created if there is sufficient
+            data within the search ellipsoid.
+            Required=Yes
+
+        in: Drillhole
+            Input sample data. This must contain the X, Y and Z coordinates of each sample and the
+            grade field (**VALUE**) to be estimated. This will usually be a drillhole file, but can
+            be any file containing the four required fields
+            Required=Yes
+
+        Output Files:
+        -------------
+
+        model: Block Model
+            Output interpolated model. This will include all the fields in the input prototype
+            model plus the estimated grade field (**VALUE**). In addition the number of samples
+            field (**NUMSAM**) and the variance field (**VARIANCE**) will be included if they have
+            been specified
+            Required=Yes
+
+        Fields:
+        -------
+
+        x: Numeric : IN
+            Name of the field containing the X coordinate of the sample.
+            Default=X
+            Required=Yes
+
+        y: Numeric : IN
+            Name of the field containing the Y coordinate of the sample.
+            Default=Y
+            Required=Yes
+
+        z: Numeric : IN
+            Name of the field containing the Z coordinate of the sample.
+            Default=Z
+            Required=Yes
+
+        value: Any : IN
+            Name of the field containing the grade to be estimated.
+            Default=Undefined
+            Required=Yes
+
+        numsam: Numeric : MODEL
+            Name of the field to be created in the output **MODEL** file which is used to record
+            the number of samples used for estimating each cell. If a field name is not specified
+            the number of samples used will not be recorded.
+            Default=Undefined
+            Required=No
+
+        variance: Numeric : MODEL
+            Name of the field to be created in the output **MODEL** file which is used to record
+            the kriged variance of the estimate of eachcell. This can only be used if Ordinary
+            Kriging (IMETHOD=3) has been selected. If a field name is not specified then the
+            variance will not be reorded.
+            Default=Undefined
+            Required=No
+
+        zone: Any : PROTO, IN
+            Name of the zonal interpolation field. The field may be numeric or up to 20 character
+            alphanumeric. The field must exist in both the **PROTO** and IN files. If it is
+            specified then cells in each **ZONE** will be interpolated using only samples with the
+            same **ZONE** value.
+            Default=Undefined
+            Required=No
+
+        length: Numeric : MODEL
+            Name of the field used for length weighting of samples. This is only used if the
+            Inverse Power of Distance interpolation method is selected (**IMETHOD** =2).
+            Default=LENGTH
+            Required=No
+
+        Parameters:
+        -----------
+
+        sdist1:
+            Length of the search ellipsoid axis in the X direction.
+            Range=0.00001,+
+            Values=Undefined
+            Default=100
+            Required=No
+
+        sdist2:
+            Length of the search ellipsoid axis in the Y direction. .
+            Range=0.00001,+
+            Values=Undefined
+            Default=100
+            Required=No
+
+        sdist3:
+            Length of the search ellipsoid axis in the Z direction. .
+            Range=0.00001,+
+            Values=Undefined
+            Default=100
+            Required=No
+
+        sangle1:
+            First rotation angle (in degrees) for the search ellipsoid. The rotation is around the
+            axis defined by **SAXIS1**.
+            Range=-360,360
+            Values=Undefined
+            Default=0
+            Required=No
+
+        saxis1:
+            Coordinate axis about which rotation **SANGLE1** is applied. Specify 1 for the X axis,
+            2 for the Y axis, or 3 for the Z axis.
+            Range=1,3
+            Values=1,2,3
+            Default=3
+            Required=No
+
+        sangle2:
+            Second rotation angle (in degrees) for the search ellipsoid. The rotation is around the
+            axis defined by **SAXIS2**.
+            Range=-360,360
+            Values=Undefined
+            Default=0
+            Required=No
+
+        saxis2:
+            Coordinate axis about which rotation **SANGLE2** is applied. Specify 1 for the X axis,
+            2 for the Y axis, or 3 for the Z axis.
+            Range=1,3
+            Values=1,2,3
+            Default=1
+            Required=No
+
+        sangle3:
+            Third rotation angle (in degrees) for the search ellipsoid. The rotation is around the
+            axis defined by **SAXIS3**.
+            Range=-360,360
+            Values=Undefined
+            Default=0
+            Required=No
+
+        saxis3:
+            Coordinate axis about which rotation **SANGLE3** is applied. Specify 1 for the X axis,
+            2 for the Y axis, or 3 for the Z axis.
+            Range=1,3
+            Values=1,2,3
+            Default=3
+            Required=No
+
+        minnum:
+            Minimum number of samples which must lie within the search ellipsoid in order for the
+            model subcell to be estimated. If there are less than the minimum number and the input
+            **PROTO** model contains cells, then an absent data value will be assigned to the grade
+            field in the output model file **MODEL** If there are less than the minimum, but the
+            input **PROTO** model does not contain any cells, then a cell will not be created in the
+            output model file **MODEL**.
+            Range=1,1400
+            Values=Undefined
+            Default=3
+            Required=No
+
+        maxnum:
+            Maximum number of samples to be used for estimating the grade of a model cell. If more
+            than the maximum number lie within the search ellipsoid, then the search ellipsoid is
+            shrunk concentrically until just **MAXNUM** samples remain. The maximum number cannot
+            exceed 1400.
+            Range=1,1400
+            Values=Undefined
+            Default=20
+            Required=No
+
+        minoct:
+            The minimum number of octants to be filled before a subcell will be interpolated. If it
+            is set to zero then octant search will not be used.
+            Range=0,8
+            Values=0,1,2,3,4,5,6,7,8
+            Default=0
+            Required=No
+
+        minperoc:
+            The minimum number of samples in an octant before it is considered to be filled.
+            Range=0,1400
+            Values=Undefined
+            Default=1
+            Required=No
+
+        maxperoc:
+            The maximum number of samples in an octant, to be used for interpolation. If there are
+            more than the maximum number in any octant, then the samples closest to subcell centre
+            are selected. If set to zero there is no limit on the number of samples.
+            Range=0,1400
+            Values=Undefined
+            Default=0
+            Required=No
+
+        imethod:
+            Interpolation method: 1: Nearest Neighbour 2: Inverse Power of Distance 3: Ordinary
+            Kriging with a one or two structure spherical variogram model .
+            Range=1,3
+            Values=1,2,3
+            Default=2
+            Required=No
+
+        power:
+            Weighting power if Inverse Power of Distance is selected (**IMETHOD** =2).
+            Range=Undefined
+            Values=Undefined
+            Default=2
+            Required=No
+
+        nstruct:
+            Number of structures in the variogram model. This parameter is only used if Ordinary
+            Kriging is selected (**IMETHOD** =3).
+            Range=1,2
+            Values=1,2
+            Default=1
+            Required=No
+
+        nugget:
+            Nugget variance of spherical variogram model. This parameter is only used if Ordinary
+            Kriging is selected (**IMETHOD** =3).
+            Range=0,+
+            Values=Undefined
+            Default=0
+            Required=No
+
+        st1var:
+            Spatial variance (ie C value) of the first structure of the spherical variogram model.
+            This parameter is only used if Ordinary Kriging is selected (**IMETHOD** =3).
+            Range=0.000001,+
+            Values=Undefined
+            Default=1
+            Required=No
+
+        st1rang1:
+            Variogram range (ie A value) in the X direction of the first structure of the spherical
+            variogram model. This parameter is only used if Ordinary Kriging is selected
+            (**IMETHOD** =3).
+            Range=0.000001,+
+            Values=Undefined
+            Default=100
+            Required=No
+
+        st1rang2:
+            Variogram range (ie A value) in the Y direction of the first structure of the spherical
+            variogram model. This parameter is only used if Ordinary Kriging is selected
+            (**IMETHOD** =3).
+            Range=0.000001,+
+            Values=Undefined
+            Default=100
+            Required=No
+
+        st1rang3:
+            Variogram range (ie A value) in the Z direction of the first structure of the spherical
+            variogram model. This parameter is only used if Ordinary Kriging is selected
+            (**IMETHOD** =3).
+            Range=0.000001,+
+            Values=Undefined
+            Default=100
+            Required=No
+
+        st2var:
+            Spatial variance (ie C value) of the second structure of the spherical variogram model.
+            This parameter is only used if Ordinary Kriging is selected (**IMETHOD** =3) and two
+            structures have been specified (**NSTRUCT** =2).
+            Range=0.000001,+
+            Values=Undefined
+            Default=1
+            Required=No
+
+        st2rang1:
+            Variogram range (ie A value) in the X direction of the second structure of the
+            spherical variogram model. This parameter is only used if Ordinary Kriging is selected
+            (**IMETHOD** =3) and two structures have been specified (**NSTRUCT** =2).
+            Range=0.000001,+
+            Values=Undefined
+            Default=100
+            Required=No
+
+        st2rang2:
+            Variogram range (ie A value) in the Y direction of the second structure of the
+            spherical variogram model. This parameter is only used if Ordinary Kriging is selected
+            (**IMETHOD** =3) and two structures have been specified (**NSTRUCT** =2).
+            Range=0.000001,+
+            Values=Undefined
+            Default=100
+            Required=No
+
+        st2rang3:
+            Variogram range (ie A value) in the Z direction of the second structure of the
+            spherical variogram model. This parameter is only used if Ordinary Kriging is selected
+            (**IMETHOD** =3) and two structures have been specified (**NSTRUCT** =2).
+            Range=0.000001,+
+            Values=Undefined
+            Default=100
+            Required=No
+
+        parent:
+            Flag to control parent cell estimation: 0: estimate a grade for each individual
+            subcell. 1: estimate a grade for the parent cell and assign that grade to all subcells
+            lying within the parent cell.
+            Range=0,1
+            Values=0,1
+            Default=0
+            Required=No
+
+        xpoints:
+            Number of discretisation points in the X direction. Discretisation points are used to
+            simulate each cell or subcell for the purpose of grade estimation. They are only used
+            for Inverse Power of Distance (**IMETHOD** =2) and Ordinary Kriging (**IMETHOD** =3)
+            estimation methods. If Inverse Power of Distance is used then **XPOINTS** , **YPOINTS**
+            and **ZPOINTS** may all be 1, and so the subcell is represented by a single point at its
+            centre. If Ordinary Kriging is used then the total number of discretisation points
+            (**XPOINTS** x **YPOINTS** x **ZPOINTS**) must be greater than or equal to 2.
+            Range=1,6
+            Values=1,2,3,4,5,6
+            Default=3
+            Required=No
+
+        ypoints:
+            Number of discretisation points in the Y direction. Discretisation points are used to
+            simulate each cell or subcell for the purpose of grade estimation. They are only used
+            for Inverse Power of Distance (**IMETHOD** =2) and Ordinary Kriging (**IMETHOD** =3)
+            estimation methods. If Inverse Power of Distance is used then **XPOINTS** , **YPOINTS**
+            and **ZPOINTS** may all be 1, and so the subcell is represented by a single point at its
+            centre. If Ordinary Kriging is used then the total number of discretisation points
+            (**XPOINTS** x **YPOINTS** x **ZPOINTS**) must be greater than or equal to 2.
+            Range=1,6
+            Values=1,2,3,4,5,6
+            Default=3
+            Required=No
+
+        zpoints:
+            Number of discretisation points in the Z direction.
+            Range=1,6
+            Values=1,2,3,4,5,6
+            Default=3
+            Required=No
+
+        xsubcell:
+            Number of subcells per parent cell to be created in the X direction. This only applies
+            if there are no cells in the input prototype model PROTO, and therefore cells (and
+            subcells) are created by the GRADEprocess.
+            Range=1,20
+            Values=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
+            Default=1
+            Required=No
+
+        ysubcell:
+            Number of subcells per parent cell to be created in the Y direction.
+            Range=1,20
+            Values=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
+            Default=1
+            Required=No
+
+        zsubcell:
+            Number of subcells per parent cell to be created in the Z direction.
+            Range=1,20
+            Values=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
+            Default=1
+            Required=No
+
+        print:
+            Display control: 0: minimum output including progress message. 1: as 0 plus details of
+            input parameters. 2: as 1 plus display of each cell value.
+            Range=0,2
+            Values=0,1,2
+            Default=0
+            Required=No
+
+        """
+        command = "grade "
+
+        if proto_i == "required":
+            raise ValueError("proto_i is required.")
+
+        if proto_i != "optional":
+            command += " &proto=" + proto_i
+
+        if in_i == "required":
+            raise ValueError("in_i is required.")
+
+        if in_i != "optional":
+            command += " &in=" + in_i
+
+        if model_o == "required":
+            raise ValueError("model_o is required.")
+
+        if model_o != "optional":
+            command += " &model=" + model_o
+
+        if x_f != "optional":
+            command += " *x=" + x_f
+
+        if y_f != "optional":
+            command += " *y=" + y_f
+
+        if z_f != "optional":
+            command += " *z=" + z_f
+
+        if value_f != "optional":
+            command += " *value=" + value_f
+
+        if numsam_f != "optional":
+            command += " *numsam=" + numsam_f
+
+        if variance_f != "optional":
+            command += " *variance=" + variance_f
+
+        if zone_f != "optional":
+            command += " *zone=" + zone_f
+
+        if length_f != "optional":
+            command += " *length=" + length_f
+
+        if sdists_f[0] != "optional":
+            command += self.parse_infields_list("sdist", sdists_f, 3, "@")
+
+        if sangles_f[0] != "optional":
+            command += self.parse_infields_list("sangle", sangles_f, 3, "@")
+
+        if saxiss_f[0] != "optional":
+            command += self.parse_infields_list("saxis", saxiss_f, 3, "@")
+
+        if minnum_p != "optional":
+            try:
+                val = float(minnum_p)
+                if not (1.0 <= val <= 1400.0) and val != 3.0:
+                    raise ValueError(f"minnum_p value {minnum_p} is not in allowed range: [1.0, [1400.0]")
+            except ValueError as e:
+                if isinstance(minnum_p, (int, float)):
+                    raise e
+
+        if minnum_p != "optional":
+            command += " @minnum=" + str(minnum_p)
+
+        if maxnum_p != "optional":
+            try:
+                val = float(maxnum_p)
+                if not (1.0 <= val <= 1400.0) and val != 20.0:
+                    raise ValueError(f"maxnum_p value {maxnum_p} is not in allowed range: [1.0, [1400.0]")
+            except ValueError as e:
+                if isinstance(maxnum_p, (int, float)):
+                    raise e
+
+        if maxnum_p != "optional":
+            command += " @maxnum=" + str(maxnum_p)
+
+        if minoct_p != "optional":
+            try:
+                val = float(minoct_p)
+                if val not in [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]:
+                    raise ValueError(f"minoct_p value {minoct_p} is not in allowed values: [0, 1, 2, 3, 4, 5, 6, 7, 8]")
+            except ValueError as e:
+                if isinstance(minoct_p, (int, float)):
+                    raise e
+
+        if minoct_p != "optional":
+            command += " @minoct=" + str(minoct_p)
+
+        if minperoc_p != "optional":
+            try:
+                val = float(minperoc_p)
+                if not (0.0 <= val <= 1400.0) and val != 1.0:
+                    raise ValueError(f"minperoc_p value {minperoc_p} is not in allowed range: [0.0, [1400.0]")
+            except ValueError as e:
+                if isinstance(minperoc_p, (int, float)):
+                    raise e
+
+        if minperoc_p != "optional":
+            command += " @minperoc=" + str(minperoc_p)
+
+        if maxperoc_p != "optional":
+            try:
+                val = float(maxperoc_p)
+                if not (0.0 <= val <= 1400.0) and val != 0.0:
+                    raise ValueError(f"maxperoc_p value {maxperoc_p} is not in allowed range: [0.0, [1400.0]")
+            except ValueError as e:
+                if isinstance(maxperoc_p, (int, float)):
+                    raise e
+
+        if maxperoc_p != "optional":
+            command += " @maxperoc=" + str(maxperoc_p)
+
+        if imethod_p != "optional":
+            try:
+                val = float(imethod_p)
+                if val not in [1.0, 2.0, 3.0]:
+                    raise ValueError(f"imethod_p value {imethod_p} is not in allowed values: [1, 2, 3]")
+            except ValueError as e:
+                if isinstance(imethod_p, (int, float)):
+                    raise e
+
+        if imethod_p != "optional":
+            command += " @imethod=" + str(imethod_p)
+
+        if power_p != "optional":
+            command += " @power=" + str(power_p)
+
+        if nstruct_p != "optional":
+            try:
+                val = float(nstruct_p)
+                if val not in [1.0, 2.0]:
+                    raise ValueError(f"nstruct_p value {nstruct_p} is not in allowed values: [1, 2]")
+            except ValueError as e:
+                if isinstance(nstruct_p, (int, float)):
+                    raise e
+
+        if nstruct_p != "optional":
+            command += " @nstruct=" + str(nstruct_p)
+
+        if nugget_p != "optional":
+            command += " @nugget=" + str(nugget_p)
+
+        if st1var_p != "optional":
+            command += " @st1var=" + str(st1var_p)
+
+        if st1rang1_p != "optional":
+            command += " @st1rang1=" + str(st1rang1_p)
+
+        if st1rang2_p != "optional":
+            command += " @st1rang2=" + str(st1rang2_p)
+
+        if st1rang3_p != "optional":
+            command += " @st1rang3=" + str(st1rang3_p)
+
+        if st2var_p != "optional":
+            command += " @st2var=" + str(st2var_p)
+
+        if st2rang1_p != "optional":
+            command += " @st2rang1=" + str(st2rang1_p)
+
+        if st2rang2_p != "optional":
+            command += " @st2rang2=" + str(st2rang2_p)
+
+        if st2rang3_p != "optional":
+            command += " @st2rang3=" + str(st2rang3_p)
+
+        if parent_p != "optional":
+            try:
+                val = float(parent_p)
+                if val not in [0.0, 1.0]:
+                    raise ValueError(f"parent_p value {parent_p} is not in allowed values: [0, 1]")
+            except ValueError as e:
+                if isinstance(parent_p, (int, float)):
+                    raise e
+
+        if parent_p != "optional":
+            command += " @parent=" + str(parent_p)
+
+        if xpoints_p != "optional":
+            try:
+                val = float(xpoints_p)
+                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]:
+                    raise ValueError(f"xpoints_p value {xpoints_p} is not in allowed values: [1, 2, 3, 4, 5, 6]")
+            except ValueError as e:
+                if isinstance(xpoints_p, (int, float)):
+                    raise e
+
+        if xpoints_p != "optional":
+            command += " @xpoints=" + str(xpoints_p)
+
+        if ypoints_p != "optional":
+            try:
+                val = float(ypoints_p)
+                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]:
+                    raise ValueError(f"ypoints_p value {ypoints_p} is not in allowed values: [1, 2, 3, 4, 5, 6]")
+            except ValueError as e:
+                if isinstance(ypoints_p, (int, float)):
+                    raise e
+
+        if ypoints_p != "optional":
+            command += " @ypoints=" + str(ypoints_p)
+
+        if zpoints_p != "optional":
+            try:
+                val = float(zpoints_p)
+                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]:
+                    raise ValueError(f"zpoints_p value {zpoints_p} is not in allowed values: [1, 2, 3, 4, 5, 6]")
+            except ValueError as e:
+                if isinstance(zpoints_p, (int, float)):
+                    raise e
+
+        if zpoints_p != "optional":
+            command += " @zpoints=" + str(zpoints_p)
+
+        if xsubcell_p != "optional":
+            try:
+                val = float(xsubcell_p)
+                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0]:
+                    raise ValueError(f"xsubcell_p value {xsubcell_p} is not in allowed values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]")
+            except ValueError as e:
+                if isinstance(xsubcell_p, (int, float)):
+                    raise e
+
+        if xsubcell_p != "optional":
+            command += " @xsubcell=" + str(xsubcell_p)
+
+        if ysubcell_p != "optional":
+            try:
+                val = float(ysubcell_p)
+                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0]:
+                    raise ValueError(f"ysubcell_p value {ysubcell_p} is not in allowed values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]")
+            except ValueError as e:
+                if isinstance(ysubcell_p, (int, float)):
+                    raise e
+
+        if ysubcell_p != "optional":
+            command += " @ysubcell=" + str(ysubcell_p)
+
+        if zsubcell_p != "optional":
+            try:
+                val = float(zsubcell_p)
+                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0]:
+                    raise ValueError(f"zsubcell_p value {zsubcell_p} is not in allowed values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]")
+            except ValueError as e:
+                if isinstance(zsubcell_p, (int, float)):
+                    raise e
+
+        if zsubcell_p != "optional":
+            command += " @zsubcell=" + str(zsubcell_p)
+
+        if print_p != "optional":
+            try:
+                val = float(print_p)
+                if val not in [0.0, 1.0, 2.0]:
+                    raise ValueError(f"print_p value {print_p} is not in allowed values: [0, 1, 2]")
+            except ValueError as e:
+                if isinstance(print_p, (int, float)):
+                    raise e
+
+        if print_p != "optional":
+            command += " @print=" + str(print_p)
+
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -16069,6 +18316,7 @@ The resulting downhole sample file can then be merged with existing drillhole sa
                 zfactor_p="required",
                 norig_p=1,
                 excel_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -16353,6 +18601,9 @@ Only weights for the optimum grid size are reported. If you want weights for a d
         if excel_p != "optional":
             command += " @excel=" + str(excel_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -16361,10 +18612,12 @@ Only weights for the optimum grid size are reported. If you want weights for a d
     def grton(self,
                 polyno_i="optional",
                 qtn_o="required",
+                qtr_o="optional",
                 support_p=0,
                 blockvar_p="optional",
                 maxiter_p=100,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -16389,6 +18642,11 @@ Only weights for the optimum grid size are reported. If you want weights for a d
             Compulsory output file containing grade and tonnage values for different cut-offs.
             Change of support calculations are NOT used. It includes the following explicit fields:
             Required=Yes
+
+        qtr: Undefined
+            Optional output file containing grade and tonnage values for different cut-offs. Change
+            of support calculations are used. It includes the following explicit fields:
+            Required=No
 
         Fields:
         -------
@@ -16439,6 +18697,9 @@ Only weights for the optimum grid size are reported. If you want weights for a d
         if qtn_o != "optional":
             command += " &qtn=" + qtn_o
 
+        if qtr_o != "optional":
+            command += " &qtr=" + qtr_o
+
         if support_p != "optional":
             try:
                 val = float(support_p)
@@ -16469,6 +18730,9 @@ Only weights for the optimum grid size are reported. If you want weights for a d
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -16477,6 +18741,7 @@ Only weights for the optimum grid size are reported. If you want weights for a d
     def hisfit(self,
                 in_i="required",
                 modelou_o="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -16645,6 +18910,9 @@ XY  |  RESET LIMITS [/CL]  |  Set X-Y limits of histogram display area. XMIN Ent
         if modelou_o != "optional":
             command += " &modelou=" + modelou_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -16658,6 +18926,7 @@ XY  |  RESET LIMITS [/CL]  |  Set X-Y limits of histogram display area. XMIN Ent
                 minimum_p="required",
                 numbins_p="required",
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -16758,7 +19027,7 @@ Note: Any sample value below @**MINIMUM** will be put into the bottom bin. Any s
             try:
                 val = float(numbins_p)
                 if not (1.0 <= val <= 50.0):
-                    raise ValueError(f"numbins_p value {numbins_p} is not in allowed range: [1.0, 50.0]")
+                    raise ValueError(f"numbins_p value {numbins_p} is not in allowed range: [1.0, [50.0]")
             except ValueError as e:
                 if isinstance(numbins_p, (int, float)):
                     raise e
@@ -16777,6 +19046,9 @@ Note: Any sample value below @**MINIMUM** will be put into the bottom bin. Any s
 
         if print_p != "optional":
             command += " @print=" + str(print_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -16807,6 +19079,7 @@ Note: Any sample value below @**MINIMUM** will be put into the bottom bin. Any s
                 prompt_p=1,
                 keepname_p="optional",
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -17204,6 +19477,9 @@ It is often the case that the first one or two samples in exploration holes cont
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -17215,6 +19491,7 @@ It is often the case that the first one or two samples in exploration holes cont
                 bhid_f="optional",
                 from_f="optional",
                 to_f="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -17288,6 +19565,9 @@ The two input files must be sorted on fields * **BHID** and * **FROM**. Holes ar
         if inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -17296,6 +19576,7 @@ The two input files must be sorted on fields * **BHID** and * **FROM**. Holes ar
     def igesin(self,
                 proto_i="optional",
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -17338,6 +19619,9 @@ When using this process, it must be remembered that it is often impossible to co
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -17345,6 +19629,7 @@ When using this process, it must be remembered that it is often impossible to co
 
     def igesout(self,
                 in_i="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -17379,6 +19664,9 @@ When using this process, it must be remembered that it is often impossible to co
         if in_i != "optional":
             command += " &in=" + in_i
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -17392,6 +19680,7 @@ When using this process, it must be remembered that it is often impossible to co
                 y_f="optional",
                 z_f="optional",
                 psmodel_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -17536,6 +19825,9 @@ See [Block Model Size Limits](<../COMMON/Block_Models_Size_Limits.md>).
         if psmodel_p != "optional":
             command += " @psmodel=" + str(psmodel_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -17544,6 +19836,7 @@ See [Block Model Size Limits](<../COMMON/Block_Models_Size_Limits.md>).
     def indata(self,
                 in_i="required",
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -17595,6 +19888,580 @@ Note: Data records may not start with the character "!". This is because the ! s
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
+        if retrieval != "optional":
+            command += "{" + retrieval + "}"
+
+        self.run_command(command)
+
+    def indest(self,
+                proto_i="required",
+                in_i="required",
+                srcparm_i="required",
+                estparm_i="required",
+                vmodparm_i="optional",
+                model_o="optional",
+                avgrades_o="optional",
+                indicate_o="optional",
+                sampout_o="optional",
+                x_f="optional",
+                y_f="optional",
+                z_f="optional",
+                zone1_f_f="optional",
+                zone2_f_f="optional",
+                key_f="optional",
+                length_f_f="optional",
+                dens_f_f="optional",
+                discmeth_p="optional",
+                xpoints_p=1,
+                ypoints_p=1,
+                zpoints_p=1,
+                xdspace_p="optional",
+                ydspace_p="optional",
+                zdspace_p="optional",
+                parent_p="optional",
+                mindisc_p=1,
+                copyval_p="optional",
+                fvaltype_p="optional",
+                fstep_p="optional",
+                xmin_p="optional",
+                xmax_p="optional",
+                ymin_p="optional",
+                ymax_p="optional",
+                zmin_p="optional",
+                zmax_p="optional",
+                xsubcell_p=1,
+                ysubcell_p=1,
+                zsubcell_p=1,
+                order_p="optional",
+                grmethod_p="optional",
+                pgfields_p="optional",
+                arguments="optional",
+                retrieval="optional"):
+
+        r"""
+        INDEST
+        ------
+        **Note** : This is a _superprocess_ and running it may have an effect on other Datamine files in the project.
+
+The INDEST process uses the Indicator Estimation (IE) method to estimate grades into a block model using the cumulative distribution function (CDF) of indicator transformed sample grades
+
+To operate, INDEST needs a series of threshold values between the smallest and largest grade values. These threshold values, referred to as cutoffs, are used to numerically build the CDF of each block in the model. For each cutoff, data in the search volume are transformed into 0s and 1s: 1s if the data are greater than the threshold, and 0s if they are less than or equal. It then estimates the probability that the block grade is greater than the threshold value, using one of the standard estimation methods. This is usually kriging, but INDEST allows other methods such as Nearest Neighbour or Inverse Power of Distance to be used. Performing this operation for each cutoff across the range of the sample data approximates the CDF for the model cell. After the CDF is built, it is post processed to calculate the indicator estimated grade.
+
+INDESTuses the ESTIMAprocess to do the estimation for each cutoff. For further details of ESTIMA.
+
+If you are using Indicator Kriging (IK) then you must already have calculated a variogram for each cutoff, and stored the models in the Variogram Model file. The[VGRAM](<vgram.md>)process has specific features for calculating indicator variograms.
+
+For each cutoff INDESTcalculates the following data which can optionally be stored in the **Output Model** file:
+
+  * The proportion (fraction) of the model subcell which is above cutoff.
+
+  * The grade of the proportion of the subcell which lies above cutoff.
+
+The main output from INDESTis the grade above a cutoff of zero, ie the indicator estimated grade of the total subcell.
+
+### Estimation Parameter File
+
+In order to useINDESTyou must specify one record in the Estimation Parameter File &**ESTPARM** for each cutoff. This requires the numeric field **CUTOFF** to be included in the file.
+
+The * **VALUE_IN** field is the grade in the input sample &**IN** file to which the cutoffs are applied. Note that this is different from the use of the * **VALUE_IN** field when using ESTIMATE for Indicator Estimation.
+
+If the * **VALUE_OU** field is not specified then the * **VALUE_IN** field will be created in the output model file to hold the indicator estimated grade. If a * **VALUE_OU** field is specified in the first record of the Estimation Parameter File, then this value will be used for the indicator estimated grade in the output model file
+
+You can only estimate one set of indicators in a single run. In other words all the **VALUE_IN** fields must be the same. Also when using **INDEST** you cannot estimate a grade using non indicator methods in the same run.
+
+If you are using zone control then you must explicitly specify all combinations of zone field(s) in the Estimation Parameter File. You cannot use the option that is available in ESTIMA that allows you to specify an absent data zone field value that then applies to all zones that are not explicitly identified in&ESTPARM.
+
+If you are using zone control then you may use different cutoffs for different zones. However the PRABn and GRABn fields in the output model file must then be handled very carefully! The maximum number of cutoff values is 24.
+
+Fields for indicator estimation:
+
+  * **BINGRADE** : Used when **GRMETHOD** =4 to set the grade below the cutoff
+
+  * **ABVGRADE** : Sets the grade above the cutoff (only used for the top bin)
+
+### Grade Above Cutoff
+
+The calculation of the grade above each cutoff requires that the average grade between each successive pair of cutoffs be specified. For example if cutoff grades of 2, 5, 6.5 and 9.5g/t are selected then average grades are required for the ranges:
+
+From  |  To  
+---|---  
+0 |  2  
+2 |  5  
+5 |  6.5  
+6.5 |  9.5  
+9.5 |  ∞  
+  
+Four methods are available to specify the average grade for each range, controlled by parameter @**GRMETHOD** :
+
+GRMETHOD  |  Description  
+---|---  
+1 |  Average of minimum and maximum cutoff values. The grade above the highest cutoff is calculated as the highest cutoff plus half the difference between the highest and second highest cutoffs.  
+2 |  Calculated by INDEST from the grades of the samples in the &**IN** file.  
+3 |  Calculated by INDEST from the grades of the samples in the &**IN** file. However for the top bin (above the highest cutoff) the median grade is calculated.  
+4 |  Values are specified by the user, using the **BINGRADE** and **ABVGRADE** fields in the &**ESTPARM** file. The **BINGRADE** field contains the grade below the cutoff and the **ABVGRADE** field the grade above the cutoff. The ABVGRADE field is therefore only used for the top bin.  
+  
+**GRMETHOD** of 4 is illustrated in the following table:
+
+CUTOFF  | BINGRADE |  ABVGRADE   
+---|---|---  
+2 |  1.3 |  -  
+5 |  3.6 |  -  
+6.5 |  5.7 |   
+9.5 |  7.8 |  11.1  
+  
+The values used by INDEST can be recorded by specifying an output &**AVGRADES** file.
+
+### Indicators
+
+Indicator values are calculated for each sample in the input sample &**IN** file for each cutoff. An indicator takes the value:
+
+0 ‑ the grade is less than or equal to the cutoff.
+
+1 ‑ the grade is above the cutoff.
+
+The indicator values can be saved by specifying an output &**INDICATE** file.
+
+###  Output Model 
+
+Fields **PRAB1 ... PRAB** n will be created in the Output Model file to store the proportion of the subcell above each cutoff. These are calculated directly by ESTIMA. Then the fields **GRAB1 ... GRAB** n are calculated during the post-processing to store the corresponding grade above each cutoff. The grade above cutoff values (**GRABn**) are calculated from the proportion and average grade between each pair of cutoffs. For example:
+
+Cutoff Number  |  Cutoff  |  PRABn  |  Calculation   
+---|---|---|---  
+4 |  9.5 |  0.1 |  GRAB4= 11.1 (This figure is taken directly from the ABVGRADE field)  
+3 |  6.5 |  0.3 |  GRAB3= {0.1x11.1 + (0.3‑0.1)x7.8} / 0.3 = 8.9  
+2 |  5 |  0.6 |  GRAB2= {0.1x11.1 + (0.3‑0.1)x7.8 + (0.6‑0.3)x5.7} / 0.6 = 7.3  
+1 |  2 |  0.85 |  GRAB1= {0.1x11.1 + (0.3‑0.1)x7.8 + (0.6‑0.3)x5.7 + (0.85‑0.6)x3.6} / 0.85 = 6.21  
+0 |  0 |  1 |  Indicator Grade=0.1x11.1 + (0.3‑0.1)x7.8 + (0.6‑0.3)x5.7 \+ (0.85‑0.6)x3.6 + (1.0‑0.85)x1.3 = 5.48  
+  
+The **PRABn** and **GRABn** fields will be stored in the output &**MODEL** file if parameter @PGFIELDS is set to 1.
+
+### Order Relation
+
+One of the main drawbacks of the indicator estimation method is the Order Relation Problem. This will occur if the proportion of the subcell above cutoff n is estimated to be less than the proportion above cutoff n+1. ie PRAB(n) < PRAB(n+1). Three options are available to correct for this, controlled by parameter ORDER:
+
+=1: Downwards.  
+=2: Upwards.  
+=3: Average of methods 1 and 2.
+
+The recommended method (and default) is 3.
+
+        Input Files:
+        ------------
+
+        proto: Block_Model_File
+            Input model prototype. This is a standard block model file containing the 13 compulsory
+            fields. It may also contain the rotated model fields. If it includes cells then it must
+            be sorted on IJK.
+            Required=Yes
+
+        in: Undefined
+            Input sample data. This must contain X,Y and Z fields and at least one grade field.
+            Required=Yes
+
+        srcparm: Undefined
+            Search volume parameter file. This contains 24 compulsory fields defining the search
+            volume and the number of samples needed for grade estimation. More than one search
+            volume may be defined. All fields are numeric:
+            Required=Yes
+
+        estparm: Undefined
+            Estimation parameter file. Each record in the file describes an estimation method and
+            its associated parameters. The fields are dependent on the estimation methods selected.
+            All fields are optional except for **VALUE_IN** , **SREFNUM** and **CUTOFF**. General
+            fields:
+            Required=Yes
+
+        vmodparm: Variogram \- Model
+            Variogram model parameter file. Each record in this file defines a variogram model type
+            and its parameters. Only the VREFNUM field is compulsory.
+            Required=No
+
+        Output Files:
+        -------------
+
+        model: Block Model File
+            Output model containing estimated grades, variance etc.
+            Required=No
+
+        avgrades: Undefined
+            Output file containing cutoff grade ranges and average grade used for each range. It
+            will include zone field(s), if any, plus the following fields:
+            Required=No
+
+        indicate: Undefined
+            Output indicator file. This is a copy of the sample input IN file, but also includes
+            the 0/1 indicator values for each cutoff
+            Required=No
+
+        sampout: Undefined
+            Output sample file containing details of weights for each sample for each cell
+            estimated.
+            Required=No
+
+        Fields:
+        -------
+
+        x: Numeric : IN
+            X coordinate of sample data in IN file. If not specified, then X is assumed.
+            Default=Undefined
+            Required=No
+
+        y: Numeric : IN
+            Y coordinate of sample data in IN file. If not specified, then Y is assumed.
+            Default=Undefined
+            Required=No
+
+        z: Numeric : IN
+            Z coordinate of sample data in IN file. If not specified, then Z is assumed.
+            Default=Undefined
+            Required=No
+
+        zone1_f: Any : IN
+            First field for zonal control.
+            Default=Undefined
+            Required=No
+
+        zone2_f: Any : IN
+            Second field for zonal control.
+            Default=Undefined
+            Required=No
+
+        key: Numeric : IN
+            Key field used to specify the field limiting the number of samples for estimation. The
+            field must exist in the IN file.
+            Default=Undefined
+            Required=No
+
+        length_f: Numeric : IN
+            Field used for length weighting in IPD. The field must exist in the IN file.
+            Default=Undefined
+            Required=No
+
+        dens_f: Numeric : IN
+            Field used for density weighting in IPD. The field must exist in the IN file.
+            Default=Undefined
+            Required=No
+
+        Parameters:
+        -----------
+
+        discmeth:
+            Cell discretisation method:
+            Range=
+            Values=
+            Default=
+            Required=No
+
+        xpoints:
+            Number of discretisation points in X. (1)
+            Range=Undefined
+            Values=Undefined
+            Default=1
+            Required=No
+
+        ypoints:
+            Number of discretisation points in Y. (1)
+            Range=Undefined
+            Values=Undefined
+            Default=1
+            Required=No
+
+        zpoints:
+            Number of discretisation points in Z. (1)
+            Range=Undefined
+            Values=Undefined
+            Default=1
+            Required=No
+
+        xdspace:
+            Distance between discretisation points in X if DISCMETH=2. The default gives just one
+            point.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        ydspace:
+            Distance between discretisation points in Y if DISCMETH=2. The default gives just one
+            point.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        zdspace:
+            Distance between discretisation points in Z if DISCMETH=2. The default gives just one
+            point.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        parent:
+            Flag to control parent cell estimation:
+            Range=
+            Values=
+            Default=
+            Required=No
+
+        mindisc:
+            Minimum number of discretisation points. Only used if PARENT=2. The default is (1).
+            Range=Undefined
+            Values=Undefined
+            Default=1
+            Required=No
+
+        copyval:
+            Flag controlling copying of values from PROTO to MODEL if there is insufficient data to
+            estimate them:
+            Range=
+            Values=
+            Default=
+            Required=No
+
+        fvaltype:
+            Flag for cell size approximation for F values:
+            Range=
+            Values=
+            Default=
+            Required=No
+
+        fstep:
+            Step size for cell approximation. This is only used if **FVALTYPE** =2.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        xmin:
+            Minimum X value for model updating. The default is the X model origin.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        xmax:
+            Maximum X value for model updating. The default is the maximum X value for **PROTO**.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        ymin:
+            Minimum Y value for model updating. The default is the Y model origin.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        ymax:
+            Maximum Y value for model updating. The default is the maximum Y value for **PROTO**.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        zmin:
+            Minimum Z value for model updating. The default is the Z model origin.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        zmax:
+            Maximum Z value for model updating. The default is the maximum Z value for **PROTO**.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        xsubcell:
+            Number of subcells per parent cell in X if **PROTO** is empty. The default is (1).
+            Range=Undefined
+            Values=Undefined
+            Default=1
+            Required=No
+
+        ysubcell:
+            Number of subcells per parent cell in Y if **PROTO** is empty. The default is (1).
+            Range=Undefined
+            Values=Undefined
+            Default=1
+            Required=No
+
+        zsubcell:
+            Number of subcells per parent cell in Z if **PROTO** is empty. The default is (1).
+            Range=Undefined
+            Values=Undefined
+            Default=1
+            Required=No
+
+        order:
+            Order relation correction method:
+            Range=
+            Values=
+            Default=
+            Required=No
+
+        grmethod:
+            Method for specifying average grade within each cutoff range:
+            Range=
+            Values=
+            Default=
+            Required=No
+
+        pgfields:
+            Flag to select whether the proportion above cutoff fields (PRABn) and the grade above
+            cutoff fields (GRABn) should be included in the output MODEL file:
+            Range=
+            Values=
+            Default=
+            Required=No
+
+        """
+        command = "indest "
+
+        if proto_i == "required":
+            raise ValueError("proto_i is required.")
+
+        if proto_i != "optional":
+            command += " &proto=" + proto_i
+
+        if in_i == "required":
+            raise ValueError("in_i is required.")
+
+        if in_i != "optional":
+            command += " &in=" + in_i
+
+        if srcparm_i == "required":
+            raise ValueError("srcparm_i is required.")
+
+        if srcparm_i != "optional":
+            command += " &srcparm=" + srcparm_i
+
+        if estparm_i == "required":
+            raise ValueError("estparm_i is required.")
+
+        if estparm_i != "optional":
+            command += " &estparm=" + estparm_i
+
+        if vmodparm_i != "optional":
+            command += " &vmodparm=" + vmodparm_i
+
+        if model_o != "optional":
+            command += " &model=" + model_o
+
+        if avgrades_o != "optional":
+            command += " &avgrades=" + avgrades_o
+
+        if indicate_o != "optional":
+            command += " &indicate=" + indicate_o
+
+        if sampout_o != "optional":
+            command += " &sampout=" + sampout_o
+
+        if x_f != "optional":
+            command += " *x=" + x_f
+
+        if y_f != "optional":
+            command += " *y=" + y_f
+
+        if z_f != "optional":
+            command += " *z=" + z_f
+
+        if zone1_f_f != "optional":
+            command += " *zone1_f=" + zone1_f_f
+
+        if zone2_f_f != "optional":
+            command += " *zone2_f=" + zone2_f_f
+
+        if key_f != "optional":
+            command += " *key=" + key_f
+
+        if length_f_f != "optional":
+            command += " *length_f=" + length_f_f
+
+        if dens_f_f != "optional":
+            command += " *dens_f=" + dens_f_f
+
+        if discmeth_p != "optional":
+            command += " @discmeth=" + str(discmeth_p)
+
+        if xpoints_p != "optional":
+            command += " @xpoints=" + str(xpoints_p)
+
+        if ypoints_p != "optional":
+            command += " @ypoints=" + str(ypoints_p)
+
+        if zpoints_p != "optional":
+            command += " @zpoints=" + str(zpoints_p)
+
+        if xdspace_p != "optional":
+            command += " @xdspace=" + str(xdspace_p)
+
+        if ydspace_p != "optional":
+            command += " @ydspace=" + str(ydspace_p)
+
+        if zdspace_p != "optional":
+            command += " @zdspace=" + str(zdspace_p)
+
+        if parent_p != "optional":
+            command += " @parent=" + str(parent_p)
+
+        if mindisc_p != "optional":
+            command += " @mindisc=" + str(mindisc_p)
+
+        if copyval_p != "optional":
+            command += " @copyval=" + str(copyval_p)
+
+        if fvaltype_p != "optional":
+            command += " @fvaltype=" + str(fvaltype_p)
+
+        if fstep_p != "optional":
+            command += " @fstep=" + str(fstep_p)
+
+        if xmin_p != "optional":
+            command += " @xmin=" + str(xmin_p)
+
+        if xmax_p != "optional":
+            command += " @xmax=" + str(xmax_p)
+
+        if ymin_p != "optional":
+            command += " @ymin=" + str(ymin_p)
+
+        if ymax_p != "optional":
+            command += " @ymax=" + str(ymax_p)
+
+        if zmin_p != "optional":
+            command += " @zmin=" + str(zmin_p)
+
+        if zmax_p != "optional":
+            command += " @zmax=" + str(zmax_p)
+
+        if xsubcell_p != "optional":
+            command += " @xsubcell=" + str(xsubcell_p)
+
+        if ysubcell_p != "optional":
+            command += " @ysubcell=" + str(ysubcell_p)
+
+        if zsubcell_p != "optional":
+            command += " @zsubcell=" + str(zsubcell_p)
+
+        if order_p != "optional":
+            command += " @order=" + str(order_p)
+
+        if grmethod_p != "optional":
+            command += " @grmethod=" + str(grmethod_p)
+
+        if pgfields_p != "optional":
+            command += " @pgfields=" + str(pgfields_p)
+
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -17604,6 +20471,7 @@ Note: Data records may not start with the character "!". This is because the ! s
                 in_i="required",
                 out_o="required",
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -17690,6 +20558,9 @@ Data lines if no **SYSFILE** , in defined format. ! terminates.
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -17716,6 +20587,7 @@ Data lines if no **SYSFILE** , in defined format. ! terminates.
                 allcol_p="optional",
                 nscan_p=0,
                 worldxyz_p=-1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -17975,6 +20847,9 @@ Note: Data records may not start with the character "!". This is because the ! s
         if worldxyz_p != "optional":
             command += " @worldxyz=" + str(worldxyz_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -17996,6 +20871,7 @@ Note: Data records may not start with the character "!". This is because the ! s
                 ysubcell_p=1,
                 zsubcell_p=1,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -18184,6 +21060,9 @@ Note: Data records may not start with the character "!". This is because the ! s
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -18213,6 +21092,7 @@ Note: Data records may not start with the character "!". This is because the ! s
                 charsize_p=3,
                 aspratio_p=0.9,
                 append_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -18541,8 +21421,8 @@ This is an interactive process and prompts appear on the command line once it is
         if rotate_p != "optional":
             try:
                 val = float(rotate_p)
-                if not (0.0 <= val <= 360.0):
-                    raise ValueError(f"rotate_p value {rotate_p} is not in allowed range: [0.0, 360.0]")
+                if not (0.0 <= val <= 360.0) and val != 45.0:
+                    raise ValueError(f"rotate_p value {rotate_p} is not in allowed range: [0.0, [360.0]")
             except ValueError as e:
                 if isinstance(rotate_p, (int, float)):
                     raise e
@@ -18556,8 +21436,8 @@ This is an interactive process and prompts appear on the command line once it is
         if elevate_p != "optional":
             try:
                 val = float(elevate_p)
-                if not (-90.0 <= val <= 90.0):
-                    raise ValueError(f"elevate_p value {elevate_p} is not in allowed range: [-90.0, 90.0]")
+                if not (-90.0 <= val <= 90.0) and val != 45.0:
+                    raise ValueError(f"elevate_p value {elevate_p} is not in allowed range: [-90.0, [90.0]")
             except ValueError as e:
                 if isinstance(elevate_p, (int, float)):
                     raise e
@@ -18582,6 +21462,9 @@ This is an interactive process and prompts appear on the command line once it is
 
         if append_p != "optional":
             command += " @append=" + str(append_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -18618,6 +21501,7 @@ This is an interactive process and prompts appear on the command line once it is
                 charsize_p=3,
                 aspratio_p=0.9,
                 append_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -18935,8 +21819,8 @@ The smoothness of the surface may be controlled by parameter @**GRIDINT**. This 
         if rotate_p != "optional":
             try:
                 val = float(rotate_p)
-                if not (0.0 <= val <= 360.0):
-                    raise ValueError(f"rotate_p value {rotate_p} is not in allowed range: [0.0, 360.0]")
+                if not (0.0 <= val <= 360.0) and val != 45.0:
+                    raise ValueError(f"rotate_p value {rotate_p} is not in allowed range: [0.0, [360.0]")
             except ValueError as e:
                 if isinstance(rotate_p, (int, float)):
                     raise e
@@ -18947,8 +21831,8 @@ The smoothness of the surface may be controlled by parameter @**GRIDINT**. This 
         if elevate_p != "optional":
             try:
                 val = float(elevate_p)
-                if not (-90.0 <= val <= 90.0):
-                    raise ValueError(f"elevate_p value {elevate_p} is not in allowed range: [-90.0, 90.0]")
+                if not (-90.0 <= val <= 90.0) and val != 45.0:
+                    raise ValueError(f"elevate_p value {elevate_p} is not in allowed range: [-90.0, [90.0]")
             except ValueError as e:
                 if isinstance(elevate_p, (int, float)):
                     raise e
@@ -19004,8 +21888,8 @@ The smoothness of the surface may be controlled by parameter @**GRIDINT**. This 
         if colst_p != "optional":
             try:
                 val = float(colst_p)
-                if not (1.0 <= val <= 64.0):
-                    raise ValueError(f"colst_p value {colst_p} is not in allowed range: [1.0, 64.0]")
+                if not (1.0 <= val <= 64.0) and val != 1.0:
+                    raise ValueError(f"colst_p value {colst_p} is not in allowed range: [1.0, [64.0]")
             except ValueError as e:
                 if isinstance(colst_p, (int, float)):
                     raise e
@@ -19031,6 +21915,9 @@ The smoothness of the surface may be controlled by parameter @**GRIDINT**. This 
         if append_p != "optional":
             command += " @append=" + str(append_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -19050,6 +21937,7 @@ The smoothness of the surface may be controlled by parameter @**GRIDINT**. This 
                 elevate_p=45,
                 charsize_p=4,
                 aspratio_p=0.9,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -19216,8 +22104,8 @@ Note: Scaling is fully automatic in this process.
         if rotate_p != "optional":
             try:
                 val = float(rotate_p)
-                if not (0.0 <= val <= 360.0):
-                    raise ValueError(f"rotate_p value {rotate_p} is not in allowed range: [0.0, 360.0]")
+                if not (0.0 <= val <= 360.0) and val != 45.0:
+                    raise ValueError(f"rotate_p value {rotate_p} is not in allowed range: [0.0, [360.0]")
             except ValueError as e:
                 if isinstance(rotate_p, (int, float)):
                     raise e
@@ -19228,8 +22116,8 @@ Note: Scaling is fully automatic in this process.
         if elevate_p != "optional":
             try:
                 val = float(elevate_p)
-                if not (-90.0 <= val <= 90.0):
-                    raise ValueError(f"elevate_p value {elevate_p} is not in allowed range: [-90.0, 90.0]")
+                if not (-90.0 <= val <= 90.0) and val != 45.0:
+                    raise ValueError(f"elevate_p value {elevate_p} is not in allowed range: [-90.0, [90.0]")
             except ValueError as e:
                 if isinstance(elevate_p, (int, float)):
                     raise e
@@ -19242,6 +22130,9 @@ Note: Scaling is fully automatic in this process.
 
         if aspratio_p != "optional":
             command += " @aspratio=" + str(aspratio_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -19265,6 +22156,7 @@ Note: Scaling is fully automatic in this process.
                 charsize_p=3,
                 aspratio_p=0.9,
                 append_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -19460,8 +22352,8 @@ Note: Scaling is fully automatic in this process.
         if rotate_p != "optional":
             try:
                 val = float(rotate_p)
-                if not (0.0 <= val <= 360.0):
-                    raise ValueError(f"rotate_p value {rotate_p} is not in allowed range: [0.0, 360.0]")
+                if not (0.0 <= val <= 360.0) and val != 45.0:
+                    raise ValueError(f"rotate_p value {rotate_p} is not in allowed range: [0.0, [360.0]")
             except ValueError as e:
                 if isinstance(rotate_p, (int, float)):
                     raise e
@@ -19472,8 +22364,8 @@ Note: Scaling is fully automatic in this process.
         if elevate_p != "optional":
             try:
                 val = float(elevate_p)
-                if not (-90.0 <= val <= 90.0):
-                    raise ValueError(f"elevate_p value {elevate_p} is not in allowed range: [-90.0, 90.0]")
+                if not (-90.0 <= val <= 90.0) and val != 30.0:
+                    raise ValueError(f"elevate_p value {elevate_p} is not in allowed range: [-90.0, [90.0]")
             except ValueError as e:
                 if isinstance(elevate_p, (int, float)):
                     raise e
@@ -19502,6 +22394,9 @@ Note: Scaling is fully automatic in this process.
         if append_p != "optional":
             command += " @append=" + str(append_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -19510,12 +22405,12 @@ Note: Scaling is fully automatic in this process.
     def join(self,
                 inmods_i=['optional'],
                 out_o="required",
-                keys_f=['optional'],
                 subsetr_p=0,
                 subsetf_p=0,
                 cartjoin_p=0,
                 keytol_p=1e-05,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -19622,9 +22517,6 @@ Both input files must be sorted in the order of the key fields before they can b
         if inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
-        if keys_f[0] != "optional":
-            command += self.parse_infields_list("key", keys_f, 10, "*")
-
         if subsetr_p != "optional":
             try:
                 val = float(subsetr_p)
@@ -19676,6 +22568,9 @@ Both input files must be sorted in the order of the key fields before they can b
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -19685,6 +22580,9 @@ Both input files must be sorted in the order of the key fields before they can b
                 samples_i="required",
                 testblks_i="required",
                 epar_i="optional",
+                fields_i="required",
+                vmodel_i="required",
+                spar_i="optional",
                 out_o="optional",
                 key_f="optional",
                 blkgroup_f="optional",
@@ -19694,6 +22592,7 @@ Both input files must be sorted in the order of the key fields before they can b
                 nblkcov_p=20,
                 prnt_p="required",
                 nthreads_p=-1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -19732,6 +22631,25 @@ The output file **OUT** lists block size, block group, discretization, search pa
         epar: 
             The input estimation parameter file used to specify parameters and for each estimation.
             This must contain the following fields:
+            Required=No
+
+        fields: Undefined
+            A file that contains field names of variables to be used in estimation. Input variables
+            must be included under the mandatory column IN_VAR and each of these fields must be
+            present in the **SAMPLES** and **VGRAM** file. If more than 1 variable is supplied
+            Multivariate (Co)Kriging will be performed. If _IMETHOD_ =10 is used, the column
+            _SKMEAN_ must be used to specify the mean per variable. If _IMETHOD_ =11 is used the
+            column _LOC_MEAN_ must be used to specify the local mean fields in the prototype model.
+            Required=Yes
+
+        vmodel: Undefined
+            The input (cross-)variogram model parameter file. If more than 1 variable is suppled in
+            the **FIELDS** file (i.e. multivariate estimation), this file must contain the columns
+            _GRADE_ and _GRADE2_.
+            Required=Yes
+
+        spar: 
+            The input search parameter file. This must contain the following 12 mandatory fields:
             Required=No
 
         Output Files:
@@ -19827,6 +22745,21 @@ The output file **OUT** lists block size, block group, discretization, search pa
         if epar_i != "optional":
             command += " &epar=" + epar_i
 
+        if fields_i == "required":
+            raise ValueError("fields_i is required.")
+
+        if fields_i != "optional":
+            command += " &fields=" + fields_i
+
+        if vmodel_i == "required":
+            raise ValueError("vmodel_i is required.")
+
+        if vmodel_i != "optional":
+            command += " &vmodel=" + vmodel_i
+
+        if spar_i != "optional":
+            command += " &spar=" + spar_i
+
         if out_o != "optional":
             command += " &out=" + out_o
 
@@ -19887,6 +22820,9 @@ The output file **OUT** lists block size, block group, discretization, search pa
         if nthreads_p != "optional":
             command += " @nthreads=" + str(nthreads_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -19908,6 +22844,7 @@ The output file **OUT** lists block size, block group, discretization, search pa
                 vaxiscol_p=10,
                 charsize_p=3,
                 dimenu_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -20122,8 +23059,8 @@ A title is automatically generated giving the Bench and Blast numbers; again, th
         if haxiscol_p != "optional":
             try:
                 val = float(haxiscol_p)
-                if not (1.0 <= val <= 64.0):
-                    raise ValueError(f"haxiscol_p value {haxiscol_p} is not in allowed range: [1.0, 64.0]")
+                if not (1.0 <= val <= 64.0) and val != 8.0:
+                    raise ValueError(f"haxiscol_p value {haxiscol_p} is not in allowed range: [1.0, [64.0]")
             except ValueError as e:
                 if isinstance(haxiscol_p, (int, float)):
                     raise e
@@ -20134,8 +23071,8 @@ A title is automatically generated giving the Bench and Blast numbers; again, th
         if vaxiscol_p != "optional":
             try:
                 val = float(vaxiscol_p)
-                if not (1.0 <= val <= 64.0):
-                    raise ValueError(f"vaxiscol_p value {vaxiscol_p} is not in allowed range: [1.0, 64.0]")
+                if not (1.0 <= val <= 64.0) and val != 10.0:
+                    raise ValueError(f"vaxiscol_p value {vaxiscol_p} is not in allowed range: [1.0, [64.0]")
             except ValueError as e:
                 if isinstance(vaxiscol_p, (int, float)):
                     raise e
@@ -20158,6 +23095,9 @@ A title is automatically generated giving the Bench and Blast numbers; again, th
         if dimenu_p != "optional":
             command += " @dimenu=" + str(dimenu_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -20169,6 +23109,7 @@ A title is automatically generated giving the Bench and Blast numbers; again, th
                 fields_f=['optional'],
                 fieldnam_f="optional",
                 prompt_p=20,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -20252,6 +23193,9 @@ If the input is a catalogue file (as created by the **[LISTDR](<listdr.md>)** pr
         if prompt_p != "optional":
             command += " @prompt=" + str(prompt_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -20260,6 +23204,7 @@ If the input is a catalogue file (as created by the **[LISTDR](<listdr.md>)** pr
     def listc(self,
                 in_i="required",
                 prompt_p=20,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -20322,6 +23267,9 @@ If an index file is being displayed, the data records will be displayed as if th
         if prompt_p != "optional":
             command += " @prompt=" + str(prompt_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -20336,6 +23284,7 @@ If an index file is being displayed, the data records will be displayed as if th
                 cutmin_p=0,
                 cutint_p=10,
                 cutnum_p=10,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -20436,6 +23385,9 @@ If an index file is being displayed, the data records will be displayed as if th
         if cutnum_p != "optional":
             command += " @cutnum=" + str(cutnum_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -20463,6 +23415,7 @@ If an index file is being displayed, the data records will be displayed as if th
                 valleyadj_p=0,
                 key_p="optional",
                 diagonal_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -20679,8 +23632,8 @@ Note: Selecting this option can introduce a performance hit, so where large coin
         if trimang_p != "optional":
             try:
                 val = float(trimang_p)
-                if not (0.0 <= val <= 360.0):
-                    raise ValueError(f"trimang_p value {trimang_p} is not in allowed range: [0.0, 360.0]")
+                if not (0.0 <= val <= 360.0) and val != 0.0:
+                    raise ValueError(f"trimang_p value {trimang_p} is not in allowed range: [0.0, [360.0]")
             except ValueError as e:
                 if isinstance(trimang_p, (int, float)):
                     raise e
@@ -20718,6 +23671,9 @@ Note: Selecting this option can introduce a performance hit, so where large coin
         if diagonal_p != "optional":
             command += " @diagonal=" + str(diagonal_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -20727,6 +23683,7 @@ Note: Selecting this option can introduce a performance hit, so where large coin
                 in_i="required",
                 value_f="optional",
                 keys_f=['optional'],
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -20789,6 +23746,9 @@ The input file (&**IN**) must be sorted on the keyfields which define the sample
         if keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 10, "*")
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -20813,6 +23773,7 @@ The input file (&**IN**) must be sorted on the keyfields which define the sample
                 factor_p=1,
                 inverse_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -21086,8 +24047,8 @@ The @INVERSE parameter allows an inverse coordinate rotation. If @**INVERSE** =1
         if xsubcell_p != "optional":
             try:
                 val = float(xsubcell_p)
-                if not (1.0 <= val <= 20.0):
-                    raise ValueError(f"xsubcell_p value {xsubcell_p} is not in allowed range: [1.0, 20.0]")
+                if not (1.0 <= val <= 20.0) and val != 1.0:
+                    raise ValueError(f"xsubcell_p value {xsubcell_p} is not in allowed range: [1.0, [20.0]")
             except ValueError as e:
                 if isinstance(xsubcell_p, (int, float)):
                     raise e
@@ -21098,8 +24059,8 @@ The @INVERSE parameter allows an inverse coordinate rotation. If @**INVERSE** =1
         if ysubcell_p != "optional":
             try:
                 val = float(ysubcell_p)
-                if not (1.0 <= val <= 20.0):
-                    raise ValueError(f"ysubcell_p value {ysubcell_p} is not in allowed range: [1.0, 20.0]")
+                if not (1.0 <= val <= 20.0) and val != 1.0:
+                    raise ValueError(f"ysubcell_p value {ysubcell_p} is not in allowed range: [1.0, [20.0]")
             except ValueError as e:
                 if isinstance(ysubcell_p, (int, float)):
                     raise e
@@ -21110,8 +24071,8 @@ The @INVERSE parameter allows an inverse coordinate rotation. If @**INVERSE** =1
         if zsubcell_p != "optional":
             try:
                 val = float(zsubcell_p)
-                if not (1.0 <= val <= 20.0):
-                    raise ValueError(f"zsubcell_p value {zsubcell_p} is not in allowed range: [1.0, 20.0]")
+                if not (1.0 <= val <= 20.0) and val != 1.0:
+                    raise ValueError(f"zsubcell_p value {zsubcell_p} is not in allowed range: [1.0, [20.0]")
             except ValueError as e:
                 if isinstance(zsubcell_p, (int, float)):
                     raise e
@@ -21146,6 +24107,9 @@ The @INVERSE parameter allows an inverse coordinate rotation. If @**INVERSE** =1
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -21159,6 +24123,7 @@ The @INVERSE parameter allows an inverse coordinate rotation. If @**INVERSE** =1
                 keysfrst_p=1,
                 roworder_p=1,
                 keytol_p=1e-05,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -21295,6 +24260,9 @@ Note: Although the order of fields in a file does not affect subsequent processi
         if keytol_p != "optional":
             command += " @keytol=" + str(keytol_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -21304,11 +24272,17 @@ Note: Although the order of fields in a file does not affect subsequent processi
                 proto_i="required",
                 samples_i="required",
                 spar_i="required",
+                epar_i="required",
+                fields_i="required",
+                vmodel_i="required",
                 outmodel_o="optional",
                 avgrades_o="optional",
+                indicate_o="optional",
+                sampout_o="optional",
                 order_p="optional",
                 grmethod_p="optional",
                 pgfields_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -21353,6 +24327,21 @@ The main output from MIKEST is the grade above a cutoff of zero, i.e. the indica
             For optional fields refer to the COKRIG online Help . Required Fields:
             Required=Yes
 
+        epar: Undefined
+            Estimation parameter file. Each record in the file describes an estimation method and
+            its associated numeric parameters. There are 9 required fields as described below.
+            Required=Yes
+
+        fields: Undefined
+            Estimation Fields file. This file is used to define field names associated with each
+            EREFNUM defined in the EPAR file. There are two required fields as described below:
+            Required=Yes
+
+        vmodel: Variogram - Model
+            Variogram model parameter file. Each record in this file defines a variogram model type
+            and its parameters. There are 13 required fields as described below.
+            Required=Yes
+
         Output Files:
         -------------
 
@@ -21363,6 +24352,16 @@ The main output from MIKEST is the grade above a cutoff of zero, i.e. the indica
         avgrades: Undefined
             Output file containing cutoff grade ranges and average grade used for each range. It
             will include zone field(s), if any, plus the following fields:
+            Required=No
+
+        indicate: Undefined
+            Output indicator file. This is a copy of the sample input SAMPLES file, but also
+            includes the 0/1 indicator values for each cutoff
+            Required=No
+
+        sampout: Undefined
+            Output sample file containing details of weights for each sample for each cell
+            estimated.
             Required=No
 
         Fields:
@@ -21414,11 +24413,35 @@ The main output from MIKEST is the grade above a cutoff of zero, i.e. the indica
         if spar_i != "optional":
             command += " &spar=" + spar_i
 
+        if epar_i == "required":
+            raise ValueError("epar_i is required.")
+
+        if epar_i != "optional":
+            command += " &epar=" + epar_i
+
+        if fields_i == "required":
+            raise ValueError("fields_i is required.")
+
+        if fields_i != "optional":
+            command += " &fields=" + fields_i
+
+        if vmodel_i == "required":
+            raise ValueError("vmodel_i is required.")
+
+        if vmodel_i != "optional":
+            command += " &vmodel=" + vmodel_i
+
         if outmodel_o != "optional":
             command += " &outmodel=" + outmodel_o
 
         if avgrades_o != "optional":
             command += " &avgrades=" + avgrades_o
+
+        if indicate_o != "optional":
+            command += " &indicate=" + indicate_o
+
+        if sampout_o != "optional":
+            command += " &sampout=" + sampout_o
 
         if order_p != "optional":
             command += " @order=" + str(order_p)
@@ -21428,6 +24451,9 @@ The main output from MIKEST is the grade above a cutoff of zero, i.e. the indica
 
         if pgfields_p != "optional":
             command += " @pgfields=" + str(pgfields_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -21439,6 +24465,7 @@ The main output from MIKEST is the grade above a cutoff of zero, i.e. the indica
                 modelout_o="required",
                 minvol_p=0,
                 tolernce_p=0.0001,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -21516,6 +24543,9 @@ The output model includes field **INTERVAL**. This is set to 1 for the subcell t
         if tolernce_p != "optional":
             command += " @tolernce=" + str(tolernce_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -21528,6 +24558,7 @@ The output model includes field **INTERVAL**. This is set to 1 for the subcell t
                 minwid_p="required",
                 widdir_p="required",
                 oremin_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -21636,6 +24667,9 @@ Given this decision, **MINEWD** will set up structure arcs which cause strings o
         if oremin_p != "optional":
             command += " @oremin=" + str(oremin_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -21648,6 +24682,7 @@ Given this decision, **MINEWD** will set up structure arcs which cause strings o
                 perimout_o="required",
                 perim_f="optional",
                 mine_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -21793,6 +24828,9 @@ Using the wireframe model produced in step (5), section profile strings along an
         if mine_p != "optional":
             command += " @mine=" + str(mine_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -21812,6 +24850,7 @@ Using the wireframe model produced in step (5), section profile strings along an
                 dilp_p="required",
                 diln_p="required",
                 dilint_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -22019,6 +25058,9 @@ Although the ore body orientation is not explicit in the drill hole data, diluti
         if dilint_p != "optional":
             command += " @dilint=" + str(dilint_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -22051,6 +25093,7 @@ Although the ore body orientation is not explicit in the drill hole data, diluti
                 density_p=1,
                 slicefld_p=1,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -22372,6 +25415,9 @@ The process requires as input a geological model, a set of zone definitions, and
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -22389,6 +25435,7 @@ The process requires as input a geological model, a set of zone definitions, and
                 phase_f="optional",
                 density_p='-',
                 setabsnt_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -22540,6 +25587,9 @@ For example, if carrying out a pre-feasibility study, a strategic planning exerc
         if setabsnt_p != "optional":
             command += " @setabsnt=" + str(setabsnt_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -22547,10 +25597,12 @@ For example, if carrying out a pre-feasibility study, a strategic planning exerc
 
     def mod2xyz(self,
                 inmods_i=['optional'],
+                out_o="required",
                 x_f="optional",
                 y_f="optional",
                 z_f="optional",
                 fields_f=['optional'],
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -22584,6 +25636,10 @@ The IN1 file is a standard block model file with one or more attribute fields. T
         Output Files:
         -------------
 
+        out: Undefined
+            Copy of IN2 file with extra fields F1, F2, etc from input model file.
+            Required=Yes
+
         Fields:
         -------
 
@@ -22613,6 +25669,12 @@ The IN1 file is a standard block model file with one or more attribute fields. T
         """
         command = "mod2xyz "
 
+        if out_o == "required":
+            raise ValueError("out_o is required.")
+
+        if out_o != "optional":
+            command += " &out=" + out_o
+
         if x_f != "optional":
             command += " *x=" + x_f
 
@@ -22627,6 +25689,9 @@ The IN1 file is a standard block model file with one or more attribute fields. T
 
         if fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 10, "*")
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -22644,6 +25709,7 @@ The IN1 file is a standard block model file with one or more attribute fields. T
                 factor_p=1,
                 plot_tbl_p=0,
                 display_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -22828,8 +25894,8 @@ Referring to row '2', column '6' in the above table: for a cutoff of 1 g/t, the 
         if cutint_p != "optional":
             try:
                 val = float(cutint_p)
-                if not (1e-05 <= val <= 9999999.0):
-                    raise ValueError(f"cutint_p value {cutint_p} is not in allowed range: [1e-05, 9999999.0]")
+                if not (1e-05 <= val <= 9999999.0) and val != 1.0:
+                    raise ValueError(f"cutint_p value {cutint_p} is not in allowed range: [1e-05, [9999999.0]")
             except ValueError as e:
                 if isinstance(cutint_p, (int, float)):
                     raise e
@@ -22840,8 +25906,8 @@ Referring to row '2', column '6' in the above table: for a cutoff of 1 g/t, the 
         if cutmax_p != "optional":
             try:
                 val = float(cutmax_p)
-                if not (2e-05 <= val <= 9999999.0):
-                    raise ValueError(f"cutmax_p value {cutmax_p} is not in allowed range: [2e-05, 9999999.0]")
+                if not (2e-05 <= val <= 9999999.0) and val != 10.0:
+                    raise ValueError(f"cutmax_p value {cutmax_p} is not in allowed range: [2e-05, [9999999.0]")
             except ValueError as e:
                 if isinstance(cutmax_p, (int, float)):
                     raise e
@@ -22852,8 +25918,8 @@ Referring to row '2', column '6' in the above table: for a cutoff of 1 g/t, the 
         if pcint_p != "optional":
             try:
                 val = float(pcint_p)
-                if not (2.5 <= val <= 25.0):
-                    raise ValueError(f"pcint_p value {pcint_p} is not in allowed range: [2.5, 25.0]")
+                if not (2.5 <= val <= 25.0) and val != 5.0:
+                    raise ValueError(f"pcint_p value {pcint_p} is not in allowed range: [2.5, [25.0]")
             except ValueError as e:
                 if isinstance(pcint_p, (int, float)):
                     raise e
@@ -22870,8 +25936,8 @@ Referring to row '2', column '6' in the above table: for a cutoff of 1 g/t, the 
         if plot_tbl_p != "optional":
             try:
                 val = float(plot_tbl_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"plot_tbl_p value {plot_tbl_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.0:
+                    raise ValueError(f"plot_tbl_p value {plot_tbl_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(plot_tbl_p, (int, float)):
                     raise e
@@ -22882,14 +25948,17 @@ Referring to row '2', column '6' in the above table: for a cutoff of 1 g/t, the 
         if display_p != "optional":
             try:
                 val = float(display_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"display_p value {display_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 1.0:
+                    raise ValueError(f"display_p value {display_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(display_p, (int, float)):
                     raise e
 
         if display_p != "optional":
             command += " @display=" + str(display_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -22902,6 +25971,7 @@ Referring to row '2', column '6' in the above table: for a cutoff of 1 g/t, the 
                 exclude_i="optional",
                 out_o="optional",
                 envmodel_o="optional",
+                results_o="optional",
                 value_f="optional",
                 grade_f="optional",
                 shapzone_f="optional",
@@ -22960,6 +26030,7 @@ Referring to row '2', column '6' in the above table: for a cutoff of 1 g/t, the 
                 calcenv_p=1,
                 progress_p=5000,
                 info_p=2,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -23096,153 +26167,6 @@ If @**ENVNUM** =0 then all sub-MMUs within all envelopes are assigned envelope n
 
 An optional waste post-processing step, controlled by parameter @**OPTWASTE** , is used to determine whether a waste sub-MMU that is enclosed by or adjacent to a mineable envelope should be included as part of the envelope. A test is made to determine how many MMUs which include that sub-MMU meet the Head Grade criteria. This is expressed as a fraction of the total number of MMUs that include the sub-MMU. If this fraction is greater than or equal to the @**OPTWASTE** parameter then the sub-MMU is included as part of the mineable envelope. If this post-processing option is not required then the value of the parameter should be set to zero which is the default.
 
-### Output Files
-
-Three output files can be selected:
-
-  * OUT - A copy of the input model with extra field MINED
-
-  * ENVMODEL - Envelope model showing envelope type and envelope number for each sub-MMU
-
-  * RESULTS - Results file - grade and tonnes by envelope
-
-All three files are optional but a minimum of one file must be selected. Although the contents of the two model files are always calculated by the process the actual files are only created if they have been selected. Very large files can take several minutes to write, so if a file is not required then it is faster not to select it. 
-
-#### Output Model
-
-All blocks in the input file (&**IN**) are written to the output model file (&**OUT**) without subdivision but with the addition of a * **MINED** field to indicate the proportion of the input block that is included in a mineable envelope.
-
-#### Envelope Model
-
-The Envelope block model (&**ENVMOD**) identifies cells lying within mineable envelopes. It provides an aid to visualisation and is required as input to the sequencing process **ENVSEQ**. The cell size is defined by the sub-MMU increment size and by default this is used as the parent cell size for the envelope model. However the @**XSUBCELL** , @**YSUBCELL** and @**ZSUBCELL** parameters can be used to define the parent cell in terms of multiples of the sub-MMU size. 
-
-In addition to the standard 13 model fields the envelope model includes the following: 
-
-  * * **GRADE** recording the average block grade.
-  * * **VALUE** for the accumulated value of a block.
-  * * **DENSITY** the average density.
-  * * **ENVBEST** the grade (if @OPTIMISE=1,2,3) or the accumulated value (if @OPTIMISE=4) of the best MMU in which the sub-MMU participates. 
-  * * **OPTIMISE** an implicit numeric field which records the value of the @OPTIMISE parameter. 
-  * * **ENVNUM** the envelope number.
-  * * **ENVELOPE** records the envelope type for each block: 
-
-UND |  undefined (not explicitly modeled) in the input model and not included in an envelope  
----|---  
-EXC |  excluded in the input model  
-MOD |  modeled in the input model, but not included in an envelope  
-PDW |  pre-defined waste  
-MAX-UND |  undefined in the input model but included in a Maximum envelope  
-MAX-MOD |  modeled in the input model and included in a Maximum envelope  
-MAX-PDW |  initially classified as pre-defined waste but then included in a Maximum envelope  
-MIN-UND |  undefined in the input model but included in a Minimum envelope  
-MIN-MOD |  modeled in the input model and included in a Minimum envelope  
-MIN-PDW |  initially classified as pre-defined waste but then included in a Minimum envelope  
-MIN-IUND |  undefined in input model and added to a Minimum envelope in the post-processing phase  
-MIN-IMOD |  modeled in input model and added to a Minimum envelope in the post-processing phase  
-RNK-UND |  undefined in the input model but included in a Ranked envelope  
-RNK-MOD |  modeled in the input model and included in a Ranked envelope  
-RNK-PDW |  initially classified as pre-defined waste but then included in a Ranked envelope  
-RNK-IUND |  undefined in input model and added to a Ranked envelope in the post-processing phase  
-RNK-IMOD |  modeled in input model and added to a Ranked envelope in the post-processing phase  
-  
-As can be seen from the definitions above the model may include blocks in those areas within the envelope that are not explicitly defined in the input model. 
-
-The @**ENVOUT** parameter controls which of the above envelope types are written to the envelope model:
-
-0 |  all values  
----|---  
-1 |  all values except UND (the default)  
-2 |  all values except UND, MOD, EXC  
-3 |  all values except UND, MOD, EXC, PDW  
-4 |  all values except UND, MOD, EXC, PDW, MAX-UND, MAX-MOD, MAX-PDW  
-  
-The envelope model can be evaluated directly, and with the use of **BLKPER** a series of boundary strings can be output for wireframing, or with **BLKTRI** the model can be directly wireframed. 
-
-#### Results File
-
-A summary report for each envelope is written to the &**RESULTS** file with statistics on volume, tonnes, grade or value, envelope limits and center of gravity. 
-
-If a Maximum envelope has been selected then the results will include all material classified as MAX-UND, MAX-MOD or MAX-PDW. If a Minimum envelope has been selected then the results are for the five MIN-* envelope types and similarly for a Ranked envelope.
-
-### Maximum Size of Envelope Model
-
-The maximum size of the envelope model is 100,000,000. If the input parameters define an envelope model with more than this number of potential sub-MMUs then the process terminates with an error message. The calculation of the maximum potential number of sub-MMUs is illustrated in the following table:
-
-|  X |  Y |  Z  
----|---|---|---  
-@MMUMIN[XYZ]  |  200  |  300 |  400  
-@MMUMAX[XYZ] |  3200 |  1800 |  1400  
-Range = MMUMAX - MMUMIN |  3000 |  1500 |  1000  
-@MMUSIZE[XYZ] |  30 |  15 |  10  
-@MMUINC[XYZ] |  3 |  3 |  2  
-Sub-MMU Size = MMUSIZE / MMUINC |  10 |  5 |  5  
-Number of Sub-MMUs = Range / Increment Size |  300 |  300 |  200  
-  
-The limits of the envelope model are defined by parameters **MMUMIN**[XYZ] and **MMUMAX**[XYZ], and the sub-MMU size is defined by dividing the MMU size by the number of increments per MMU. Therefore in the above example there will be 300 sub-MMUs in X, 300 in Y and 200 in Z making a total of 300*300*200 = 18,000,000 potential cells. This model could therefore be created in the EP version but not in the SP version.
-
-### Processing Speed
-
-Processing speed is affected by a wide range of factors including:
-
-  * Input model size
-  * Maximum potential number of sub-MMUs in output envelope model
-  * Parameter values
-  * Computer hardware and operating system
-  * Available contiguous memory
-
-The **MODENV** process has five large arrays which are used for storing input model data, intermediate processing data and output model data. These arrays are organised so that as much as possible is held in physical memory with the remainder being stored in virtual memory ie on disk. As memory access is very much faster than disk access the processing speed will slow down significantly if virtual memory has to be used. Unfortunately simply adding more physical memory to the computer only helps up to a point as there is a limit (usually 2Gb) on the amount of memory the operating system can address for a single program such as Studio. 
-
-It order to maximize available memory the following steps are recommended:
-
-  * Minimize the number of memory resident programs that are loaded when the computer starts.
-  * Reboot the computer, load and run Studio immediately. Do not run other programs.
-  * Minimize the maximum potential number of sub-MMUs (cells) in the output envelope model.
-
-Consult your Datamine support office for more information on computer memory requirements. 
-
-##### The Slicing Option
-
-An option exists that can help to optimize memory usage. If all the storage arrays fit into memory then no further optimization is possible but if the arrays are too large then **MODENV** slices the input geological model into sub-models that do fit into memory and processes each one individually. The sub-models overlap to avoid any edge effect and are recombined back into a single model.  
-  
-The overlap is in the X direction and the width of the overlap is controlled by parameter @**XOVERLAP**. The default is 2 which means that in length units the overlap for each edge is twice the size of the MMU dimension in X. The minimum width, excluding overlap, is the parent cell size in X of the input geological model. Consider the following example:
-
-  * Parent cell size in X of geological model (XINC) = 12
-  * Size of MMU in X (MMUSIZEX) = 8
-  * Overlap parameter (@XOVERLAP) = 2 
-
-In this case, the overlap on each side will be 16 (8 * 2) and the minimum total slice width will be 12 + 2 * 16 = 44. If @**XOVERLAP** is set to 1 then the overlap on each side will be 8 (8 * 1) and the minimum total slice width will be 12 + 2 * 8 = 28. 
-
-Note: This calculation is to find the _minimum_ slice width. In practice a slice will usually include several parent cell widths from the geological model plus the overlap either side.
-
-Experience has shown that an @**XOVERLAP** value of 2 is sufficient to eliminate almost all approximations caused by slicing. For most practical situations an @**XOVERLAP** value of 1 is sufficient and will give only minimal differences from the full solution of no slicing. If an @**XOVERLAP** value of 2 is used and the minimum width slice does not all fit in physical memory then the processing speed will be reduced as virtual memory is used and a message will be displayed in the **Command** Window. If processing is taking too long then it is suggested that the command is terminated (using the x button on the **Command** menu bar) and rerun with an @**XOVERLAP** value of 1. If the minimum slice width still does not fit in memory then other options to reduce run time are available as described in the Minimizing Run Time section below.
-
-If a large model is being processed then it can be useful to first run a test to find whether virtual memory will be required. If parameter @**NORUN** is set to 1 then the size of each slice will be calculated and compared with the available memory but the actual envelopes will not be calculated. The report in the **Command** window identifies which slices will require virtual memory as illustrated below. A decision may then be made to reduce the size of the overlap (@**XOVERLAP**) and rerun.
-
-Although the slicing option can be used for most cases there are some combinations of inputs for which the geological model cannot be sliced and virtual memory usage is still required for large models. The restrictions are:
-
-  * The **SHAPE** file must not include any records, so the Minimum Mining Unit (MMU) cannot be defined as a mini model.
-  * If the **IN** model is rotated then a SHAPE file cannot be used. The limits and rotation of the envelope model will be the same as the limits and rotation of the IN model.
-  * The **SHAPE** file cannot be rotated.
-
-### Minimizing Run Time
-
-  * Always do a test run first with a small number of MMU increments. Ideally set **MMUINCX** = **MMUINCY** = **MMUINCZ** = 1 and use the min/max volume parameters (@**MMUMIN**[XYZ],@ **MMUMAX**[XYZ]) to restrict the volume of the envelope model.
-  * The number of potential cells in the output envelope model has the biggest effect on run time so always keep the MMU increment parameters as small as possible.
-  * Use the @**ENVOUT** parameter to eliminate some **ENVELOPE** categories of cells from the envelope model. For example setting @**ENVOUT** =2 will eliminate cells that have **ENVELOPE** values of:
-    * _UND_ (undefined): volumes without cells in the geological model
-    * _MOD_ (model): cells in the geological model but not in an envelope
-    *  _EXC_ (excluded): cells that have been defined as excluded
-
-Note: The above categories of **ENVELOPE** are often not needed in the envelope model.
-
-  * Only select the output files that you actually need. Creating each file adds to the processing time. Maybe for the first run just select an envelope model and do not select either the mined model or the reserves output file. Creating the mined model can add significantly to the processing time so don't create it if you are not going to use it.
-  * Set @**ENVNUM** =0 so that envelopes are not assigned unique numbers.
-  * Set the @**XOVERLAP** parameter to 1. 
-
-### Progress Messages
-
-The level of information and progress messages displayed in the Output Window is controlled by parameter @INFO which is either 1 (minimum), 2 (intermediate) or 3 (maximum). Although the default is 2 it is suggested that a value of 3 is selected if the run time is more than a few seconds so that progress can be monitored closely. As well as information in the Output Window detailed progress is recorded in the message area at the bottom left corner of the window.
-
         Input Files:
         ------------
 
@@ -23285,6 +26209,13 @@ The level of information and progress messages displayed in the Output Window is
             unit increment defines the cell size. The file is a standard model file with the fields
             ***VALUE, *GRADE, *ENVBEST, *DENSITY, *ENVELOPE** and * **SHAPZONE** if specified. The
             value in the * **ENVBEST** field depends on the value of @**OPTIMISE** :
+            Required=No
+
+        results: Undefined
+            Output results file to report statistics for each envelope, with fields ***ENVNUM,
+            *ENVELOPE, *SHAPZONE** (if specified), ***VALUE, *GRADE, VOLUME, TONNES, MINX, MAXX,
+            MINY, MAXY, MINZ, MAXZ, COGX, COGY, COGZ. *ENVELOPE** and ***SHAPZONE** fields are
+            reported individually and in total.
             Required=No
 
         Fields:
@@ -23749,6 +26680,9 @@ The level of information and progress messages displayed in the Output Window is
         if envmodel_o != "optional":
             command += " &envmodel=" + envmodel_o
 
+        if results_o != "optional":
+            command += " &results=" + results_o
+
         if value_f != "optional":
             command += " *value=" + value_f
 
@@ -23803,8 +26737,8 @@ The level of information and progress messages displayed in the Output Window is
         if maxwaste_p != "optional":
             try:
                 val = float(maxwaste_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"maxwaste_p value {maxwaste_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 1.0:
+                    raise ValueError(f"maxwaste_p value {maxwaste_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(maxwaste_p, (int, float)):
                     raise e
@@ -23818,8 +26752,8 @@ The level of information and progress messages displayed in the Output Window is
         if maxore_p != "optional":
             try:
                 val = float(maxore_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"maxore_p value {maxore_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.0:
+                    raise ValueError(f"maxore_p value {maxore_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(maxore_p, (int, float)):
                     raise e
@@ -23842,8 +26776,8 @@ The level of information and progress messages displayed in the Output Window is
         if pdwaste_p != "optional":
             try:
                 val = float(pdwaste_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"pdwaste_p value {pdwaste_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.0:
+                    raise ValueError(f"pdwaste_p value {pdwaste_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(pdwaste_p, (int, float)):
                     raise e
@@ -23854,8 +26788,8 @@ The level of information and progress messages displayed in the Output Window is
         if optwaste_p != "optional":
             try:
                 val = float(optwaste_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"optwaste_p value {optwaste_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.0:
+                    raise ValueError(f"optwaste_p value {optwaste_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(optwaste_p, (int, float)):
                     raise e
@@ -23983,8 +26917,8 @@ The level of information and progress messages displayed in the Output Window is
         if xsubcell_p != "optional":
             try:
                 val = float(xsubcell_p)
-                if not (1.0 <= val <= 100.0):
-                    raise ValueError(f"xsubcell_p value {xsubcell_p} is not in allowed range: [1.0, 100.0]")
+                if not (1.0 <= val <= 100.0) and val != 1.0:
+                    raise ValueError(f"xsubcell_p value {xsubcell_p} is not in allowed range: [1.0, [100.0]")
             except ValueError as e:
                 if isinstance(xsubcell_p, (int, float)):
                     raise e
@@ -23995,8 +26929,8 @@ The level of information and progress messages displayed in the Output Window is
         if ysubcell_p != "optional":
             try:
                 val = float(ysubcell_p)
-                if not (1.0 <= val <= 100.0):
-                    raise ValueError(f"ysubcell_p value {ysubcell_p} is not in allowed range: [1.0, 100.0]")
+                if not (1.0 <= val <= 100.0) and val != 1.0:
+                    raise ValueError(f"ysubcell_p value {ysubcell_p} is not in allowed range: [1.0, [100.0]")
             except ValueError as e:
                 if isinstance(ysubcell_p, (int, float)):
                     raise e
@@ -24007,8 +26941,8 @@ The level of information and progress messages displayed in the Output Window is
         if zsubcell_p != "optional":
             try:
                 val = float(zsubcell_p)
-                if not (1.0 <= val <= 100.0):
-                    raise ValueError(f"zsubcell_p value {zsubcell_p} is not in allowed range: [1.0, 100.0]")
+                if not (1.0 <= val <= 100.0) and val != 1.0:
+                    raise ValueError(f"zsubcell_p value {zsubcell_p} is not in allowed range: [1.0, [100.0]")
             except ValueError as e:
                 if isinstance(zsubcell_p, (int, float)):
                     raise e
@@ -24067,6 +27001,9 @@ The level of information and progress messages displayed in the Output Window is
         if info_p != "optional":
             command += " @info=" + str(info_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -24082,6 +27019,7 @@ The level of information and progress messages displayed in the Output Window is
                 pairs_p=0,
                 fullcell_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -24318,6 +27256,9 @@ Otherwise, the model is read once for each set of perimeters (multiple passes). 
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -24345,6 +27286,7 @@ Otherwise, the model is read once for each set of perimeters (multiple passes). 
                 defgrade_p="optional",
                 usezone_p="optional",
                 tolernce_p=0.001,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -24583,8 +27525,8 @@ If both the input model file and the input wireframe triangle file include field
         if maxdip_p != "optional":
             try:
                 val = float(maxdip_p)
-                if not (0.0 <= val <= 90.0):
-                    raise ValueError(f"maxdip_p value {maxdip_p} is not in allowed range: [0.0, 90.0]")
+                if not (0.0 <= val <= 90.0) and val != 0.0:
+                    raise ValueError(f"maxdip_p value {maxdip_p} is not in allowed range: [0.0, [90.0]")
             except ValueError as e:
                 if isinstance(maxdip_p, (int, float)):
                     raise e
@@ -24610,8 +27552,8 @@ If both the input model file and the input wireframe triangle file include field
         if xsubcell_p != "optional":
             try:
                 val = float(xsubcell_p)
-                if not (1.0 <= val <= 100.0):
-                    raise ValueError(f"xsubcell_p value {xsubcell_p} is not in allowed range: [1.0, 100.0]")
+                if not (1.0 <= val <= 100.0) and val != 1.0:
+                    raise ValueError(f"xsubcell_p value {xsubcell_p} is not in allowed range: [1.0, [100.0]")
             except ValueError as e:
                 if isinstance(xsubcell_p, (int, float)):
                     raise e
@@ -24622,8 +27564,8 @@ If both the input model file and the input wireframe triangle file include field
         if ysubcell_p != "optional":
             try:
                 val = float(ysubcell_p)
-                if not (1.0 <= val <= 100.0):
-                    raise ValueError(f"ysubcell_p value {ysubcell_p} is not in allowed range: [1.0, 100.0]")
+                if not (1.0 <= val <= 100.0) and val != 1.0:
+                    raise ValueError(f"ysubcell_p value {ysubcell_p} is not in allowed range: [1.0, [100.0]")
             except ValueError as e:
                 if isinstance(ysubcell_p, (int, float)):
                     raise e
@@ -24634,8 +27576,8 @@ If both the input model file and the input wireframe triangle file include field
         if zsubcell_p != "optional":
             try:
                 val = float(zsubcell_p)
-                if not (1.0 <= val <= 100.0):
-                    raise ValueError(f"zsubcell_p value {zsubcell_p} is not in allowed range: [1.0, 100.0]")
+                if not (1.0 <= val <= 100.0) and val != 1.0:
+                    raise ValueError(f"zsubcell_p value {zsubcell_p} is not in allowed range: [1.0, [100.0]")
             except ValueError as e:
                 if isinstance(zsubcell_p, (int, float)):
                     raise e
@@ -24657,6 +27599,9 @@ If both the input model file and the input wireframe triangle file include field
 
         if tolernce_p != "optional":
             command += " @tolernce=" + str(tolernce_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -24683,6 +27628,7 @@ If both the input model file and the input wireframe triangle file include field
                 numz_p="optional",
                 miss_p="optional",
                 print_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -24929,6 +27875,9 @@ The specified fields * **F1** \- * **Fn** should have discrete values rather tha
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -24940,6 +27889,7 @@ The specified fields * **F1** \- * **Fn** should have discrete values rather tha
                 wirept_o="optional",
                 origin_p=0,
                 pttol_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -25039,6 +27989,9 @@ The standard wireframe GROUP, SURFACE, adjacency and orientation data is output 
         if pttol_p != "optional":
             command += " @pttol=" + str(pttol_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -25059,6 +28012,7 @@ The standard wireframe GROUP, SURFACE, adjacency and orientation data is output 
                 xsubcell_p=1,
                 ysubcell_p=1,
                 resol_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -25229,6 +28183,9 @@ The metal content and mass from the stope wireframe data is the same in the bloc
         if resol_p != "optional":
             command += " @resol=" + str(resol_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -25246,6 +28203,7 @@ The metal content and mass from the stope wireframe data is the same in the bloc
                 refwgt_f="optional",
                 mingrade_p=0,
                 maxgrade_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -25398,6 +28356,9 @@ All files matching the template _nsc_*.txt and _sp*.dm will be deleted as the pr
         if maxgrade_p != "optional":
             command += " @maxgrade=" + str(maxgrade_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -25408,6 +28369,7 @@ All files matching the template _nsc_*.txt and _sp*.dm will be deleted as the pr
                 samples_i="required",
                 out_o="required",
                 vsetnum_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -25481,6 +28443,9 @@ This process is triggered during **Advanced Estimation** , specifically from the
         if vsetnum_p != "optional":
             command += " @vsetnum=" + str(vsetnum_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -25493,6 +28458,7 @@ This process is triggered during **Advanced Estimation** , specifically from the
                 nsgrade_f="optional",
                 mingrade_p=0,
                 maxgrade_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -25581,6 +28547,9 @@ You can also restrict the scope of transformation by setting a minimum (@MINGRAD
         if maxgrade_p != "optional":
             command += " @maxgrade=" + str(maxgrade_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -25601,6 +28570,7 @@ You can also restrict the scope of transformation by setting a minimum (@MINGRAD
                 yinc_p=10,
                 zinc_p=10,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -25808,8 +28778,8 @@ The optional wireframe file is created around the limits of the prototype model.
         if zinc_p != "optional":
             try:
                 val = float(zinc_p)
-                if not (1e-06 <= val <= 9999999.0):
-                    raise ValueError(f"zinc_p value {zinc_p} is not in allowed range: [1e-06, 9999999.0]")
+                if not (1e-06 <= val <= 9999999.0) and val != 10.0:
+                    raise ValueError(f"zinc_p value {zinc_p} is not in allowed range: [1e-06, [9999999.0]")
             except ValueError as e:
                 if isinstance(zinc_p, (int, float)):
                     raise e
@@ -25829,6 +28799,9 @@ The optional wireframe file is created around the limits of the prototype model.
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -25843,6 +28816,7 @@ The optional wireframe file is created around the limits of the prototype model.
                 nodd_p=0,
                 dplace_p=-1,
                 implicit_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -26008,6 +28982,9 @@ The maximum permitted width of 240 characters is not applicable when using this 
         if implicit_p != "optional":
             command += " @implicit=" + str(implicit_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -26047,6 +29024,7 @@ The maximum permitted width of 240 characters is not applicable when using this 
                 anaxiss_f=['optional'],
                 andists_f=['optional'],
                 print_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -26599,6 +29577,9 @@ The results for each panel are displayed in the **Output** window. If [kriging](
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -26622,6 +29603,7 @@ The results for each panel are displayed in the **Output** window. If [kriging](
                 vmethod_p=1,
                 vgram_p=1,
                 print_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -26844,8 +29826,8 @@ Warning: If two or more samples have the same X and Y coordinate then an error w
         if nmax_p != "optional":
             try:
                 val = float(nmax_p)
-                if not (1.0 <= val <= 1900.0):
-                    raise ValueError(f"nmax_p value {nmax_p} is not in allowed range: [1.0, 1900.0]")
+                if not (1.0 <= val <= 1900.0) and val != 50.0:
+                    raise ValueError(f"nmax_p value {nmax_p} is not in allowed range: [1.0, [1900.0]")
             except ValueError as e:
                 if isinstance(nmax_p, (int, float)):
                     raise e
@@ -26895,6 +29877,9 @@ Warning: If two or more samples have the same X and Y coordinate then an error w
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -26912,6 +29897,7 @@ Warning: If two or more samples have the same X and Y coordinate then an error w
                 scnorm_p=0,
                 loadeign_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -27110,6 +30096,9 @@ MATXTYPE |  LOADEIGN |  SCNORM
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -27142,6 +30131,7 @@ MATXTYPE |  LOADEIGN |  SCNORM
                 symbgr_p="optional",
                 fitpaper_p=0,
                 shadepct_p=100.0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -27460,8 +30450,8 @@ Plots may either be plotted at true size, by specifying absent data (-) to the @
         if angle_p != "optional":
             try:
                 val = float(angle_p)
-                if not (0.0 <= val <= 360.0):
-                    raise ValueError(f"angle_p value {angle_p} is not in allowed range: [0.0, 360.0]")
+                if not (0.0 <= val <= 360.0) and val != 0.0:
+                    raise ValueError(f"angle_p value {angle_p} is not in allowed range: [0.0, [360.0]")
             except ValueError as e:
                 if isinstance(angle_p, (int, float)):
                     raise e
@@ -27574,14 +30564,17 @@ Plots may either be plotted at true size, by specifying absent data (-) to the @
         if shadepct_p != "optional":
             try:
                 val = float(shadepct_p)
-                if not (1.0 <= val <= 100.0):
-                    raise ValueError(f"shadepct_p value {shadepct_p} is not in allowed range: [1.0, 100.0]")
+                if not (1.0 <= val <= 100.0) and val != 100.0:
+                    raise ValueError(f"shadepct_p value {shadepct_p} is not in allowed range: [1.0, [100.0]")
             except ValueError as e:
                 if isinstance(shadepct_p, (int, float)):
                     raise e
 
         if shadepct_p != "optional":
             command += " @shadepct=" + str(shadepct_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -27593,6 +30586,7 @@ Plots may either be plotted at true size, by specifying absent data (-) to the @
                 wiretr_i="required",
                 wirept_i="required",
                 perimout_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -27659,6 +30653,9 @@ Values for additional fields in the input perimeter are taken as constant for th
         if perimout_o != "optional":
             command += " &perimout=" + perimout_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -27684,6 +30681,7 @@ Values for additional fields in the input perimeter are taken as constant for th
                 pvalue_p="optional",
                 resol_p=0,
                 ovcheck_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -27936,8 +30934,8 @@ If no perimeter file is specified or if no attributes are specified then the pro
         if xsubcell_p != "optional":
             try:
                 val = float(xsubcell_p)
-                if not (1.0 <= val <= 100.0):
-                    raise ValueError(f"xsubcell_p value {xsubcell_p} is not in allowed range: [1.0, 100.0]")
+                if not (1.0 <= val <= 100.0) and val != 1.0:
+                    raise ValueError(f"xsubcell_p value {xsubcell_p} is not in allowed range: [1.0, [100.0]")
             except ValueError as e:
                 if isinstance(xsubcell_p, (int, float)):
                     raise e
@@ -27948,8 +30946,8 @@ If no perimeter file is specified or if no attributes are specified then the pro
         if ysubcell_p != "optional":
             try:
                 val = float(ysubcell_p)
-                if not (1.0 <= val <= 100.0):
-                    raise ValueError(f"ysubcell_p value {ysubcell_p} is not in allowed range: [1.0, 100.0]")
+                if not (1.0 <= val <= 100.0) and val != 1.0:
+                    raise ValueError(f"ysubcell_p value {ysubcell_p} is not in allowed range: [1.0, [100.0]")
             except ValueError as e:
                 if isinstance(ysubcell_p, (int, float)):
                     raise e
@@ -27960,8 +30958,8 @@ If no perimeter file is specified or if no attributes are specified then the pro
         if zsubcell_p != "optional":
             try:
                 val = float(zsubcell_p)
-                if not (1.0 <= val <= 100.0):
-                    raise ValueError(f"zsubcell_p value {zsubcell_p} is not in allowed range: [1.0, 100.0]")
+                if not (1.0 <= val <= 100.0) and val != 1.0:
+                    raise ValueError(f"zsubcell_p value {zsubcell_p} is not in allowed range: [1.0, [100.0]")
             except ValueError as e:
                 if isinstance(zsubcell_p, (int, float)):
                     raise e
@@ -27987,6 +30985,9 @@ If no perimeter file is specified or if no attributes are specified then the pro
         if ovcheck_p != "optional":
             command += " @ovcheck=" + str(ovcheck_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -27996,6 +30997,7 @@ If no perimeter file is specified or if no attributes are specified then the pro
                 perimin_i="required",
                 perimout_o="required",
                 close_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -28057,6 +31059,9 @@ If no perimeter file is specified or if no attributes are specified then the pro
         if close_p != "optional":
             command += " @close=" + str(close_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -28068,6 +31073,7 @@ If no perimeter file is specified or if no attributes are specified then the pro
                 perimout_o="required",
                 tagfield_f="optional",
                 maxsep_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -28142,6 +31148,9 @@ Updates the values of points in an input perimeter file by comparison with a ref
         if maxsep_p != "optional":
             command += " @maxsep=" + str(maxsep_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -28163,6 +31172,7 @@ Updates the values of points in an input perimeter file by comparison with a ref
                 stize_p="required",
                 numplane_p="required",
                 maxdist_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -28372,6 +31382,9 @@ PERTRA processes a file of input perimeters, and generates the corresponding per
         if maxdist_p != "optional":
             command += " @maxdist=" + str(maxdist_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -28384,6 +31397,7 @@ PERTRA processes a file of input perimeters, and generates the corresponding per
                 print_p=0,
                 append_p=0,
                 sort_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -28541,6 +31555,9 @@ The result of a pattern matching expression is either TRUE or FALSE. Any result 
         if sort_p != "optional":
             command += " @sort=" + str(sort_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -28553,6 +31570,7 @@ The result of a pattern matching expression is either TRUE or FALSE. Any result 
                 fields_f=['optional'],
                 fieldnam_f="optional",
                 append_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -28774,6 +31792,9 @@ TEST> DEVFILE MATCHES \reg* END
         if append_p != "optional":
             command += " @append=" + str(append_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -28795,6 +31816,7 @@ TEST> DEVFILE MATCHES \reg* END
                 zorig_p=0,
                 bheight_p=0,
                 checkrot_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -28964,8 +31986,8 @@ Subcell splitting is controlled by the parameters @**XSUBCELL** , @**YSUBCELL** 
         if density_p != "optional":
             try:
                 val = float(density_p)
-                if not (0.0 <= val <= 9999.0):
-                    raise ValueError(f"density_p value {density_p} is not in allowed range: [0.0, 9999.0]")
+                if not (0.0 <= val <= 9999.0) and val != 1.0:
+                    raise ValueError(f"density_p value {density_p} is not in allowed range: [0.0, [9999.0]")
             except ValueError as e:
                 if isinstance(density_p, (int, float)):
                     raise e
@@ -28976,8 +31998,8 @@ Subcell splitting is controlled by the parameters @**XSUBCELL** , @**YSUBCELL** 
         if xsubcell_p != "optional":
             try:
                 val = float(xsubcell_p)
-                if not (1.0 <= val <= 20.0):
-                    raise ValueError(f"xsubcell_p value {xsubcell_p} is not in allowed range: [1.0, 20.0]")
+                if not (1.0 <= val <= 20.0) and val != 1.0:
+                    raise ValueError(f"xsubcell_p value {xsubcell_p} is not in allowed range: [1.0, [20.0]")
             except ValueError as e:
                 if isinstance(xsubcell_p, (int, float)):
                     raise e
@@ -28988,8 +32010,8 @@ Subcell splitting is controlled by the parameters @**XSUBCELL** , @**YSUBCELL** 
         if ysubcell_p != "optional":
             try:
                 val = float(ysubcell_p)
-                if not (1.0 <= val <= 20.0):
-                    raise ValueError(f"ysubcell_p value {ysubcell_p} is not in allowed range: [1.0, 20.0]")
+                if not (1.0 <= val <= 20.0) and val != 1.0:
+                    raise ValueError(f"ysubcell_p value {ysubcell_p} is not in allowed range: [1.0, [20.0]")
             except ValueError as e:
                 if isinstance(ysubcell_p, (int, float)):
                     raise e
@@ -29009,14 +32031,17 @@ Subcell splitting is controlled by the parameters @**XSUBCELL** , @**YSUBCELL** 
         if checkrot_p != "optional":
             try:
                 val = float(checkrot_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"checkrot_p value {checkrot_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.0:
+                    raise ValueError(f"checkrot_p value {checkrot_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(checkrot_p, (int, float)):
                     raise e
 
         if checkrot_p != "optional":
             command += " @checkrot=" + str(checkrot_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -29047,6 +32072,7 @@ Subcell splitting is controlled by the parameters @**XSUBCELL** , @**YSUBCELL** 
                 numtab_p="optional",
                 volume_p=0,
                 tonnesa_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -29292,8 +32318,8 @@ Subcell splitting is controlled by the parameters @**XSUBCELL** , @**YSUBCELL** 
         if gdec_p != "optional":
             try:
                 val = float(gdec_p)
-                if not (0.0 <= val <= 4.0):
-                    raise ValueError(f"gdec_p value {gdec_p} is not in allowed range: [0.0, 4.0]")
+                if not (0.0 <= val <= 4.0) and val != 2.0:
+                    raise ValueError(f"gdec_p value {gdec_p} is not in allowed range: [0.0, [4.0]")
             except ValueError as e:
                 if isinstance(gdec_p, (int, float)):
                     raise e
@@ -29326,7 +32352,7 @@ Subcell splitting is controlled by the parameters @**XSUBCELL** , @**YSUBCELL** 
             try:
                 val = float(numtab_p)
                 if not (1.0 <= val <= 99.0):
-                    raise ValueError(f"numtab_p value {numtab_p} is not in allowed range: [1.0, 99.0]")
+                    raise ValueError(f"numtab_p value {numtab_p} is not in allowed range: [1.0, [99.0]")
             except ValueError as e:
                 if isinstance(numtab_p, (int, float)):
                     raise e
@@ -29358,6 +32384,9 @@ Subcell splitting is controlled by the parameters @**XSUBCELL** , @**YSUBCELL** 
         if tonnesa_p != "optional":
             command += " @tonnesa=" + str(tonnesa_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -29386,6 +32415,7 @@ Subcell splitting is controlled by the parameters @**XSUBCELL** , @**YSUBCELL** 
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -29608,8 +32638,8 @@ The input file should contain just one entry for each location. If it contains m
         if angle_p != "optional":
             try:
                 val = float(angle_p)
-                if not (0.0 <= val <= 360.0):
-                    raise ValueError(f"angle_p value {angle_p} is not in allowed range: [0.0, 360.0]")
+                if not (0.0 <= val <= 360.0) and val != 0.0:
+                    raise ValueError(f"angle_p value {angle_p} is not in allowed range: [0.0, [360.0]")
             except ValueError as e:
                 if isinstance(angle_p, (int, float)):
                     raise e
@@ -29659,6 +32689,9 @@ The input file should contain just one entry for each location. If it contains m
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -29685,6 +32718,7 @@ The input file should contain just one entry for each location. If it contains m
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -29912,8 +32946,8 @@ The length and direction of the arrows plotted are specified by the values of *L
         if headangl_p != "optional":
             try:
                 val = float(headangl_p)
-                if not (1.0 <= val <= 90.0):
-                    raise ValueError(f"headangl_p value {headangl_p} is not in allowed range: [1.0, 90.0]")
+                if not (1.0 <= val <= 90.0) and val != 90.0:
+                    raise ValueError(f"headangl_p value {headangl_p} is not in allowed range: [1.0, [90.0]")
             except ValueError as e:
                 if isinstance(headangl_p, (int, float)):
                     raise e
@@ -29944,6 +32978,9 @@ The length and direction of the arrows plotted are specified by the values of *L
 
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -29989,6 +33026,7 @@ The length and direction of the arrows plotted are specified by the values of *L
                 yscale_p="optional",
                 append_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -30409,6 +33447,9 @@ The length and direction of the arrows plotted are specified by the values of *L
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -30481,6 +33522,7 @@ The length and direction of the arrows plotted are specified by the values of *L
                 vertexag_p=1,
                 append_p=0,
                 print_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -31195,8 +34237,8 @@ The contour strings can be output to a string file. The contours generated can b
         if gsmooth_p != "optional":
             try:
                 val = float(gsmooth_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"gsmooth_p value {gsmooth_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.0:
+                    raise ValueError(f"gsmooth_p value {gsmooth_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(gsmooth_p, (int, float)):
                     raise e
@@ -31267,6 +34309,9 @@ The contour strings can be output to a string file. The contours generated can b
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -31288,6 +34333,7 @@ The contour strings can be output to a string file. The contours generated can b
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -31473,6 +34519,9 @@ Unlike [PLOTAN](<plotan.md>), where the value of a third field is plotted at the
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -31499,6 +34548,7 @@ Unlike [PLOTAN](<plotan.md>), where the value of a third field is plotted at the
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -31735,8 +34785,8 @@ If a number of plots are to be generated with the same scales and axes, then it 
         if igrid_p != "optional":
             try:
                 val = float(igrid_p)
-                if not (0.0 <= val <= 20.0):
-                    raise ValueError(f"igrid_p value {igrid_p} is not in allowed range: [0.0, 20.0]")
+                if not (0.0 <= val <= 20.0) and val != 0.0:
+                    raise ValueError(f"igrid_p value {igrid_p} is not in allowed range: [0.0, [20.0]")
             except ValueError as e:
                 if isinstance(igrid_p, (int, float)):
                     raise e
@@ -31792,6 +34842,9 @@ If a number of plots are to be generated with the same scales and axes, then it 
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -31817,6 +34870,7 @@ If a number of plots are to be generated with the same scales and axes, then it 
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -32069,8 +35123,8 @@ Also note:
         if igridx_p != "optional":
             try:
                 val = float(igridx_p)
-                if not (0.0 <= val <= 10.0):
-                    raise ValueError(f"igridx_p value {igridx_p} is not in allowed range: [0.0, 10.0]")
+                if not (0.0 <= val <= 10.0) and val != 0.0:
+                    raise ValueError(f"igridx_p value {igridx_p} is not in allowed range: [0.0, [10.0]")
             except ValueError as e:
                 if isinstance(igridx_p, (int, float)):
                     raise e
@@ -32135,6 +35189,9 @@ Also note:
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -32179,6 +35236,7 @@ Also note:
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -32590,8 +35648,8 @@ If no prototype is used then all 6 of the scale and size parameters must be set 
         if ibase_p != "optional":
             try:
                 val = float(ibase_p)
-                if not (1.0 <= val <= 11.0):
-                    raise ValueError(f"ibase_p value {ibase_p} is not in allowed range: [1.0, 11.0]")
+                if not (1.0 <= val <= 11.0) and val != 1.0:
+                    raise ValueError(f"ibase_p value {ibase_p} is not in allowed range: [1.0, [11.0]")
             except ValueError as e:
                 if isinstance(ibase_p, (int, float)):
                     raise e
@@ -32764,6 +35822,9 @@ If no prototype is used then all 6 of the scale and size parameters must be set 
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -32797,6 +35858,7 @@ If no prototype is used then all 6 of the scale and size parameters must be set 
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -33054,7 +36116,7 @@ Use of the @**FACTOR** parameter allows for example section lines in feet or hun
             try:
                 val = float(angle_p)
                 if not (0.0 <= val <= 360.0):
-                    raise ValueError(f"angle_p value {angle_p} is not in allowed range: [0.0, 360.0]")
+                    raise ValueError(f"angle_p value {angle_p} is not in allowed range: [0.0, [360.0]")
             except ValueError as e:
                 if isinstance(angle_p, (int, float)):
                     raise e
@@ -33185,6 +36247,9 @@ Use of the @**FACTOR** parameter allows for example section lines in feet or hun
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -33203,6 +36268,7 @@ Use of the @**FACTOR** parameter allows for example section lines in feet or hun
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -33357,6 +36423,9 @@ If the **[HISTOG](<histog.md>)** process was used to generate the input file, th
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -33379,6 +36448,7 @@ If the **[HISTOG](<histog.md>)** process was used to generate the input file, th
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -33592,6 +36662,9 @@ The line type may be chosen by optional parameter. Currently available are broad
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -33613,6 +36686,7 @@ The line type may be chosen by optional parameter. Currently available are broad
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -33807,6 +36881,9 @@ Note: An empty plot file may be generated if the specified fields do not exist, 
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -33817,6 +36894,7 @@ Note: An empty plot file may be generated if the specified fields do not exist, 
                 proto_i="required",
                 section_i="optional",
                 annfile_i="optional",
+                legend_i="optional",
                 plot_o="required",
                 modcol_f="optional",
                 charsize_p=2,
@@ -33851,6 +36929,7 @@ Note: An empty plot file may be generated if the specified fields do not exist, 
                 xscale_p="optional",
                 yscale_p="optional",
                 vertexag_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -33891,6 +36970,11 @@ Note: A 'box' is defined as the intersection of the specified plane with a model
         annfile: 
             Optional annotation input file for specifying annotations as an alternative to the
             interactive input. Only used if the **ANNOTATE** =1. Compulsory fields:
+            Required=No
+
+        legend: 
+            Optional shading legend input file which may be used as an alternative to interactive
+            input. Only used if the **SHADE** =1. Compulsory fields:
             Required=No
 
         Output Files:
@@ -34169,6 +37253,9 @@ Note: A 'box' is defined as the intersection of the specified plane with a model
         if annfile_i != "optional":
             command += " &annfile=" + annfile_i
 
+        if legend_i != "optional":
+            command += " &legend=" + legend_i
+
         if plot_o == "required":
             raise ValueError("plot_o is required.")
 
@@ -34346,6 +37433,9 @@ Note: A 'box' is defined as the intersection of the specified plane with a model
         if vertexag_p != "optional":
             command += " @vertexag=" + str(vertexag_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -34380,6 +37470,7 @@ Note: A 'box' is defined as the intersection of the specified plane with a model
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -34744,6 +37835,9 @@ The line type may be chosen by optional parameter. Currently available are broad
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -34781,6 +37875,7 @@ The line type may be chosen by optional parameter. Currently available are broad
                 xscale_p="optional",
                 yscale_p="optional",
                 fillcode_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -35107,8 +38202,8 @@ A special facility for crest representation is available. This facility is defin
         if angle_p != "optional":
             try:
                 val = float(angle_p)
-                if not (-360.0 <= val <= 360.0):
-                    raise ValueError(f"angle_p value {angle_p} is not in allowed range: [-360.0, 360.0]")
+                if not (-360.0 <= val <= 360.0) and val != 0.0:
+                    raise ValueError(f"angle_p value {angle_p} is not in allowed range: [-360.0, [360.0]")
             except ValueError as e:
                 if isinstance(angle_p, (int, float)):
                     raise e
@@ -35165,13 +38260,16 @@ A special facility for crest representation is available. This facility is defin
             try:
                 val = float(fillcode_p)
                 if not (1.0 <= val <= 3030.0):
-                    raise ValueError(f"fillcode_p value {fillcode_p} is not in allowed range: [1.0, 3030.0]")
+                    raise ValueError(f"fillcode_p value {fillcode_p} is not in allowed range: [1.0, [3030.0]")
             except ValueError as e:
                 if isinstance(fillcode_p, (int, float)):
                     raise e
 
         if fillcode_p != "optional":
             command += " @fillcode=" + str(fillcode_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -35192,6 +38290,7 @@ A special facility for crest representation is available. This facility is defin
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -35355,6 +38454,9 @@ For each variable, you are prompted for the variable name, maximum value to be p
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -35396,6 +38498,7 @@ For each variable, you are prompted for the variable name, maximum value to be p
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -35735,8 +38838,8 @@ For each variable, you are prompted for the variable name, maximum value to be p
         if angle_p != "optional":
             try:
                 val = float(angle_p)
-                if not (-360.0 <= val <= 360.0):
-                    raise ValueError(f"angle_p value {angle_p} is not in allowed range: [-360.0, 360.0]")
+                if not (-360.0 <= val <= 360.0) and val != 0.0:
+                    raise ValueError(f"angle_p value {angle_p} is not in allowed range: [-360.0, [360.0]")
             except ValueError as e:
                 if isinstance(angle_p, (int, float)):
                     raise e
@@ -35798,8 +38901,8 @@ For each variable, you are prompted for the variable name, maximum value to be p
         if slopecol_p != "optional":
             try:
                 val = float(slopecol_p)
-                if not (-1.0 <= val <= 64.0):
-                    raise ValueError(f"slopecol_p value {slopecol_p} is not in allowed range: [-1.0, 64.0]")
+                if not (-1.0 <= val <= 64.0) and val != -1.0:
+                    raise ValueError(f"slopecol_p value {slopecol_p} is not in allowed range: [-1.0, [64.0]")
             except ValueError as e:
                 if isinstance(slopecol_p, (int, float)):
                     raise e
@@ -35810,8 +38913,8 @@ For each variable, you are prompted for the variable name, maximum value to be p
         if benchcol_p != "optional":
             try:
                 val = float(benchcol_p)
-                if not (-1.0 <= val <= 64.0):
-                    raise ValueError(f"benchcol_p value {benchcol_p} is not in allowed range: [-1.0, 64.0]")
+                if not (-1.0 <= val <= 64.0) and val != -1.0:
+                    raise ValueError(f"benchcol_p value {benchcol_p} is not in allowed range: [-1.0, [64.0]")
             except ValueError as e:
                 if isinstance(benchcol_p, (int, float)):
                     raise e
@@ -35822,8 +38925,8 @@ For each variable, you are prompted for the variable name, maximum value to be p
         if ffanncol_p != "optional":
             try:
                 val = float(ffanncol_p)
-                if not (-1.0 <= val <= 64.0):
-                    raise ValueError(f"ffanncol_p value {ffanncol_p} is not in allowed range: [-1.0, 64.0]")
+                if not (-1.0 <= val <= 64.0) and val != -1.0:
+                    raise ValueError(f"ffanncol_p value {ffanncol_p} is not in allowed range: [-1.0, [64.0]")
             except ValueError as e:
                 if isinstance(ffanncol_p, (int, float)):
                     raise e
@@ -35863,6 +38966,9 @@ For each variable, you are prompted for the variable name, maximum value to be p
 
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -35925,6 +39031,7 @@ For each variable, you are prompted for the variable name, maximum value to be p
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -36465,7 +39572,7 @@ The value used in the process will be selected in the following order of priorit
             try:
                 val = float(angle_p)
                 if not (-360.0 <= val <= 360.0):
-                    raise ValueError(f"angle_p value {angle_p} is not in allowed range: [-360.0, 360.0]")
+                    raise ValueError(f"angle_p value {angle_p} is not in allowed range: [-360.0, [360.0]")
             except ValueError as e:
                 if isinstance(angle_p, (int, float)):
                     raise e
@@ -36510,7 +39617,7 @@ The value used in the process will be selected in the following order of priorit
             try:
                 val = float(iangle_p)
                 if not (-360.0 <= val <= 360.0):
-                    raise ValueError(f"iangle_p value {iangle_p} is not in allowed range: [-360.0, 360.0]")
+                    raise ValueError(f"iangle_p value {iangle_p} is not in allowed range: [-360.0, [360.0]")
             except ValueError as e:
                 if isinstance(iangle_p, (int, float)):
                     raise e
@@ -36563,6 +39670,9 @@ The value used in the process will be selected in the following order of priorit
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -36614,6 +39724,7 @@ The value used in the process will be selected in the following order of priorit
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -37209,6 +40320,9 @@ The value used in the process will be selected in the following order of priorit
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -37263,6 +40377,7 @@ The value used in the process will be selected in the following order of priorit
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -37893,8 +41008,8 @@ Interaction depends on the value of **PLTYPE** selected:
         if trcol_p != "optional":
             try:
                 val = float(trcol_p)
-                if not (-1.0 <= val <= 64.0):
-                    raise ValueError(f"trcol_p value {trcol_p} is not in allowed range: [-1.0, 64.0]")
+                if not (-1.0 <= val <= 64.0) and val != -1.0:
+                    raise ValueError(f"trcol_p value {trcol_p} is not in allowed range: [-1.0, [64.0]")
             except ValueError as e:
                 if isinstance(trcol_p, (int, float)):
                     raise e
@@ -37905,8 +41020,8 @@ Interaction depends on the value of **PLTYPE** selected:
         if tikcol_p != "optional":
             try:
                 val = float(tikcol_p)
-                if not (-1.0 <= val <= 64.0):
-                    raise ValueError(f"tikcol_p value {tikcol_p} is not in allowed range: [-1.0, 64.0]")
+                if not (-1.0 <= val <= 64.0) and val != -1.0:
+                    raise ValueError(f"tikcol_p value {tikcol_p} is not in allowed range: [-1.0, [64.0]")
             except ValueError as e:
                 if isinstance(tikcol_p, (int, float)):
                     raise e
@@ -37917,8 +41032,8 @@ Interaction depends on the value of **PLTYPE** selected:
         if anncol_p != "optional":
             try:
                 val = float(anncol_p)
-                if not (-1.0 <= val <= 64.0):
-                    raise ValueError(f"anncol_p value {anncol_p} is not in allowed range: [-1.0, 64.0]")
+                if not (-1.0 <= val <= 64.0) and val != -1.0:
+                    raise ValueError(f"anncol_p value {anncol_p} is not in allowed range: [-1.0, [64.0]")
             except ValueError as e:
                 if isinstance(anncol_p, (int, float)):
                     raise e
@@ -37929,8 +41044,8 @@ Interaction depends on the value of **PLTYPE** selected:
         if barcol_p != "optional":
             try:
                 val = float(barcol_p)
-                if not (-1.0 <= val <= 64.0):
-                    raise ValueError(f"barcol_p value {barcol_p} is not in allowed range: [-1.0, 64.0]")
+                if not (-1.0 <= val <= 64.0) and val != -1.0:
+                    raise ValueError(f"barcol_p value {barcol_p} is not in allowed range: [-1.0, [64.0]")
             except ValueError as e:
                 if isinstance(barcol_p, (int, float)):
                     raise e
@@ -37995,6 +41110,9 @@ Interaction depends on the value of **PLTYPE** selected:
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -38012,6 +41130,7 @@ Interaction depends on the value of **PLTYPE** selected:
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -38157,6 +41276,9 @@ Interaction depends on the value of **PLTYPE** selected:
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -38177,6 +41299,7 @@ Interaction depends on the value of **PLTYPE** selected:
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -38351,6 +41474,9 @@ Interaction depends on the value of **PLTYPE** selected:
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -38369,6 +41495,7 @@ Interaction depends on the value of **PLTYPE** selected:
                 charsize_p=3,
                 aspratio_p=0.9,
                 append_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -38553,6 +41680,9 @@ The process tests that the point @**XSTART** ,@**YSTART** lies in the plot regio
         if append_p != "optional":
             command += " @append=" + str(append_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -38576,6 +41706,7 @@ The process tests that the point @**XSTART** ,@**YSTART** lies in the plot regio
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -38793,6 +41924,9 @@ Up to 10 fields can be specified terminating with a blank line or a comma in col
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -38812,6 +41946,7 @@ Up to 10 fields can be specified terminating with a blank line or a comma in col
                 xscale_p="optional",
                 yscale_p="optional",
                 vertexag_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -39040,8 +42175,8 @@ If 4 selected, interaction is as follows:
         if linecode_p != "optional":
             try:
                 val = float(linecode_p)
-                if not (1001.0 <= val <= 1006.0):
-                    raise ValueError(f"linecode_p value {linecode_p} is not in allowed range: [1001.0, 1006.0]")
+                if not (1001.0 <= val <= 1006.0) and val != 1001.0:
+                    raise ValueError(f"linecode_p value {linecode_p} is not in allowed range: [1001.0, [1006.0]")
             except ValueError as e:
                 if isinstance(linecode_p, (int, float)):
                     raise e
@@ -39088,6 +42223,9 @@ If 4 selected, interaction is as follows:
         if vertexag_p != "optional":
             command += " @vertexag=" + str(vertexag_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -39099,6 +42237,7 @@ If 4 selected, interaction is as follows:
                 lines_p="optional",
                 noff_p=0,
                 sysfile_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -39202,6 +42341,9 @@ Output selected fields from a file as a plotted table with headings, and user de
         if sysfile_p != "optional":
             command += " @sysfile=" + str(sysfile_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -39216,6 +42358,7 @@ Output selected fields from a file as a plotted table with headings, and user de
                 yscale_p="optional",
                 unit_p=0,
                 append_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -39343,6 +42486,9 @@ Additional data overlay plotting functions are available in the **PLTLAY** proce
         if append_p != "optional":
             command += " @append=" + str(append_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -39355,6 +42501,7 @@ Additional data overlay plotting functions are available in the **PLTLAY** proce
                 y_f="optional",
                 order_p="required",
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -39473,6 +42620,9 @@ The input file must contain two explicit numeric fields *X and *Y. The polynomia
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -39483,6 +42633,15 @@ The input file must contain two explicit numeric fields *X and *Y. The polynomia
                 srcparm_i="optional",
                 wiretr_i="optional",
                 wirept_i="optional",
+                out_o="required",
+                model_o="optional",
+                polytr_o="optional",
+                polypt_o="optional",
+                x_f="optional",
+                y_f="optional",
+                z_f="optional",
+                wtfield_f="optional",
+                zone_f="optional",
                 compleng_p=0,
                 xinc_p="optional",
                 yinc_p="optional",
@@ -39490,6 +42649,7 @@ The input file must contain two explicit numeric fields *X and *Y. The polynomia
                 srefnum_p="optional",
                 radius_p=100,
                 maxgrdpt_p=10,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -39614,8 +42774,55 @@ The optional output wireframe model (POLYTR, POLYPT) is created using the [BLKTR
         Output Files:
         -------------
 
+        out: Undefined
+            Output file containing declustered weights. This will be a copy of the IN file, but
+            will also include the field **DCWEIGHT**.
+            Required=Yes
+
+        model: Undefined
+            Output model file containing sample identifier for each grid point.
+            Required=No
+
+        polytr: Wireframe Triangle
+            Output wireframe triangle file describing polyhedra. Warning: Using this option can
+            increase processing time. Do not use if more than a few hundred samples in the IN file.
+            Required=No
+
+        polypt: Wireframe Points
+            Output wireframe points file describing polyhedra. Warning: Using this option can
+            increase processing time. Do not use if more than a few hundred samples in the IN file.
+            Required=No
+
         Fields:
         -------
+
+        x: Numeric : IN
+            X coordinate of sample data.
+            Default=X
+            Required=Yes
+
+        y: Numeric : IN
+            Y coordinate of sample data.
+            Default=Y
+            Required=Yes
+
+        z: Numeric : IN
+            Z coordinate of sample data.
+            Default=Z
+            Required=Yes
+
+        wtfield: Numeric : IN
+            Field to be used for calculating declustered weights. This ensures that records
+            containing absent data values for that field will be ignored. If a WTFIELD field is not
+            specified then the Z field is used.
+            Default=Undefined
+            Required=No
+
+        zone: Undefined : WIRETR
+            Field in wireframe triangle file identifying different zones. If selected then a set of
+            weights will be calculated for each zone.
+            Default=Undefined
+            Required=No
 
         Parameters:
         -----------
@@ -39692,6 +42899,36 @@ The optional output wireframe model (POLYTR, POLYPT) is created using the [BLKTR
         if wirept_i != "optional":
             command += " &wirept=" + wirept_i
 
+        if out_o == "required":
+            raise ValueError("out_o is required.")
+
+        if out_o != "optional":
+            command += " &out=" + out_o
+
+        if model_o != "optional":
+            command += " &model=" + model_o
+
+        if polytr_o != "optional":
+            command += " &polytr=" + polytr_o
+
+        if polypt_o != "optional":
+            command += " &polypt=" + polypt_o
+
+        if x_f != "optional":
+            command += " *x=" + x_f
+
+        if y_f != "optional":
+            command += " *y=" + y_f
+
+        if z_f != "optional":
+            command += " *z=" + z_f
+
+        if wtfield_f != "optional":
+            command += " *wtfield=" + wtfield_f
+
+        if zone_f != "optional":
+            command += " *zone=" + zone_f
+
         if compleng_p != "optional":
             command += " @compleng=" + str(compleng_p)
 
@@ -39713,14 +42950,17 @@ The optional output wireframe model (POLYTR, POLYPT) is created using the [BLKTR
         if maxgrdpt_p != "optional":
             try:
                 val = float(maxgrdpt_p)
-                if not (1.0 <= val <= 100.0):
-                    raise ValueError(f"maxgrdpt_p value {maxgrdpt_p} is not in allowed range: [1.0, 100.0]")
+                if not (1.0 <= val <= 100.0) and val != 10.0:
+                    raise ValueError(f"maxgrdpt_p value {maxgrdpt_p} is not in allowed range: [1.0, [100.0]")
             except ValueError as e:
                 if isinstance(maxgrdpt_p, (int, float)):
                     raise e
 
         if maxgrdpt_p != "optional":
             command += " @maxgrdpt=" + str(maxgrdpt_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -39743,6 +42983,7 @@ The optional output wireframe model (POLYTR, POLYPT) is created using the [BLKTR
                 diagonal_p=1,
                 progress_p=1,
                 display_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -39771,41 +43012,6 @@ If there are 100 or more samples in each of the IN1 and IN2 files then the 1%, 2
 If a **KEY** field is specified then the field must exist in the **IN1** file. The same **KEY** field may also exist in the **IN2** file. A PP or QQ line or set of symbols will be created for each unique value of the **KEY** field.
 
 If the **KEY** field only exists in the **IN1** file then all the samples from the **IN2** file will be matched with the samples from the **IN1** file for every **KEY** field value. This is particularly useful if you are comparing multiple realisations from a conditional simulation run with the original sample data as shown in example 3 below.
-
-#### Output Files
-
-The **PPOUT** and **QQOUT** files contain the data from which the plot files are constructed. You then have three options for creating the plots:
-
-  * draft quality plots can be created by specifying the **PPPLOT** and **QQPLOT** output plot files, which are created by **PPQQPLOT** using the graphics processes. The plot size, scaling, annotation etc are all fixed.
-
-  * the **PPOUT** and **QQOUT** files can be used as input to the **CHART** process. Although this is still only draft quality, you can specify plot size, scaling, colour, text size, axis annotation, title, legend, etc.
-
-  * you can export the **PPOUT** and **QQOUT** files to Excel or any charting package.
-
-The PPOUT file includes the following fields:
-
-Field |  Description  
----|---  
-LOWER |  Lower bound of grade range, calculated using parameter **BINSIZE**.  
-UPPER |  Upper bound of grade range  
-N1 |  If the **WEIGHT1** field has not been selected then **N1** is the number of samples in the bin (between **LOWER** and **UPPER**) for file **IN1**. Otherwise it is the sum of the weights for the samples in the bin.  
-PROB1 |  The probability (percentage) of samples in file IN1 lying within the bin.  
-CUMPROB1 |  The cumulative probability (percentage) of samples in file IN1 less than **UPPER**.  
-MEAN1 |  The mean grade of samples in file **IN1** lying within the bin.  
-N2 |  If the **WEIGHT2** field has not been selected then **N2** is the number of samples in the bin (between **LOWER** and **UPPER**) for file **IN2**. Otherwise it is the sum of the weights for the samples in the bin.  
-PROB2 |  The probability (percentage) of samples in file **IN2** lying within the bin.  
-CUMPROB2 |  The cumulative probability (percentage) of samples in file IN2 less than **UPPER**.  
-MEAN2 |  The mean grade of samples in file **IN2** lying within the bin.  
-  
-The QQOUT file includes the following fields:
-
-Field |  Description  
----|---  
-QUANTILE |  The quantile (expressed as a percentile)  
-VALUE1 |  The corresponding quantile grade in file IN1.  
-VALUE2 |  The corresponding quantile grade in file IN2.  
-  
-If PPPLOT and QQPLOT files are specified then plot files will be created even if the PPOUT and QQOUT files are not specified.
 
         Input Files:
         ------------
@@ -40014,6 +43220,9 @@ If PPPLOT and QQPLOT files are specified then plot files will be created even if
         if display_p != "optional":
             command += " @display=" + str(display_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -40034,6 +43243,7 @@ If PPPLOT and QQPLOT files are specified then plot files will be created even if
                 tol_p=0.001,
                 accuracy_p=0.001,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -40417,6 +43627,9 @@ SETC GEOCAT |  60
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -40436,6 +43649,7 @@ SETC GEOCAT |  60
                 extend_p=0,
                 cross_p=0,
                 zeroxyz_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -40641,8 +43855,8 @@ This process may be run without an output file for checking perimeters and repor
         if reduce_p != "optional":
             try:
                 val = float(reduce_p)
-                if not (0.0 <= val <= 90.0):
-                    raise ValueError(f"reduce_p value {reduce_p} is not in allowed range: [0.0, 90.0]")
+                if not (0.0 <= val <= 90.0) and val != 0.0:
+                    raise ValueError(f"reduce_p value {reduce_p} is not in allowed range: [0.0, [90.0]")
             except ValueError as e:
                 if isinstance(reduce_p, (int, float)):
                     raise e
@@ -40680,6 +43894,9 @@ This process may be run without an output file for checking perimeters and repor
         if zeroxyz_p != "optional":
             command += " @zeroxyz=" + str(zeroxyz_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -40703,6 +43920,7 @@ This process may be run without an output file for checking perimeters and repor
                 wfmethod_p="optional",
                 sampnode_p="optional",
                 ptweight_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -40929,6 +44147,9 @@ Another example: if @WFMETHOD is not 1, @BOUNDTYP is not used.
         if ptweight_p != "optional":
             command += " @**ptweight**=" + str(ptweight_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -40945,6 +44166,7 @@ Another example: if @WFMETHOD is not 1, @BOUNDTYP is not used.
                 standard_p=0,
                 znorm_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -41105,6 +44327,9 @@ In order to present a two dimensional view of multi-dimensional space with minim
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -41124,6 +44349,7 @@ In order to present a two dimensional view of multi-dimensional space with minim
                 topcut_p=0,
                 topgrade_p="optional",
                 ndp_p=2,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -41346,6 +44572,9 @@ If a **KEY** field has been specified, then the quantile analysis is done separa
         if ndp_p != "optional":
             command += " @ndp=" + str(ndp_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -41379,6 +44608,7 @@ If a **KEY** field has been specified, then the quantile analysis is done separa
                 ysubcell_p=1,
                 zsubcell_p=1,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -41712,8 +44942,8 @@ The **QUICKEST** process interpolates grades into a block model using basic calc
         if minnum_p != "optional":
             try:
                 val = float(minnum_p)
-                if not (1.0 <= val <= 1400.0):
-                    raise ValueError(f"minnum_p value {minnum_p} is not in allowed range: [1.0, 1400.0]")
+                if not (1.0 <= val <= 1400.0) and val != 3.0:
+                    raise ValueError(f"minnum_p value {minnum_p} is not in allowed range: [1.0, [1400.0]")
             except ValueError as e:
                 if isinstance(minnum_p, (int, float)):
                     raise e
@@ -41724,8 +44954,8 @@ The **QUICKEST** process interpolates grades into a block model using basic calc
         if maxnum_p != "optional":
             try:
                 val = float(maxnum_p)
-                if not (1.0 <= val <= 1400.0):
-                    raise ValueError(f"maxnum_p value {maxnum_p} is not in allowed range: [1.0, 1400.0]")
+                if not (1.0 <= val <= 1400.0) and val != 20.0:
+                    raise ValueError(f"maxnum_p value {maxnum_p} is not in allowed range: [1.0, [1400.0]")
             except ValueError as e:
                 if isinstance(maxnum_p, (int, float)):
                     raise e
@@ -41748,8 +44978,8 @@ The **QUICKEST** process interpolates grades into a block model using basic calc
         if minperoc_p != "optional":
             try:
                 val = float(minperoc_p)
-                if not (0.0 <= val <= 1400.0):
-                    raise ValueError(f"minperoc_p value {minperoc_p} is not in allowed range: [0.0, 1400.0]")
+                if not (0.0 <= val <= 1400.0) and val != 1.0:
+                    raise ValueError(f"minperoc_p value {minperoc_p} is not in allowed range: [0.0, [1400.0]")
             except ValueError as e:
                 if isinstance(minperoc_p, (int, float)):
                     raise e
@@ -41760,8 +44990,8 @@ The **QUICKEST** process interpolates grades into a block model using basic calc
         if maxperoc_p != "optional":
             try:
                 val = float(maxperoc_p)
-                if not (0.0 <= val <= 1400.0):
-                    raise ValueError(f"maxperoc_p value {maxperoc_p} is not in allowed range: [0.0, 1400.0]")
+                if not (0.0 <= val <= 1400.0) and val != 0.0:
+                    raise ValueError(f"maxperoc_p value {maxperoc_p} is not in allowed range: [0.0, [1400.0]")
             except ValueError as e:
                 if isinstance(maxperoc_p, (int, float)):
                     raise e
@@ -41868,6 +45098,9 @@ The **QUICKEST** process interpolates grades into a block model using basic calc
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -41880,6 +45113,7 @@ The **QUICKEST** process interpolates grades into a block model using basic calc
                 rank_f="optional",
                 cumprop_f="optional",
                 phi_f="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -41964,6 +45198,9 @@ Output fields created are as follows:
         if phi_f != "optional":
             command += " *phi=" + phi_f
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -41990,6 +45227,7 @@ Output fields created are as follows:
                 absgrade_p=0,
                 unmodgrd_p=0,
                 unmodden_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -42377,6 +45615,9 @@ The **UNMODDEN** parameter defines the density of unmodelled volumes. It is only
         if unmodden_p != "optional":
             command += " @unmodden=" + str(unmodden_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -42387,6 +45628,7 @@ The **UNMODDEN** parameter defines the density of unmodelled volumes. It is only
                 out_o="required",
                 recmin_p=1,
                 recmax_p='+',
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -42453,6 +45695,9 @@ The records passing the retrieval criteria (if any) are numbered and those satis
         if recmax_p != "optional":
             command += " @recmax=" + str(recmax_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -42471,53 +45716,13 @@ The records passing the retrieval criteria (if any) are numbered and those satis
                 factor_p=1,
                 setabsnt_p=0,
                 bench_p='Do not categorize by benches',
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
         RECMODEL
         --------
         RECMODEL is used to compare the tonnes and grades of pairs of groups of cells in a block model with the same value of two ID fields. An example of how it might be used is to compare the optimised pushbacks defined in a block model against designed pushbacks defined by another set of field values.
-
-### Input Files
-
-#### MODEL File
-
-Input model file for reconciliation. It must contain a field identifying the cells to be reconciled with the wireframe volumes.
-
-For example, if the model has been created by NPV Scheduler this field may be the optimally planned pushback identifier PSB_PIT or PIT_NO. The wireframe files could represent the planned pushbacks. The results would provide an indication of how close the designed pushbacks are to the optimised pushbacks.
-
-### Output Files
-
-#### Results
-
-Output results file containing tonnes and grades for categories of each unique value of **IDFIELD2**. The categories, with value of **RECCODE** from 1 to 5, are as follows:
-    
-    
-    CODE=1, SOURCE=IDFIELD1:
-
-The total amount of material in the model with a specified value of **IDFIELD1**.
-    
-    
-    CODE=2, SOURCE=IDFIELD2:
-
-The total amount of material in the model with a specified value of **IDFIELD2**.
-    
-    
-    CODE=3, SOURCE=IDFIELD1 and IDFIELD2:
-
-The total amount of material in the model with the same specified value of **IDFIELD1** AND **IDFIELD2**.
-    
-    
-    CODE=4, SOURCE=IDFIELD1 Only:
-
-The total amount of material in the model with a specified value of **IDFIELD1** and NOT with the specified value of **IDFIELD2**.
-    
-    
-    CODE=5, SOURCE=IDFIELD2 Only:
-
-The total amount of material in the model with a specified value of **IDFIELD2** and NOT with the specified value of **IDFIELD1**.
-
-[![](../Images/RECMODEL_1.png)](<javascript:void\(0\);>)
 
         Input Files:
         ------------
@@ -42669,6 +45874,9 @@ The total amount of material in the model with a specified value of **IDFIELD2**
         if bench_p != "optional":
             command += " @bench=" + str(bench_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -42690,6 +45898,7 @@ The total amount of material in the model with a specified value of **IDFIELD2**
                 factor_p=1,
                 setabsnt_p=0,
                 bench_p='Do not categorize by benches',
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -42937,6 +46146,9 @@ The total amount of material in the model with a specified value of **IDFIELD2**
         if bench_p != "optional":
             command += " @bench=" + str(bench_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -42949,6 +46161,7 @@ The total amount of material in the model with a specified value of **IDFIELD2**
                 f1_f25_f="optional",
                 fieldnam_f="optional",
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -43068,6 +46281,9 @@ If **REGMOD** is used for other purposes then the implication of this treatment 
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -43082,6 +46298,7 @@ If **REGMOD** is used for other purposes then the implication of this treatment 
                 cutoff1_p="optional",
                 restrict_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -43217,6 +46434,9 @@ Note: This can be performed on any type of Datamine block model.
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -43225,6 +46445,7 @@ Note: This can be performed on any type of Datamine block model.
     def rename(self,
                 in_i="required",
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -43274,6 +46495,9 @@ With work-file structure databases, when a file is renamed, a check is made to s
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -43290,6 +46514,7 @@ With work-file structure databases, when a file is renamed, a check is made to s
                 compress_p="optional",
                 mindsply_p=0,
                 sysfile_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -43459,6 +46684,9 @@ This process allows printing of headers according to the key field values. The u
         if sysfile_p != "optional":
             command += " @sysfile=" + str(sysfile_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -43469,6 +46697,7 @@ This process allows printing of headers according to the key field values. The u
                 lines_p="optional",
                 noff_p=0,
                 sysfile_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -43562,6 +46791,9 @@ Data is output using ordinary FORTRAN format conversions, so any illegal values 
         if sysfile_p != "optional":
             command += " @sysfile=" + str(sysfile_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -43582,6 +46814,7 @@ Data is output using ordinary FORTRAN format conversions, so any illegal values 
                 ysubcell_p=1,
                 zsubcell_p=1,
                 print_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -43792,6 +47025,9 @@ Note: AXIS 1 is in the Y direction, if unrotated. Distances along e.g. AXIS 2 wi
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -43801,6 +47037,7 @@ Note: AXIS 1 is in the Y direction, if unrotated. Distances along e.g. AXIS 2 wi
                 inmods_i=['optional'],
                 out_o="required",
                 keys_f=['optional'],
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -43860,6 +47097,9 @@ A typical use of the **RESTRI** process is to select drillholes from a file by s
         if keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 10, "*")
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -43874,6 +47114,7 @@ A typical use of the **RESTRI** process is to select drillholes from a file by s
                 magic_p=0.35,
                 maxit_p=100,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -43994,6 +47235,9 @@ In order to present a two dimensional view of multi-dimensional space with minim
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -44005,6 +47249,7 @@ In order to present a two dimensional view of multi-dimensional space with minim
                 rotaxiss_f=['optional'],
                 angles_f=['optional'],
                 outaxiss_f=['optional'],
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -44094,6 +47339,9 @@ In order to present a two dimensional view of multi-dimensional space with minim
         if outaxiss_f[0] != "optional":
             command += self.parse_infields_list("outaxis", outaxiss_f, 3, "@")
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -44108,6 +47356,7 @@ In order to present a two dimensional view of multi-dimensional space with minim
                 fieldnam_f="optional",
                 keepall_p=0,
                 keytol_p=1e-05,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -44214,6 +47463,9 @@ In order to present a two dimensional view of multi-dimensional space with minim
         if keytol_p != "optional":
             command += " @keytol=" + str(keytol_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -44228,6 +47480,7 @@ In order to present a two dimensional view of multi-dimensional space with minim
                 fieldnam_f="optional",
                 keepall_p=0,
                 keytol_p=1e-05,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -44344,6 +47597,9 @@ The process works by checking the selected field values against the values just 
         if keytol_p != "optional":
             command += " @keytol=" + str(keytol_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -44359,6 +47615,7 @@ The process works by checking the selected field values against the values just 
                 outside_p=0,
                 perim_p="optional",
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -44520,6 +47777,9 @@ The input and output files may be the same for in-place flagging of values. Retr
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -44543,6 +47803,7 @@ The input and output files may be the same for in-place flagging of values. Retr
                 checkrot_p="optional",
                 ijksort_p="optional",
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -44796,6 +48057,9 @@ Note: [SELEXY](<selexy.md>) is a similar process to **SELPER** but **SELPER** ha
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -44814,6 +48078,7 @@ Note: [SELEXY](<selexy.md>) is a similar process to **SELPER** but **SELPER** ha
                 zone_p="optional",
                 select_p="required",
                 toleranc_p=0.001,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -44983,6 +48248,9 @@ An outside point is outside all wireframe models. Attribute fields will not be c
         if toleranc_p != "optional":
             command += " @toleranc=" + str(toleranc_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -45006,6 +48274,7 @@ An outside point is outside all wireframe models. Attribute fields will not be c
                 allpts_p=0,
                 setabsnt_p=0,
                 fixnorm_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -45293,6 +48562,9 @@ A wireframe surface or DTM is one which contains no vertical or overhanging port
         if fixnorm_p != "optional":
             command += " @**fixnorm**=" + str(fixnorm_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -45302,6 +48574,7 @@ A wireframe surface or DTM is one which contains no vertical or overhanging port
                 in_i="required",
                 out_o="required",
                 multifld_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -45380,6 +48653,9 @@ The value to be set into the given field name. If the value is alphanumeric, thi
         if multifld_p != "optional":
             command += " @multifld=" + str(multifld_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -45440,6 +48716,7 @@ The value to be set into the given field name. If the value is alphanumeric, thi
                 varred_p=1,
                 rectgrid_p=0,
                 dbglevel_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -46283,8 +49560,8 @@ All files matching the template _sgs_*.txt and _sp*.dm will be deleted as the pr
         if maxdatpt_p != "optional":
             try:
                 val = float(maxdatpt_p)
-                if not (1.0 <= val <= 48.0):
-                    raise ValueError(f"maxdatpt_p value {maxdatpt_p} is not in allowed range: [1.0, 48.0]")
+                if not (1.0 <= val <= 48.0) and val != 12.0:
+                    raise ValueError(f"maxdatpt_p value {maxdatpt_p} is not in allowed range: [1.0, [48.0]")
             except ValueError as e:
                 if isinstance(maxdatpt_p, (int, float)):
                     raise e
@@ -46295,8 +49572,8 @@ All files matching the template _sgs_*.txt and _sp*.dm will be deleted as the pr
         if maxsimpt_p != "optional":
             try:
                 val = float(maxsimpt_p)
-                if not (1.0 <= val <= 48.0):
-                    raise ValueError(f"maxsimpt_p value {maxsimpt_p} is not in allowed range: [1.0, 48.0]")
+                if not (1.0 <= val <= 48.0) and val != 12.0:
+                    raise ValueError(f"maxsimpt_p value {maxsimpt_p} is not in allowed range: [1.0, [48.0]")
             except ValueError as e:
                 if isinstance(maxsimpt_p, (int, float)):
                     raise e
@@ -46367,6 +49644,9 @@ All files matching the template _sgs_*.txt and _sp*.dm will be deleted as the pr
         if dbglevel_p != "optional":
             command += " @dbglevel=" + str(dbglevel_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -46376,6 +49656,7 @@ All files matching the template _sgs_*.txt and _sp*.dm will be deleted as the pr
                 proto_i="required",
                 in_i="required",
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -46440,6 +49721,9 @@ See [geological model file limitations](<../COMMON/Block_Models_Size_Limits.md>)
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -46454,6 +49738,7 @@ See [geological model file limitations](<../COMMON/Block_Models_Size_Limits.md>)
                 stize_p="required",
                 numst_p="required",
                 close_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -46604,6 +49889,9 @@ Note: There is a limit of 1200 points in any single input or output perimeter, a
         if close_p != "optional":
             command += " @close=" + str(close_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -46640,6 +49928,7 @@ Note: There is a limit of 1200 points in any single input or output perimeter, a
                 kpoints_p=6,
                 datamean_p="optional",
                 infoeff_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -47082,6 +50371,9 @@ This record provides a summary of the total model without any cut-off. This data
         if infoeff_p != "optional":
             command += " @infoeff=" + str(infoeff_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -47114,6 +50406,7 @@ This record provides a summary of the total model without any cut-off. This data
                 kpoints_p="optional",
                 datamean_p="optional",
                 infoeff_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -47486,6 +50779,9 @@ If this is not the case then the step value will be reset as one twentieth of th
         if infoeff_p != "optional":
             command += " @infoeff=" + str(infoeff_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -47494,6 +50790,7 @@ If this is not the case then the step value will be reset as one twentieth of th
     def splat(self,
                 inmods_i=['optional'],
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -47545,6 +50842,9 @@ A typical use for SPLAT is to add fields onto the end of existing records in a f
         if inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -47585,6 +50885,7 @@ A typical use for SPLAT is to add fields onto the end of existing records in a f
                 xscale_p="optional",
                 yscale_p="optional",
                 append_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -47967,6 +51268,9 @@ The contouring algorithm in SPLICO, as in most commonly available techniques, ca
         if append_p != "optional":
             command += " @append=" + str(append_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -47978,6 +51282,7 @@ The contouring algorithm in SPLICO, as in most commonly available techniques, ca
                 key_f="optional",
                 ndp_p=0,
                 maxfiles_p=50,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -48080,6 +51385,9 @@ If the &**FNAMES** file is not defined then the output filenames will be created
         if maxfiles_p != "optional":
             command += " @maxfiles=" + str(maxfiles_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -48093,6 +51401,7 @@ If the &**FNAMES** file is not defined then the output filenames will be created
                 sturgess_p=0,
                 logmode_p=0,
                 perc_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -48230,6 +51539,9 @@ Values of skewness and kurtosis calculated are interpreted as:
         if perc_p != "optional":
             command += " @perc=" + str(perc_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -48244,6 +51556,7 @@ Values of skewness and kurtosis calculated are interpreted as:
                 domain_f="optional",
                 dcweight_f="optional",
                 density_f="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -48396,6 +51709,9 @@ The output workbook also includes a "Box & Whisker" worksheet. This includes, fo
         if density_f != "optional":
             command += " *density=" + density_f
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -48407,6 +51723,7 @@ The output workbook also includes a "Box & Whisker" worksheet. This includes, fo
                 fields_f=['optional'],
                 fieldnam_f="optional",
                 plot_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -48495,6 +51812,9 @@ These results are displayed on the terminal, and can be copied to the print devi
         if plot_p != "optional":
             command += " @plot=" + str(plot_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -48513,6 +51833,7 @@ These results are displayed on the terminal, and can be copied to the print devi
                 pcntiles_p=0,
                 sortout_p=1,
                 print_p=2,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -48738,6 +52059,9 @@ The following fields are also output:
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -48748,6 +52072,7 @@ The following fields are also output:
                 out_o="required",
                 keys_f=['optional'],
                 keytol_p=1e-05,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -48824,6 +52149,9 @@ Both input files must be sorted in the order of the keyfields before they can be
         if keytol_p != "optional":
             command += " @keytol=" + str(keytol_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -48834,6 +52162,7 @@ Both input files must be sorted in the order of the keyfields before they can be
                 out_o="required",
                 keys_f=['optional'],
                 keytol_p=1e-05,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -48910,6 +52239,9 @@ Both input files must be sorted in the order of the keyfields before they can be
         if keytol_p != "optional":
             command += " @keytol=" + str(keytol_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -48923,6 +52255,7 @@ Both input files must be sorted in the order of the keyfields before they can be
                 zp_f="optional",
                 strbrk_f="optional",
                 ds_f=['optional'],
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -49016,6 +52349,9 @@ You are prompted for the following:
         if ds_f[0] != "optional":
             command += self.parse_infields_list("d", ds_f, 2, "*")
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -49028,6 +52364,7 @@ You are prompted for the following:
                 zp_f="optional",
                 descs_f=['optional'],
                 strno_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -49115,6 +52452,9 @@ The following prompts appear on running the process:
         if strno_p != "optional":
             command += " @strno=" + str(strno_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -49127,6 +52467,7 @@ The following prompts appear on running the process:
                 yp_f="optional",
                 zp_f="optional",
                 descs_f=['optional'],
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -49201,6 +52542,9 @@ A point number field can be supplied, or by default the point number will be inc
         if descs_f[0] != "optional":
             command += self.parse_infields_list("desc", descs_f, 3, "*")
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -49220,6 +52564,7 @@ A point number field can be supplied, or by default the point number will be inc
                 discy_p=5,
                 discz_p=5,
                 normsill_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -49393,6 +52738,9 @@ Support correction is implemented interactively via the [Uniform Conditioning Wi
         if normsill_p != "optional":
             command += " @normsill=" + str(normsill_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -49408,6 +52756,7 @@ Support correction is implemented interactively via the [Uniform Conditioning Wi
                 adjust_p=0,
                 ndec_p=2,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -49693,6 +53042,9 @@ The standard error of unknown values ( 2) for the coordinate calculation of each
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -49718,6 +53070,7 @@ The standard error of unknown values ( 2) for the coordinate calculation of each
                 maxstep_p="optional",
                 splits_p=3,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -50020,6 +53373,9 @@ If a perimeter file was used, the output surface model will contain an extra fie
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -50031,6 +53387,7 @@ If a perimeter file was used, the output surface model will contain an extra fie
                 control_i="required",
                 tol_i="optional",
                 out_o="required",
+                error_o="optional",
                 angle_p=1,
                 vadmean_p=1,
                 errtype_p=1,
@@ -50038,6 +53395,7 @@ If a perimeter file was used, the output surface model will contain an extra fie
                 factor_p=1,
                 refract_p='-',
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -50072,92 +53430,6 @@ Also consider the following:
   3. Checks are made for inconsistent angle measurements (for example, vertical angles readings of more than 90 , **WCB** and horizontal angle readings of more than 360 or less than 0 ). For these cases the records are ignored. In case of absent data for the horizontal angle to the reference station (field * **HZRO**), then a value of 0 is assumed.
 
   4. An important note refers to the precision of the coordinates handled in **SUROBS**. Although all variables are stored and handled by Double-Precision type variables and arrays, input and output measurements and coordinates are held in single precision type variables. In order to avoid output problems with values over 7 digits long, the use of parameters @**LOXORIG** , @**LOYORIG** and @**LOZORIG** is strongly recommended.
-
-### Fields
-
-All fields of the input files are compulsory. Therefore if any of these files are output from another process such as **[SURLOG](<surlog.md>)** or [SURTAC](<surtac.md>) the remaining compulsory fields should be added using for example process **ADDDDD**. The summary of compulsory fields required in the input files is:
-
-&HEADER |  &OBSERV |  &CONTROL |  &TOL |  &OUT |  &ERROR  
----|---|---|---|---|---  
-*JOBNUM *SURVEYOR *LEVEL *SECTION *INSTTYPE |  *JOBNUM *INSTSTN *INSTHT *RO *TARGET *HZTARG *VATARG *SDTARG *TARGHT *HZRO *VARO *SDRO *ROHT |  *STATION *X *Y *Z *RO *WCB *QB *HDIST *VDIFF *PLANE *FACTOR *REFRACT *HDERR *WCBERR *VAERR *ERRFLAG *LOXORIG *LOYORIG *LOZORIG |  *INSTTYPE *STNTYPE *HDTOL *HZTOL *VATOL *VDTOL |  *INSTSTN *INSTHT *RO *TARGET *HZA *WCB *QB *WCBERR *VA *HDIST *HDERR *RDIST *VDIFF *VDERR *PLANE *FACTOR *REFRACT *ERRFLAG |  *INSTSTN *INSTHT *RO *TARGET *HZA *WCB *QB *WCBERR *VA *HDIST *HDERR *RDIST *VDIFF *VDERR *PLANE *FACTOR *REFRACT *ERRFLAG  
-  
-Stations are identified by field * **STATION** in input file &**CONTROL** and fields * **INSTSTN** , * **TARGET** and * **RO** in input file &**OBSERV**. These must be alphanumeric and eight characters in length. A particular survey instrument or method used may be specified in a four-character alphanumeric field * **INSTTYPE** of files &**HEADER** and &**TOL**. Alphanumeric fields * **SURVEYOR** , * **LEVEL** and * **SECTION** of file &**HEADER** refer to descriptive information of the surveyor and region of the survey and must be eight characters in length. 
-
-Field * **STNTYPE** in file &**TOL** refers to the station type (**RO** or **TARGET**) for tolerances specification and must be four characters in length. Field **QB** refers to the quadrant bearing and must be twelve characters in length. All the remaining fields are numeric.
-
-### Mathematical Algorithms
-
-Means are computed by the standard algebraic method:
-
-![](../Images/SUROBS_1.png)
-
-Where:
-
-  * X = Compute mean value
-
-  * N = Number of observations
-
-  * XN = Value of the Nth observation
-
-Ranges are computed from the observations available (excluding those containing absent data) as: 
-
-R = XMX \- XMN
-
-Where: 
-
-  * XMX = Maximum measurement value
-
-  * XMN = Minimum measurement value
-
-  * R = Computed range
-
-Standard errors of the mean are computed as:
-
-![](../Images/SUROBS_2.png)
-
-Where: 
-
-  * X = Mean value of the observations
-
-  * N = Number of observations
-
-  * XN = Value of the Nth observation
-
-  * SE = Standard error of the mean
-
-When parameter @PLANE is not absent data, computed horizontal distances have to be adjusted as:
-
-RDIST = HDRO - {HDRO * [(INSTHT + 0.5 * VDIFF) - PLANE]} / WRAD
-
-Where: 
-
-  * RDIST = Adjusted plane distance 
-
-  * HDRO = Computed horizontal distance
-
-  * INSTHT = Elevation of the instrument station  
-
-  * VDIFF = Computed difference in height between station and target
-
-  * PLANE = Elevation to which the distance is to be adjusted (@PLANE)  
-
-  * WRAD = Radius of the world (6,384,100 metres)
-
-When parameter @REFRACT is not absent value, vertical angles are adjusted as: 
-
-![](../Images/SUROBS_3.png)
-
-Where: 
-
-  * VAadj = Adjusted vertical angle
-
-  * VA = Measured vertical angle
-
-  * HDIST = Computed horizontal distance  
-
-  * WRAD = Radius of the world (6,384,100 metres)  
-
-  * K = Supplied coefficient of refraction (@REFRACT[SURTRI Process](<surtri.md>)
 
         Input Files:
         ------------
@@ -50249,6 +53521,13 @@ Where:
             refraction used to adjust vertical angles where single measurements are made.
             **ERRFLAG** (N) Error flag field. Four digits may be set as follows:- ABCD e.g.
             Required=Yes
+
+        error: Undefined
+            Optional output file of measurements that do not meet the tolerances specified in the
+            input tolerance file ( **TOL**). If this file is not defined, all measurements will be
+            sent to the output file . This file will contain the same fields as the output file of
+            reduced survey measurements ( **OUT**).
+            Required=No
 
         Fields:
         -------
@@ -50344,6 +53623,9 @@ Where:
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if error_o != "optional":
+            command += " &error=" + error_o
+
         if angle_p != "optional":
             try:
                 val = float(angle_p)
@@ -50392,6 +53674,9 @@ Where:
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -50407,6 +53692,7 @@ Where:
                 radius_p="optional",
                 power_p=2,
                 minnop_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -50521,6 +53807,9 @@ The output will be completely three dimensional strings or perimeter that can be
         if minnop_p != "optional":
             command += " @minnop=" + str(minnop_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -50547,6 +53836,7 @@ The output will be completely three dimensional strings or perimeter that can be
                 factor_p=1,
                 rocheck_p=0,
                 update_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -50861,6 +54151,9 @@ Interactive graphic survey data editor.
         if update_p != "optional":
             command += " @update=" + str(update_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -50886,6 +54179,7 @@ Interactive graphic survey data editor.
                 hbratio_p=0.05,
                 maxpts_p='-',
                 check_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -51236,6 +54530,9 @@ Serious errors are likely caused by duplicate points that have not been filtered
         if check_p != "optional":
             command += " @check=" + str(check_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -51259,6 +54556,7 @@ Serious errors are likely caused by duplicate points that have not been filtered
                 loxorig_p=0,
                 loyorig_p=0,
                 lozorig_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -51477,8 +54775,8 @@ Section profiles that represent the outline of the surveyed surface where it int
         if iprcol_p != "optional":
             try:
                 val = float(iprcol_p)
-                if not (1.0 <= val <= 64.0):
-                    raise ValueError(f"iprcol_p value {iprcol_p} is not in allowed range: [1.0, 64.0]")
+                if not (1.0 <= val <= 64.0) and val != 5.0:
+                    raise ValueError(f"iprcol_p value {iprcol_p} is not in allowed range: [1.0, [64.0]")
             except ValueError as e:
                 if isinstance(iprcol_p, (int, float)):
                     raise e
@@ -51489,8 +54787,8 @@ Section profiles that represent the outline of the surveyed surface where it int
         if isccol_p != "optional":
             try:
                 val = float(isccol_p)
-                if not (1.0 <= val <= 64.0):
-                    raise ValueError(f"isccol_p value {isccol_p} is not in allowed range: [1.0, 64.0]")
+                if not (1.0 <= val <= 64.0) and val != 7.0:
+                    raise ValueError(f"isccol_p value {isccol_p} is not in allowed range: [1.0, [64.0]")
             except ValueError as e:
                 if isinstance(isccol_p, (int, float)):
                     raise e
@@ -51522,6 +54820,9 @@ Section profiles that represent the outline of the surveyed surface where it int
         if lozorig_p != "optional":
             command += " @lozorig=" + str(lozorig_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -51538,6 +54839,7 @@ Section profiles that represent the outline of the surveyed surface where it int
                 p_p=1,
                 psymbol_p=92,
                 psymsze_p=1.5,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -51692,6 +54994,9 @@ If the input perimeter file does not contain the fields **PSYMBOL** , **PSYMSZE*
         if psymsze_p != "optional":
             command += " @psymsze=" + str(psymsze_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -51702,6 +55007,7 @@ If the input perimeter file does not contain the fields **PSYMBOL** , **PSYMSZE*
                 segin_i="required",
                 perimou_o="required",
                 pointou_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -51770,6 +55076,9 @@ If the input perimeter file does not contain the fields **PSYMBOL** , **PSYMSZE*
         if pointou_o != "optional":
             command += " &pointou=" + pointou_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -51799,6 +55108,7 @@ If the input perimeter file does not contain the fields **PSYMBOL** , **PSYMSZE*
                 csvouts_f=['optional'],
                 excel_p=0,
                 rotaxiss_f=['optional'],
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -52107,6 +55417,9 @@ Swaths can either be unrotated or rotated. **SWATHPLT** provides **ANGLE** and *
         if excel_p != "optional":
             command += " @excel=" + str(excel_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -52115,6 +55428,7 @@ Swaths can either be unrotated or rotated. **SWATHPLT** provides **ANGLE** and *
     def tabres(self,
                 results_i="required",
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -52209,6 +55523,9 @@ The standard reports are as follows:
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -52228,6 +55545,7 @@ The standard reports are as follows:
                 findpg_p=0,
                 eod_p="optional",
                 trace_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -52421,6 +55739,9 @@ Note: PROTODD AND FIELDLST can not be used at the same time. Data records contai
         if trace_p != "optional":
             command += " @trace=" + str(trace_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -52432,6 +55753,7 @@ Note: PROTODD AND FIELDLST can not be used at the same time. Data records contai
                 zone_f="optional",
                 vdefault_p=0.0,
                 format_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -52529,6 +55851,9 @@ If a subcell model is supplied, it must be in sorted (IJK) order.
         if format_p != "optional":
             command += " @format=" + str(format_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -52539,6 +55864,7 @@ If a subcell model is supplied, it must be in sorted (IJK) order.
                 fields_f=['optional'],
                 plot_p=0,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -52617,6 +55943,9 @@ If a subcell model is supplied, it must be in sorted (IJK) order.
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -52642,6 +55971,7 @@ If a subcell model is supplied, it must be in sorted (IJK) order.
                 cogstep_p=0,
                 keytol_p=1e-05,
                 excel_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -52919,8 +56249,8 @@ Also note that the process will not complete until an automatically-launched ins
         if column_p != "optional":
             try:
                 val = float(column_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"column_p value {column_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.0:
+                    raise ValueError(f"column_p value {column_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(column_p, (int, float)):
                     raise e
@@ -52931,8 +56261,8 @@ Also note that the process will not complete until an automatically-launched ins
         if row_p != "optional":
             try:
                 val = float(row_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"row_p value {row_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.0:
+                    raise ValueError(f"row_p value {row_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(row_p, (int, float)):
                     raise e
@@ -52943,8 +56273,8 @@ Also note that the process will not complete until an automatically-launched ins
         if bench_p != "optional":
             try:
                 val = float(bench_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"bench_p value {bench_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.0:
+                    raise ValueError(f"bench_p value {bench_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(bench_p, (int, float)):
                     raise e
@@ -52961,14 +56291,17 @@ Also note that the process will not complete until an automatically-launched ins
         if excel_p != "optional":
             try:
                 val = float(excel_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"excel_p value {excel_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.0:
+                    raise ValueError(f"excel_p value {excel_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(excel_p, (int, float)):
                     raise e
 
         if excel_p != "optional":
             command += " @excel=" + str(excel_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -52979,6 +56312,7 @@ Also note that the process will not complete until an automatically-launched ins
                 in_i="required",
                 out_o="optional",
                 normal_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -53045,6 +56379,9 @@ These codes are listed on the **transform-coordinates** command screen and TRANS
         if normal_p != "optional":
             command += " @normal=" + str(normal_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -53059,6 +56396,7 @@ These codes are listed on the **transform-coordinates** command screen and TRANS
                 order_p="required",
                 print_p=0,
                 select_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -53181,6 +56519,9 @@ Note: If any record has any of *X, *Y or *Z values absent, the record is ignored
         if select_p != "optional":
             command += " @select=" + str(select_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -53214,6 +56555,7 @@ Note: If any record has any of *X, *Y or *Z values absent, the record is ignored
                 ymax_p="optional",
                 xscale_p="optional",
                 yscale_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -53552,6 +56894,9 @@ Contours are either simple unsmoothed straight-lines interpolated within the tri
         if yscale_p != "optional":
             command += " @yscale=" + str(yscale_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -53576,6 +56921,7 @@ Contours are either simple unsmoothed straight-lines interpolated within the tri
                 resol_p=0,
                 checkrot_p=0,
                 autosort_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -53801,8 +57147,8 @@ If the input prototype model &**PROTO** is a Rotated Model, as defined using the
         if xsubcell_p != "optional":
             try:
                 val = float(xsubcell_p)
-                if not (1.0 <= val <= 100.0):
-                    raise ValueError(f"xsubcell_p value {xsubcell_p} is not in allowed range: [1.0, 100.0]")
+                if not (1.0 <= val <= 100.0) and val != 1.0:
+                    raise ValueError(f"xsubcell_p value {xsubcell_p} is not in allowed range: [1.0, [100.0]")
             except ValueError as e:
                 if isinstance(xsubcell_p, (int, float)):
                     raise e
@@ -53813,8 +57159,8 @@ If the input prototype model &**PROTO** is a Rotated Model, as defined using the
         if ysubcell_p != "optional":
             try:
                 val = float(ysubcell_p)
-                if not (1.0 <= val <= 100.0):
-                    raise ValueError(f"ysubcell_p value {ysubcell_p} is not in allowed range: [1.0, 100.0]")
+                if not (1.0 <= val <= 100.0) and val != 1.0:
+                    raise ValueError(f"ysubcell_p value {ysubcell_p} is not in allowed range: [1.0, [100.0]")
             except ValueError as e:
                 if isinstance(ysubcell_p, (int, float)):
                     raise e
@@ -53825,8 +57171,8 @@ If the input prototype model &**PROTO** is a Rotated Model, as defined using the
         if zsubcell_p != "optional":
             try:
                 val = float(zsubcell_p)
-                if not (1.0 <= val <= 100.0):
-                    raise ValueError(f"zsubcell_p value {zsubcell_p} is not in allowed range: [1.0, 100.0]")
+                if not (1.0 <= val <= 100.0) and val != 1.0:
+                    raise ValueError(f"zsubcell_p value {zsubcell_p} is not in allowed range: [1.0, [100.0]")
             except ValueError as e:
                 if isinstance(zsubcell_p, (int, float)):
                     raise e
@@ -53843,8 +57189,8 @@ If the input prototype model &**PROTO** is a Rotated Model, as defined using the
         if checkrot_p != "optional":
             try:
                 val = float(checkrot_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"checkrot_p value {checkrot_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.0:
+                    raise ValueError(f"checkrot_p value {checkrot_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(checkrot_p, (int, float)):
                     raise e
@@ -53855,14 +57201,17 @@ If the input prototype model &**PROTO** is a Rotated Model, as defined using the
         if autosort_p != "optional":
             try:
                 val = float(autosort_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"autosort_p value {autosort_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.0:
+                    raise ValueError(f"autosort_p value {autosort_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(autosort_p, (int, float)):
                     raise e
 
         if autosort_p != "optional":
             command += " @autosort=" + str(autosort_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -53878,6 +57227,7 @@ If the input prototype model &**PROTO** is a Rotated Model, as defined using the
                 y_f="optional",
                 z_f="optional",
                 keep_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -53985,6 +57335,9 @@ Note: The input file must be sorted on the X coordinate.
         if keep_p != "optional":
             command += " @keep=" + str(keep_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -54010,6 +57363,7 @@ Note: The input file must be sorted on the X coordinate.
                 enter_evaluation_parameters_p="optional",
                 rocktype_classification_p="optional",
                 grade_intervals_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -54282,8 +57636,8 @@ These two options are controlled by the supplied value of the optional @**INCRME
         if modltype_p != "optional":
             try:
                 val = float(modltype_p)
-                if val not in [1.0, 3.0, 4.0]:
-                    raise ValueError(f"modltype_p value {modltype_p} is not in allowed values: [1, 3, 4]")
+                if val not in [1.0, 3.0, 4.0, 0.0]:
+                    raise ValueError(f"modltype_p value {modltype_p} is not in allowed values: [1, 3, 4, 0]")
             except ValueError as e:
                 if isinstance(modltype_p, (int, float)):
                     raise e
@@ -54348,6 +57702,9 @@ These two options are controlled by the supplied value of the optional @**INCRME
         if grade_intervals_p != "optional":
             command += " @grade intervals=" + str(grade_intervals_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -54362,6 +57719,7 @@ These two options are controlled by the supplied value of the optional @**INCRME
                 zbase_p="required",
                 nosid_p=1,
                 dtm_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -54527,6 +57885,9 @@ The information output includes:
         if dtm_p != "optional":
             command += " @dtm=" + str(dtm_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -54537,6 +57898,7 @@ The information output includes:
                 out_o="required",
                 dip_p="required",
                 dipdirn_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -54607,8 +57969,8 @@ The input file to the process is a standard desurveyed sample file, which must c
         if dip_p != "optional":
             try:
                 val = float(dip_p)
-                if not (0.0 <= val <= 90.0):
-                    raise ValueError(f"dip_p value {dip_p} is not in allowed range: [0.0, 90.0]")
+                if not (0.0 <= val <= 90.0) and val != 0.0:
+                    raise ValueError(f"dip_p value {dip_p} is not in allowed range: [0.0, [90.0]")
             except ValueError as e:
                 if isinstance(dip_p, (int, float)):
                     raise e
@@ -54622,14 +57984,804 @@ The input file to the process is a standard desurveyed sample file, which must c
         if dipdirn_p != "optional":
             try:
                 val = float(dipdirn_p)
-                if not (0.0 <= val <= 360.0):
-                    raise ValueError(f"dipdirn_p value {dipdirn_p} is not in allowed range: [0.0, 360.0]")
+                if not (0.0 <= val <= 360.0) and val != 0.0:
+                    raise ValueError(f"dipdirn_p value {dipdirn_p} is not in allowed range: [0.0, [360.0]")
             except ValueError as e:
                 if isinstance(dipdirn_p, (int, float)):
                     raise e
 
         if dipdirn_p != "optional":
             command += " @dipdirn=" + str(dipdirn_p)
+
+        if arguments != "optional":
+            command += " " + arguments
+
+        if retrieval != "optional":
+            command += "{" + retrieval + "}"
+
+        self.run_command(command)
+
+    def unfold(self,
+                in_i="required",
+                string_i="required",
+                unitdef_i="optional",
+                out_o="required",
+                quads_o="optional",
+                x_f="optional",
+                y_f="optional",
+                z_f="optional",
+                section_f="optional",
+                boundary_f="optional",
+                wstag_f="optional",
+                bstag_f="optional",
+                tag_f="optional",
+                unitname_f="optional",
+                hangwall_f="optional",
+                footwall_f="optional",
+                ucsa_f="optional",
+                ucsb_f="optional",
+                ucsc_f="optional",
+                linkmode_p=3,
+                ucsamode_p=2,
+                ucsbmode_p=3,
+                ucscmode_p=2,
+                plane_p=1,
+                hangid_p="optional",
+                footid_p="optional",
+                unitid_p="optional",
+                tolrnc_p=0,
+                ucsalimt_p=1,
+                orgtag_p='-',
+                arguments="optional",
+                retrieval="optional"):
+
+        r"""
+        UNFOLD
+        ------
+        Transforms a set of X,Y,Z data into an Unfolded Coordinate System [UCS] as defined by a stratified geological unit.
+
+**UNFOLD** is the process for unfolding a stratified unit. The main purpose of unfolding strata is to calculate the stratigraphical distances between points - for example, Figure 1, below, shows 2 drillhole samples either side of an anticline. The standard geometrical distance between them is a straight line, however, from a geological point of view, the distance separating them is a line following the anticline structure (shown as dashed line). It is this distance, called the stratigraphical or natural or unfolded distance, that would then be used in variogram calculation and grade estimation.
+
+This unfolding technique involves transforming the standard coordinates (orthogonal X,Y,Z axes) of every sample to an unfolded coordinate system (UCS). The UCS axes are not straight lines, and are not orthogonal to each other.
+
+[![](../Images/unfold1.gif)](<javascript:void\(0\);>)
+
+Figure 1: Geometrical and Stratigraphical Distances Between Two Points
+
+![](../Images/image001.gif) |  Standard geometrical distance between A and B. Calculated from standard orthogonal X, Y, Z axes.  
+---|---  
+![](../Images/image002.gif) |  Stratigraphical distance between A and B. Calculated from unfolded coordinate system (UCS) axes.  
+  
+Figure 2, further below, shows a simple example of sections through a stratified deposit. A plan showing the strike of the orebody is also shown in this figure. The unfolded coordinate system (UCS) has 3 axes, A, B and C:
+
+  * A - hangingwall-footwall direction (perpendicular to the orebody);
+
+  * B - down-dip (along the centre line between hangingwall and footwall);
+
+  * C - along strike.
+
+The **UNFOLD** process is used to calculate the **UCS** coordinates of desurveyed drillhole data. Variogram analysis can then be undertaken based on the **UCS**. The parameters of the variogram model are therefore calculated in the UCS. A model with cells and subcells within the folded stratified unit is created using standard methods. This model is defined using the world coordinate system.
+
+### Methodology
+
+The following method is illustrated with structural interpretations on vertical sections. However the method can also be applied when the interpretations are in plan. Structural interpretations must be provided as digitized strings on vertical sections. At a minimum, two structural strings on two sections are required to define the UCS coordinates of samples in the stratified unit. The structural strings will often be the hangingwall and footwall as shown in Figure 2, below.
+
+The method involves creating a series of hexahedrons modelling the stratified unit. Such a hexahedron is shown in Figure 3, below, where it is defined by 6 surfaces:
+
+BH1 BF1 CF1 CH1 BH2 BF2 CF2 CH2  |  Surfaces between adjacent hangingwall and footwall points within a section. Because the sections themselves are planar, these surfaces are planar. All points on each of these surfaces have the same `along strike' (UCSC) coordinate.  
+---|---  
+BH1 BH2 CH2 CH1 BF1 BF2 CF2 CF1  |  Surfaces between sections and between adjacent points on the hangingwall or footwall respectively. All points on each of these surfaces have the same `across strike' (UCSA) coordinate.  
+BH1 BH2 BF2 BF1 CH1 CH2 CF2 CF1  |  Surfaces between sections and between points on the hangingwall and footwall.  
+  
+Any point Q lying within the stratified unit will lie within one of these hexahedrons. The UCS coordinates of the point can then be calculated by interpolation within the hexahedron.
+
+[![](../Images/unfold2.gif)](<javascript:void\(0\);>)
+
+Figure 2: Coordinate Axes in the UCS
+
+[![](../Images/unfold3.gif)](<javascript:void\(0\);>)
+
+Figure 3: Hexahedron Defined by 6 Surfaces
+
+### Unfolded Coordinate System (UCS)
+
+The three reference axes are:
+
+  * A - hangingwall-footwall direction (perpendicular to the orebody);
+
+  * B - down-dip (along the centre line between hangingwall and footwall);
+
+  * C - along strike.
+
+UCS values may be scaled in one of four ways to define the relative position of data within and across the sections:
+
+  1. Normalised. A normalised coordinate is a value between 0 and 1 describing the distance as a proportion of the total distance along the axis.
+
+  2. Adjusted. An adjusted coordinate is the normalised coordinate value multiplied by the average length of the appropriate axis (see Section 1.2.6), based on the data from all sections.
+
+  3. True Length. The true length coordinate is the distance from the UCS origin measured in standard units.
+
+  4. World Coordinates. Where appropriate, a UCS value can correspond to one of the standard (orthogonal X,Y,Z) axes.
+
+The true length coordinate approximates the distance from the origin of the UCS coordinate system of the selected axis, but is measured in the standard coordinate system units.
+
+  * For UCSA, this provides a measure of width or true width.
+
+  * For UCSB it is the distance along the dip-direction of the strata.
+
+  * UCSC defaults to the `adjusted' units - this is generally satisfactory as UCSC should correspond to the direction of the fold axis.
+
+### Creation of Links
+
+The method of creating the hexahedrons involves linking footwall and hangingwall strings within a section. The user defines these links when digitizing the strings using a similar method to tagging in wireframing. Figure 4, below, shows an example where points AH to FH have been linked to AF to FF respectively.
+
+Each of these links joins points on the hangingwall and footwall that the user considers have the same `down-dip' (UCSB) coordinate. It is not essential for the first and last points on each string to be linked. Any points on a string before the first linked point or after the last linked point will be ignored.
+
+If you don't define any links between the hangingwall and footwall, the algorithm automatically creates one between the first points, and one between the last points of each string.
+
+In order to calculate the A and B coordinates of any point Q, the process takes every digitized point on the hangingwall, and creates a corresponding point on the footwall with the same down-dip distance, taking into account the links defined by the user. This is illustrated in Figure 5, below, which is an enlargement of Figure 4. In this example points A, B, C, D, E and F have been defined as linked by the user.
+
+For all other digitized points on the hangingwall (H1 , H2 , etc) and footwall (F1 , F2 , etc) strings, the linking is done automatically as follows:
+
+[![](../Images/unfold4.gif)](<javascript:void\(0\);>)
+
+Figure 4: User Defined Links
+
+The distance AH H1 is calculated as a fraction of the distance AH BH measured along the hangingwall. A new point I is then created on the footwall, where I has the same fractional distance measured from AF as H1 does from AH
+    
+    
+    AH H1 /AH H1 H2 BH = AF I1 /AF F1 BF
+
+and similarly:
+    
+    
+    BH H3 H4 /BH H3 H4 H5 CH = BF I4 /BF CF
+
+This process is repeated for each digitized point Hi on the hangingwall \- pairing it with a new point Ii on the footwall as illustrated in Figure 5, below. The reverse process is then undertaken, creating points on the hangingwall which correspond to digitized points Fi on the footwall. This reverse process is not shown in Figure 5. By joining up the pairs of points at the same fractional distances, a series of quadrilaterals are created. Point Q will lie within one of these quadrilaterals (CH CF I6 H6 ) as illustrated in Figure 5.
+
+### Calculation of USCA and B Coordinates
+
+Consider first the two dimensional problem of calculating the normalized A and B coordinates of point Q as illustrated in Figure 5. It is assumed for this calculation that Q lies on the sectional plane which includes the structural interpretations.
+
+`Points AM , M1 , M2 , BM , M3 , ..., FM` are the midpoints of the link lines and provide a reference line for the down-dip axes.
+
+Coordinate A of point Q is calculated by first identifying the quadrilateral within which the point lies i.e. CH CF I6 H6 . A straight line is the drawn through Q intersecting the hangingwall at QH , and the footwall at QF . The line is drawn such that the hangingwall and footwall intersections are at the same proportional distance in CH H6 and CF I6 respectively:
+    
+    
+    CH QH /CH H6 = CF QF /CF I6 = CM QM /CM M6
+
+The normalized value of coordinate A is calculated as:
+    
+    
+    AN = QH Q/QH QF
+
+The normalized value of coordinate B is calculated as:
+    
+    
+    BN = AM BM CM QM /AM BM CM DM EM FM
+
+### Points Between Sections
+
+The method described so far assumed that point Q lies exactly on section. In order to calculate the A and B coordinates for a point lying between sections k and k+1 the above process must be extended to three dimensions. This involves linking points between sections in a similar manner to the linking within sections described previously. In the following description AH , BH etc are again used to denote points linked by the user, and Hi are intermediate points on the strings which are linked automatically. However it should be noted that although a point on the hangingwall may be linked by the user to a point on the footwall within a section, it is not necessary that the same point is linked by the user to a point on the next section.
+
+Point AH on section k is linked to point AH on section k+1, point BH on section k is linked to point BH on section k+1, and similarly for C to H. Links are always from hangingwall to hangingwall. Each digitized point H on section k is linked to a point on section k+1. Linking is also applied from points on section k+1 back to section k.
+
+Any point Q whose coordinates are to be estimated then lies within a wireframe hexahedron. Slicing this shape with a vertical plane through Q parallel to the sections will create a quadrilateral. This is then used to calculate coordinates A and B, as described previously.
+
+You create links only between hangingwall and footwall points, within any sections. Links between footwalls on adjacent sections are always done within the process. The reason for this is that once three links have been defined, the fourth can be automatically determined from the other three. It is therefore unnecessary for the user to define footwall to footwall links, and could lead to inconsistency in the data if it were allowed.
+
+The method described in this section assumes that the sectional interpretations are parallel. If this is not the case, then an intermediate plane through point Q is created using a similar method to that described previously.
+
+Figure 6, below, shows a plan view of the sections. Each section line (eg SH SH ) represents the maximum extent of projection of the hangingwall and footwall onto plan. A line is drawn through Q such that the intersections TH and TF divide the hangingwall and footwall in the same proportions:
+    
+    
+    SH TH /SH UH = SF TF /SF UF
+
+[![](../Images/unfold5.gif)](<javascript:void\(0\);>)
+
+Figure 5: Automatic Links
+
+### Calculation of UCSC Coordinate
+
+In the majority of cases the sections on which the structures have been defined will be parallel. If this is not the case then it is assumed that the sections are perpendicular to the strike, as illustrated in the plan view in Figure 6, below - that is, all points on any given section have the same `along strike' (UCSC) coordinate.
+
+The total distance along strike is estimated by creating a reference point on each section and calculating the length of the line joining these reference points. This reference vector therefore defines the average strike length and direction.
+
+The reference point on each section is the origin (defined by @ORGTAG), or if this is not specified, it is 0.5 of the distance along the median line (axis B). The reference vector is calculated between each pair of sections. The actual length of the vector between sections i and i+1 is denoted by Vi . The length of the C axis is then the sum of all Vi 's. This is denoted as CLEN which is R1 R2 R3 R4 in Figure 6.
+
+Figure 6 is a plan showing point Q lying between sections 3 and 4. The normalized along strike coordinate C of point Q is calculated as:
+    
+    
+    CN = R1 R2 R3 RQ /CLEN
+
+[![](../Images/unfold6.gif)](<javascript:void\(0\);>)
+
+Figure 6: Calculation of Along Strike Coordinate C
+
+### UCS Coordinate Units
+
+When the UCS coordinates of point Q are calculated, an intermediate section plane will have been interpolated and a number of `normalized', `adjusted' and `true length' measures are available to generate the required UCS A, B and C coordinates.
+
+The normalized coordinates (**AN** , **BN** , **CN**) of point Q as calculated previously all lie between 0 and 1. They represent a proportion of the total distance along each axis, and so it is not easy to relate these values to actual distances. The normalized coordinate space is equivalent to unfolding and stretching the stratified unit into a unit cube.
+
+In the generation of the quadrilaterals, a number of average measures are calculated. The average length of axis C is **CLEN** as described previously. The average length of the across strike axis A (**ALEN**), and the down-dip axis B (**BLEN**) are calculated as follows.
+
+Figure 5 shows the median line AM BM CM DM EM FM for section k. The length of this line is denoted **BLEN** . The average length of the down-dip axis is then calculated as the weighted average of the k **BLEN** values over all sections. The weights used are the distance of influence of each section ie k half way to the next section measured along the C axis.
+
+For each section the area enclosed by the hangingwall, footwall, and the top and bottom links is calculated. This is then divided by the length of the median line **BLENK** for that section to calculate the average across strike width, denoted as **WK** for section k. The average length of axis A, **ALEN** , is then calculated as the weighted average of WK over all sections.
+
+The relationship between the normal coordinates of point Q (AN , BN , CN ) and the adjusted coordinates (AA , BA , CA ) is then:
+    
+    
+    AA = AN  * ALEN
+    
+    
+    BA = BN  * BLEN
+    
+    
+    CA  = CN * CLEN
+
+For the intermediate section associated with point Qm, a local estimate of the length of the across strike width (axis A), and the down dip distance (axis B) is calculated. These distances define the `true length' coordinates for point Q. Where appropriate, any one of the original (X, Y, Z) world coordinate values can be assigned to be a UCS coordinate axis.
+
+The selection of the most appropriate coordinate system for the UCS axes will be dictated by the fold structure, the available digitized strings, and the requirements of variogram modelling and kriging (or other interpolation methods). Several coordinate systems may be of interest - for example, to interpolate block grades by stratigraphic position, and also prepare contours of true thickness in long section.
+
+The default parameters for **UNFOLD** are as follows:
+
+  * @**UCSAMODE** = 2 to calculate the relative position in the stratified unit from the `adjusted' coordinate.
+
+  * @**UCSBMODE** = 3 to calculate the unfolded position appropriate to each section.
+
+  * @**UCSCMODE** = 2 to calculate the approximate position along the fold axis based on an `adjusted' coordinate.
+
+The relative position of samples in the unfolded coordinate system is strongly influenced by the use of an origin, within section and between section strings, and the selection of `normalized', `adjusted' and `true length' coordinates. It is recommended that the position of samples in the unfolded coordinate system be plotted to verify the results of the unfolding process.
+
+### File Handling
+
+The following files are used by the UNFOLD process:
+
+#### &IN - Input Data File
+
+This file holds the standard X,Y,Z coordinate values which are to be transformed into the UCS. The values are held in the fields *X,*Y,*Z.
+
+#### &STRING \- Input Boundary Strings
+
+This file holds strings that define the hangingwall and footwall of each stratum on each section. It is a standard string file with the fields **PVALUE, PTN, XP,YP, ZP**. It must also include:
+
+* **BOUNDARY** |  Boundary identifier. A numeric field identifying the boundary represented by each string. Obviously its value must be constant for all points in a string.  
+---|---  
+* **SECTION** |  Section identifier. A numeric field identifying the section number of each string. If sections are West-East then * **SECTION** could hold the Northing value.  
+  
+The file may contain some or all of the optional fields:
+
+* **WSTAG** |  Within section tags. A numeric field holding tag values used to link between the hangingwall and footwall strings within sections. The values in this field will be ignored if @**LINKMODE** =1 or 3.  
+---|---  
+* **BSTAG** |  Between section tags. A numeric field holding tag values used to link between hangingwall strings on adjacent sections. The values in this field will be ignored if @**LINKMODE** =2 or 3.  
+* **TAG** |  Tag. A numeric field holding tag values used to link strings either within or between sections. The precise usage of the values in this field is controlled by @**LINKMODE**. A tag value of 0 or - indicates that the point is not linked.  
+  
+The &STRING must be sorted by *SECTION, *BOUNDARY, PTN. It is assumed that the section numbering system is such that sorting by *SECTION will ensure that physically adjacent sections are adjacent in the &STRING file.
+
+#### &UNITDEF \- Input Unit Definitions
+
+This optional file must contain the fields:
+
+* **UNITNAME** |  A numeric or alpha field holding the name of a stratigraphical unit defined by strings in the &**STRING** file.  
+---|---  
+* **FOOTWALL** |  A numeric field holding the value of the * **BOUNDARY** field for strings in the &**STRING** file that define the footwall of the stratigraphical unit.  
+* **HANGWALL** |  A numeric field holding the value of the * **BOUNDARY** field for strings in the &**STRING** file that define the hangingwall of the stratigraphical unit.  
+  
+#### &OUT \- Output Data File
+
+The output data file contains all the fields of the &IN file plus:
+
+* **UNITNAME** |  Stratigraphical unit name. A numeric or alpha field defining the unit in which each data point lies.  
+---|---  
+* **UCSA** |  Unfolded Coordinate System (UCS) A coordinate. A numeric field holding the hangingwall-footwall direction coordinate.  
+* **UCSB** |  Unfolded Coordinate System (UCS) B coordinate. A numeric field holding the down-dip coordinate.  
+* **UCSC** |  Unfolded Coordinate System (UCS) C co -ordinate. A numeric field holding the along strike coordinate.  
+  
+The &**OUT** file may not be the same as the &**IN** file, ie, in-place operation is not allowed. The &**OUT** file will not necessarily be in the same order as the &**IN** file. The &**OUT** file will contain all data records from the &**IN** input file for which **UNFOLD** could calculate UCS coordinates. Any data points that are outside the unfolding quadrilaterals are not written to &**OUT** (unless @**TOLRNC** is used).
+
+#### &QUADS \- Output Unfolding Quadrilaterals
+
+The linkages between points effectively form a type of wireframe. The wireframing used in **UNFOLD** is based on quadrilaterals rather than triangles, and therefore uses non planar surfaces, as described previously.
+
+The quadrilaterals can be output to an optional &**QUADS** file. This is a standard perimeter file (**PVALUE, PTN, XP, YP, ZP**) with additional fields **BLOCKTYP** , * **UNITNAME** and * **SECTION**. Field **BLOCKTYP** has the following values:
+
+  1. Quadrilateral joining adjacent hangingwall and footwall points within the same section which have the same downdip coordinate (eg, BH1 BH2 CF1 CH1 in Figure 3);
+
+  2. Quadrilateral joining hangingwall and footwall points on one section with points on the adjacent section (eg, BH1 BH2 CH2 CH1 in Figure 3);
+
+  3. A special case of **BLOCKTYP** = 2, defining a downdip reference plane where UCSB=0. This is described further on.
+
+### Detailed Features
+
+#### Link Points
+
+It should be noted that it is permissible for a single point on one string to be linked to two points on the other wall, or to two points on the next section.
+
+User-defined link points between sections need not link continuously from a point on one string, to a point on the next string, to a point on the next string, and so on. Hence a point with tag value N may occur on the first three sections, but there may be no tag with value N on the fourth. A tag with the value N may then be reused on the fifth and subsequent sections.
+
+#### Multiple Units
+
+In all examples so far it has been assumed that there is just a single stratified structure with a hangingwall and a footwall. In practice there may be a series of stratified units as illustrated in Figure 7\. The footwall of the first unit becomes the hangingwall of the second unit, and so on. Each unit is treated independently, so that the UCS coordinates for unit i are based on the thickness, downdip distance and along strike distance for the individual unit number i.
+
+Rather than run UNFOLD multiple times, once for each unit, the process has been designed to allow the definition of multiple units, which are all processed in a single run. The UCS coordinates are written to the output file together with a unit identifier.
+
+It is possible for overlapping strata to be defined using the &UNITDEF file. If this does happen and a point to be transformed lies in two or more units then it will be shown in the output file as lying in the first unit, in the order in which they are defined in the &UNITDEF file.
+
+#### Unit Definition
+
+The definition of a stratified unit is controlled either by a unit definition file or by parameter, with the file taking priority if both methods are specified. The &**UNITDEF** file contains the three fields * **HANGWALL** , * **FOOTWALL** and * **UNITNAME**. * **HANGWALL** and * **FOOTWALL** are the values of the * **BOUNDARY** field from the &STRINGS file. The * **UNITNAME** field may be alpha or numeric, and is included in the &**OUT** file for each sample.
+
+If the parameter method is used to select a single unit then @**HANGID** and @**FOOTID** must both be specified. The @**UNITID** parameter is optional. The unit name field in the &**OUT** file is created according to the following rules:
+
+  * If a &**UNITDEF** file is specified, then: the * **UNITNAME** field will be copied from this file. It can therefore be either alpha or numeric depending on its type in the &**UNITDEF** file.
+
+  * If a &**UNITDEF** file is not specified, then:
+
+    * if a * **UNITNAME** field exists in the &IN file, then * **UNITNAME** field will be copied from the &IN file.
+
+  * if a * **UNITNAME** field does not exist in the &IN file, then
+
+    * if parameter @**UNITID** is - or is not specified, then a field **UNITNAME** is created as an 8 character alpha field, and all values set to WITHIN.
+
+    * if parameter @**UNITID** is specified, then a field **UNITNAME** is created as numeric, and all values are set to the value specified.
+
+[![](../Images/unfold7.gif)](<javascript:void\(0\);>)
+
+Figure 7: Multiple Stratified Units
+
+### Data Outside the Unit (@TOLRNC and @UCSALIMT)
+
+The linking method used here effectively defines a type of wireframe. It should be noted that in general it is not possible therefore to calculate the UCS coordinates of any point lying outside this wireframe. If the volume of influence of the first and last sections can be extrapolated geologically outside the wireframe, then the extent of the wireframe should be adjusted. In practice this means that the user should create two new sections before the first and after the last, which contain copies of all strings on the first and last respectively.
+
+It is possible that a sample can be identified geologically as lying within a certain unit, yet it lies outside the hangingwall or footwall surface of the wireframe. This would happen if the actual unit varied non linearly between the interpreted sections. In these circumstances it is still possible to calculate UCS coordinates by use of the @**TOLRNC** parameter.
+
+This defines a margin, expressed as a fraction of the hangingwall-footwall distance UCSA, within which a sample can lie and still be assigned UCS coordinates. In most cases, the value for @**TOLRNC** would not need to be more than a few percent, but if necessary, can be set to much larger value. For example if @**TOLRNC** is set to 0.05 (i.e. 5%) then the normalized value of UCSA may lie between -0.05 and 1.05. This tolerance value only applies to the UCSA hangingwall-footwall direction.
+
+Note that if @**TOLRNC** is used when **UNFOLD** is processing several stratified units (ie, when a &**UNITDEF** is specified), a record from the &IN file may occur more than once in the &**OUT** file. For example, a sample lying near the 'unit 1'/'unit 2' boundary of figure 7 may be selected as being in unit 1 with a normalized UCSA coordinate of 0.99. If @**TOLRNC** =0.05, it may also be selected as being in unit 2 with a normalized UCSA coordinate of -- 0.01. It will therefore occur twice in the &OUT file. 
+
+If the @**TOLRNC** parameters is used, each stratigraphic unit should be processed in **UNFOLD** separately, and only those samples belonging to the stratigraphic unit should be supplied.
+
+The Parameter @UCSALIMT is used in conjunction with @**TOLRNC** to define the limits of the **UCSA** coordinate if **UCSAMODE** =1 or 2 and . This parameter provides additional control on normalized (@**UCSAMODE** =1) and adjusted (@**UCSAMODE** =2) coordinate values as follows:
+
+  1. UCSA coordinates can be <0 and >1 as described above (This is the default).
+  2. UCSA coordinates can be <0, but if they are calculated as >1, then will be reset to 1.
+
+  3. UCSA coordinates can be >1, but if they are calculated as <0, then are reset to 0.
+
+  4. UCSA coordinates that are calculated as <0 or >1 are reset to 0 and 1 respectively.
+
+The above description is in terms of the normalized UCSA value (@**UCSAMODE** =1). If adjusted (@**UCSAMODE** =2) is selected then the coordinate is calculated as the normalized value multiplied by the average thickness in the direction of the UCSA axis.
+
+### Direction of Axes
+
+The UCSA coordinate values always increase from the hangingwall to the footwall of each unit. For instance, if the UCSA values are normalized they will vary from 0 on the hangingwall, to 1 on the footwall.
+
+The UCSB coordinates increase in the same direction as the digitized boundary strings. In all the illustrations so far it is assumed that the strings go from top to bottom, and the UCSB coordinates therefore increase with depth. However, if the strings were digitized from bottom to top, then the origin of axis UCSB will be at the bottom of each section.
+
+Another method of changing the origin for the UCSB axis is by using the @ORGTAG parameter. This selects the tag number which defines the origin position from which the UCSB coordinate is measured. UCSB coordinates are then measured as positive in the direction towards the last digitized point, and negative towards the first digitized point on the string.
+
+The UCSC coordinates increase in the order in which the strings occur in the &STRING file. For example, with West East section strings sorted by increasing Northing, the UCSC coordinates increase with Northing. The UCSC axes direction could be reversed by changing the order of the &STRING file data by using a different *SECTION field.
+
+### Non-Continuous Units
+
+If one or both strings do not exist on an intermediate section, then there will be a break in the wireframe. For the purpose of calculating the along strike distance CLEN, the two sections either side of the break will be joined with a single line connection. This is illustrated in Figure 8. **BOUNDARY** 's 3 and 7 exist on sections 1, 2, 5 and 6, but not on sections 3 or 4. Therefore unit A only exists between sections 1 and 2, and between 5 and 6.
+
+If a unit pinches out on a section then the user may represent this by defining coincident hangingwall and footwall strings on intermediate sections. This is illustrated in Figure 9, below.
+
+[![](../Images/unfold8.gif)](<javascript:void\(0\);>)
+
+Figure 8: Break in Continuity of a Unit
+
+[![](../Images/unfold9.gif)](<javascript:void\(0\);>)
+
+Figure 9: Pinching Out a Unit
+
+        Input Files:
+        ------------
+
+        in: Undefined
+            Input file containing the X,Y and Z fields of points in the world coordinate system
+            which are to be transformed to the UCS.
+            Required=Yes
+
+        string: String
+            Input string file holding the boundary strings which define the stratified unit[s]. 7
+            fields are compulsory: **SECTION , BOUNDARY , PVALUE,XP,YP,ZP** and **PTN**. 3 optional
+            fields are **WSTAG , BSTAG** and **TAG**. The file must be sorted on **SECTION ,
+            BOUNDARY PTN,** with **SECTION** being the primary keyfield. It is assumed that the
+            section numbering system is such that sorting on **SECTION** will ensure that physically
+            adjacent sections are adjacent in the **STRING** file.
+            Required=Yes
+
+        unitdef: Undefined
+            Optional input file containing the **BOUNDARY** value for the hangingwall and footwall
+            of each stratified unit. It must contain the 3 fields: **UNITNAME** , **HANGWALL** and
+            **FOOTWALL**. If **UNITDEF** is not defined, the stratified unit must be defined by
+            **UNITID** , **HANGID**.
+            Required=No
+
+        Output Files:
+        -------------
+
+        out: Undefined
+            The output file contains all the fields from the **IN** file plus the UCS coordinate
+            fields **UCSA** , **UCSB** and **UCSC** , and the **UNITNAME** field. The **OUT** file
+            must be different from the **IN** file.
+            Required=Yes
+
+        quads: Undefined
+            Optional output file containing the quadrilaterals linking hangingwall and footwall
+            points within and between sections. The file contains 8 fields: **PVALUE, PTN, XP, YP,
+            ZP BLOCKTYP, SECTION** and **UNITNAME**.
+            Required=No
+
+        Fields:
+        -------
+
+        x: Numeric : IN
+            The numeric field name in the IN file holding the data X co-ordinate, in world
+            coordinates. The default field name is X.
+            Default=Undefined
+            Required=No
+
+        y: Numeric : IN
+            The numeric field name in the IN file holding the data Y co-ordinate, in world
+            coordinates. The default field name is Y.
+            Default=Undefined
+            Required=No
+
+        z: Numeric : IN
+            The numeric field name in the IN file holding the data Z co-ordinate, in world
+            coordinates. The default field name is Z.
+            Default=Undefined
+            Required=No
+
+        section: Numeric : STRING
+            The numeric field name in the **STRING** file holding the section identifier. The
+            default field name is **SECTION**.
+            Default=Undefined
+            Required=No
+
+        boundary: Numeric : STRING
+            The numeric field name in the **STRING** file holding the boundary identifier. The
+            default field name is **BOUNDARY**.
+            Default=Undefined
+            Required=No
+
+        wstag: Numeric : STRING
+            Within Section **TAG**. A numeric tag field in the **STRING** file, defining the
+            stratigraphical links between hangingwall and footwall points on strings within the same
+            section. A value of 0 or - means that the point is not linked. The default field name is
+            **WSTAG**.
+            Default=Undefined
+            Required=No
+
+        bstag: Numeric : STRING
+            Between Section **TAG**. A numeric tag field in the **STRING** file, defining the
+            stratigraphical links between 2 points on strings on adjacent sections with the same
+            **BOUNDARY**. A value of 0 or - means that the point is not linked. The default field
+            name is **BSTAG**.
+            Default=Undefined
+            Required=No
+
+        tag: Numeric : STRING
+            A numeric tag field in the **STRING** file, defining both the stratigraphical links
+            between points on strings within the same section, and between points on adjacent
+            sections with the same **BOUNDARY**. A value of 0 or - means that the point is not
+            linked. The default field name is **TAG**.
+            Default=Undefined
+            Required=No
+
+        unitname: Any : UNITDEF
+            An alpha or numeric field in the **UNITDEF** file defining the name or number of the
+            unit. The default field name is **UNITNAME**.
+            Default=Undefined
+            Required=No
+
+        hangwall: Any : UNITDEF
+            A numeric field in the **UNITDEF** file which defines the **BOUNDARY** value of the
+            hangingwall for each **UNITNAME**. The default field name is **HANGWALL**.
+            Default=Undefined
+            Required=No
+
+        footwall: Numeric : UNITDEF
+            A numeric field in the **UNITDEF** file which defines the **BOUNDARY** value of the
+            footwall for each **UNITNAME**. The default field name is **FOOTWALL**.
+            Default=Undefined
+            Required=No
+
+        ucsa: Numeric : OUT
+            The name of the A coordinate field in the UCS measured perpendicular to the strings
+            within a section [across strike]. The field is created in the **OUT** file and has the
+            default name of **UCSA**.
+            Default=Undefined
+            Required=No
+
+        ucsb: Numeric : OUT
+            The name of the B coordinate field in the UCS measured parallel to the boundary strings
+            [down dip]. This field is created in the **OUT** file and has the default name of
+            **UCSB**.
+            Default=Undefined
+            Required=No
+
+        ucsc: Numeric : OUT
+            The name of the C coordinate field in the UCS measured from section to section [along
+            strike]. This field is created in the **OUT** file and has the default name of **UCSC**.
+            Default=Undefined
+            Required=No
+
+        Parameters:
+        -----------
+
+        linkmode:
+            The method by which links between strings are created. Options: 0: \- Within section
+            links are defined by the **WSTAG** field, or by the **TAG** field if **WSTAG** does not
+            exist. Between section links are defined by the **BSTAG** field, or by the **TAG** field
+            if **BSTAG** does not exist.; 1: \- Within section links are defined automatically.
+            Between section links are defined by the **BSTAG** field, or by the **TAG** field if
+            **BSTAG** does not exist.; 2: \- Within section links are defined by the **WSTAG**
+            field, or by the **TAG** field if **WSTAG** does not exist. Between section links are
+            defined automatically.; 3: Within section links are defined automatically. Between
+            section links are defined automatically. For simple structures it is not essential to
+            define tag points on the strings; using the default value (3) ensures that automatic
+            linking will be applied both within and between sections.
+            Range=0,3
+            Values=0,1,2,3
+            Default=3
+            Required=No
+
+        ucsamode:
+            The type of UCSA coordinate written to the OUT file. Default (2). Options: 1: \-
+            coordinates are normalised.; 2: \- coordinates are adjusted.; 3: \- coordinates are true
+            length.; 4: \- coordinates are world X value.; 5: \- coordinates are world Y value.; 6:
+            \- coordinates are world Z value.
+            Range=1,6
+            Values=1,2,3,4,5,6
+            Default=2
+            Required=No
+
+        ucsbmode:
+            The type of UCSB coordinate written to the OUT file. Default (3). Options: 1: \-
+            coordinates are normalised.; 2: \- coordinates are adjusted.; 3: \- coordinates are true
+            length.; 4: \- coordinates are world X value.; 5: \- coordinates are world Y value.; 6:
+            \- coordinates are world Z value.
+            Range=1,6
+            Values=1,2,3,4,5,6
+            Default=3
+            Required=No
+
+        ucscmode:
+            The type of UCSC coordinate written to the OUT file. Default (2). Options: 1: \-
+            coordinates are normalised.; 2: \- coordinates are adjusted.; 3: \- coordinates are true
+            length.; 4: \- coordinates are world X value.; 5: \- coordinates are world Y value.; 6:
+            \- coordinates are world Z value.
+            Range=1,6
+            Values=1,2,3,4,5,6
+            Default=2
+            Required=No
+
+        plane:
+            The plane of the structural interpretations defined in the **STRING** file. Default
+            (1). 1 - vertical sectional interpretation. 2 - interpretation in plan.
+            Range=1,2
+            Values=1,2
+            Default=1
+            Required=No
+
+        hangid:
+            The value of the field **BOUNDARY** in the **STRING** file that defines the hangingwall
+            of the unit. It will be used if the **UNITDEF** file is not defined.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        footid:
+            The value of the field **BOUNDARY** in the **STRING** file that defines the footwall of
+            the unit. It will be used if the **UNITDEF** file is not defined.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        unitid:
+            If **HANGID** and **FOOTID** are used then the corresponding unit number is defined by
+            parameter **UNITID**.
+            Range=Undefined
+            Values=Undefined
+            Default=Undefined
+            Required=No
+
+        tolrnc:
+            Tolerance in the calculation of the **UCSA** coordinate expressed as a proportion of
+            the UCSA width. The default is (0).
+            Range=Undefined
+            Values=Undefined
+            Default=0
+            Required=No
+
+        ucsalimt:
+            Flag to define the limits of the **UCSA** coordinate if **UCSAMODE** =1 or 2 and
+            **TOLRNC** >0\. The options below are defined in terms of the Normalized mode
+            [**UCSAMODE** =1]. Default (1) Options: 1: UCSA values can be less than 0 and greater
+            than 1; 2: UCSA values can be less than 0. Values calculated as greater than 1 are reset
+            to 1; 3: UCSA values calculated as less than 0 are reset to 0. Values can be greater
+            than 1; 4: UCSA values calculated as less than 0 are reset to 0. Values calculated as
+            greater than 1 are reset to 1
+            Range=1,4
+            Values=1,2,3,4
+            Default=1
+            Required=No
+
+        orgtag:
+            Tag number of points which define the origin surface from which the UCSB coordinate is
+            measured. The default surface if **ORGTAG** is undefined (-) is created from the first
+            points on each of the hangingwall and footwall strings.
+            Range=Undefined
+            Values=Undefined
+            Default=-
+            Required=No
+
+        """
+        command = "unfold "
+
+        if in_i == "required":
+            raise ValueError("in_i is required.")
+
+        if in_i != "optional":
+            command += " &in=" + in_i
+
+        if string_i == "required":
+            raise ValueError("string_i is required.")
+
+        if string_i != "optional":
+            command += " &string=" + string_i
+
+        if unitdef_i != "optional":
+            command += " &unitdef=" + unitdef_i
+
+        if out_o == "required":
+            raise ValueError("out_o is required.")
+
+        if out_o != "optional":
+            command += " &out=" + out_o
+
+        if quads_o != "optional":
+            command += " &quads=" + quads_o
+
+        if x_f != "optional":
+            command += " *x=" + x_f
+
+        if y_f != "optional":
+            command += " *y=" + y_f
+
+        if z_f != "optional":
+            command += " *z=" + z_f
+
+        if section_f != "optional":
+            command += " *section=" + section_f
+
+        if boundary_f != "optional":
+            command += " *boundary=" + boundary_f
+
+        if wstag_f != "optional":
+            command += " *wstag=" + wstag_f
+
+        if bstag_f != "optional":
+            command += " *bstag=" + bstag_f
+
+        if tag_f != "optional":
+            command += " *tag=" + tag_f
+
+        if unitname_f != "optional":
+            command += " *unitname=" + unitname_f
+
+        if hangwall_f != "optional":
+            command += " *hangwall=" + hangwall_f
+
+        if footwall_f != "optional":
+            command += " *footwall=" + footwall_f
+
+        if ucsa_f != "optional":
+            command += " *ucsa=" + ucsa_f
+
+        if ucsb_f != "optional":
+            command += " *ucsb=" + ucsb_f
+
+        if ucsc_f != "optional":
+            command += " *ucsc=" + ucsc_f
+
+        if linkmode_p != "optional":
+            try:
+                val = float(linkmode_p)
+                if val not in [0.0, 1.0, 2.0, 3.0]:
+                    raise ValueError(f"linkmode_p value {linkmode_p} is not in allowed values: [0, 1, 2, 3]")
+            except ValueError as e:
+                if isinstance(linkmode_p, (int, float)):
+                    raise e
+
+        if linkmode_p != "optional":
+            command += " @linkmode=" + str(linkmode_p)
+
+        if ucsamode_p != "optional":
+            try:
+                val = float(ucsamode_p)
+                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]:
+                    raise ValueError(f"ucsamode_p value {ucsamode_p} is not in allowed values: [1, 2, 3, 4, 5, 6]")
+            except ValueError as e:
+                if isinstance(ucsamode_p, (int, float)):
+                    raise e
+
+        if ucsamode_p != "optional":
+            command += " @ucsamode=" + str(ucsamode_p)
+
+        if ucsbmode_p != "optional":
+            try:
+                val = float(ucsbmode_p)
+                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]:
+                    raise ValueError(f"ucsbmode_p value {ucsbmode_p} is not in allowed values: [1, 2, 3, 4, 5, 6]")
+            except ValueError as e:
+                if isinstance(ucsbmode_p, (int, float)):
+                    raise e
+
+        if ucsbmode_p != "optional":
+            command += " @ucsbmode=" + str(ucsbmode_p)
+
+        if ucscmode_p != "optional":
+            try:
+                val = float(ucscmode_p)
+                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]:
+                    raise ValueError(f"ucscmode_p value {ucscmode_p} is not in allowed values: [1, 2, 3, 4, 5, 6]")
+            except ValueError as e:
+                if isinstance(ucscmode_p, (int, float)):
+                    raise e
+
+        if ucscmode_p != "optional":
+            command += " @ucscmode=" + str(ucscmode_p)
+
+        if plane_p != "optional":
+            try:
+                val = float(plane_p)
+                if val not in [1.0, 2.0]:
+                    raise ValueError(f"plane_p value {plane_p} is not in allowed values: [1, 2]")
+            except ValueError as e:
+                if isinstance(plane_p, (int, float)):
+                    raise e
+
+        if plane_p != "optional":
+            command += " @plane=" + str(plane_p)
+
+        if hangid_p != "optional":
+            command += " @hangid=" + str(hangid_p)
+
+        if footid_p != "optional":
+            command += " @footid=" + str(footid_p)
+
+        if unitid_p != "optional":
+            command += " @unitid=" + str(unitid_p)
+
+        if tolrnc_p != "optional":
+            command += " @tolrnc=" + str(tolrnc_p)
+
+        if ucsalimt_p != "optional":
+            try:
+                val = float(ucsalimt_p)
+                if val not in [1.0, 2.0, 3.0, 4.0]:
+                    raise ValueError(f"ucsalimt_p value {ucsalimt_p} is not in allowed values: [1, 2, 3, 4]")
+            except ValueError as e:
+                if isinstance(ucsalimt_p, (int, float)):
+                    raise e
+
+        if ucsalimt_p != "optional":
+            command += " @ucsalimt=" + str(ucsalimt_p)
+
+        if orgtag_p != "optional":
+            command += " @orgtag=" + str(orgtag_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -54661,6 +58813,7 @@ The input file to the process is a standard desurveyed sample file, which must c
                 numsmuy_p=1,
                 numsmuz_p=1,
                 gaout_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -54946,6 +59099,9 @@ It is implemented interactively via the [Uniform Conditioning Wizard](<../Unifor
         if gaout_p != "optional":
             command += " @gaout=" + str(gaout_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -54953,6 +59109,7 @@ It is implemented interactively via the [Uniform Conditioning Wizard](<../Unifor
 
     def unlink(self,
                 in_i="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -54987,6 +59144,9 @@ The file name is attached to symbolic file &**IN**. The name of the external bin
         if in_i != "optional":
             command += " &in=" + in_i
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -54995,6 +59155,7 @@ The file name is attached to symbolic file &**IN**. The name of the external bin
     def valida(self,
                 in_i="required",
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -55073,6 +59234,9 @@ If all the given **UNLS** relationships between field **FFFFFFFF** and field **G
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -55085,6 +59249,7 @@ If all the given **UNLS** relationships between field **FFFFFFFF** and field **G
                 key_f="optional",
                 azi_f="optional",
                 dip_f="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -55216,6 +59381,9 @@ Help information is available for every command. First select the Help button fr
         if dip_f != "optional":
             command += " *dip=" + dip_f
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -55224,6 +59392,7 @@ Help information is available for every command. First select the Help button fr
     def vcontour(self,
                 in_i="required",
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -55276,6 +59445,9 @@ The process is divided into two parts:
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -55297,6 +59469,7 @@ The process is divided into two parts:
                 search2f_p=1,
                 search3f_p=1,
                 invdistp_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -55479,8 +59652,8 @@ The difference between the two GRIDMODE settings is therefore the spatial locati
         if nlags_p != "optional":
             try:
                 val = float(nlags_p)
-                if not (1.0 <= val <= 200.0):
-                    raise ValueError(f"nlags_p value {nlags_p} is not in allowed range: [1.0, 200.0]")
+                if not (1.0 <= val <= 200.0) and val != 25.0:
+                    raise ValueError(f"nlags_p value {nlags_p} is not in allowed range: [1.0, [200.0]")
             except ValueError as e:
                 if isinstance(nlags_p, (int, float)):
                     raise e
@@ -55491,8 +59664,8 @@ The difference between the two GRIDMODE settings is therefore the spatial locati
         if nangles_p != "optional":
             try:
                 val = float(nangles_p)
-                if not (1.0 <= val <= 180.0):
-                    raise ValueError(f"nangles_p value {nangles_p} is not in allowed range: [1.0, 180.0]")
+                if not (1.0 <= val <= 180.0) and val != 9.0:
+                    raise ValueError(f"nangles_p value {nangles_p} is not in allowed range: [1.0, [180.0]")
             except ValueError as e:
                 if isinstance(nangles_p, (int, float)):
                     raise e
@@ -55518,8 +59691,8 @@ The difference between the two GRIDMODE settings is therefore the spatial locati
         if disc_p != "optional":
             try:
                 val = float(disc_p)
-                if not (1.0 <= val <= 10.0):
-                    raise ValueError(f"disc_p value {disc_p} is not in allowed range: [1.0, 10.0]")
+                if not (1.0 <= val <= 10.0) and val != 3.0:
+                    raise ValueError(f"disc_p value {disc_p} is not in allowed range: [1.0, [10.0]")
             except ValueError as e:
                 if isinstance(disc_p, (int, float)):
                     raise e
@@ -55530,8 +59703,8 @@ The difference between the two GRIDMODE settings is therefore the spatial locati
         if minsamp_p != "optional":
             try:
                 val = float(minsamp_p)
-                if not (1.0 <= val <= 10.0):
-                    raise ValueError(f"minsamp_p value {minsamp_p} is not in allowed range: [1.0, 10.0]")
+                if not (1.0 <= val <= 10.0) and val != 1.0:
+                    raise ValueError(f"minsamp_p value {minsamp_p} is not in allowed range: [1.0, [10.0]")
             except ValueError as e:
                 if isinstance(minsamp_p, (int, float)):
                     raise e
@@ -55542,8 +59715,8 @@ The difference between the two GRIDMODE settings is therefore the spatial locati
         if optsamp_p != "optional":
             try:
                 val = float(optsamp_p)
-                if not (1.0 <= val <= 100.0):
-                    raise ValueError(f"optsamp_p value {optsamp_p} is not in allowed range: [1.0, 100.0]")
+                if not (1.0 <= val <= 100.0) and val != 50.0:
+                    raise ValueError(f"optsamp_p value {optsamp_p} is not in allowed range: [1.0, [100.0]")
             except ValueError as e:
                 if isinstance(optsamp_p, (int, float)):
                     raise e
@@ -55554,8 +59727,8 @@ The difference between the two GRIDMODE settings is therefore the spatial locati
         if searchlf_p != "optional":
             try:
                 val = float(searchlf_p)
-                if not (0.0 <= val <= 100.0):
-                    raise ValueError(f"searchlf_p value {searchlf_p} is not in allowed range: [0.0, 100.0]")
+                if not (0.0 <= val <= 100.0) and val != 2.0:
+                    raise ValueError(f"searchlf_p value {searchlf_p} is not in allowed range: [0.0, [100.0]")
             except ValueError as e:
                 if isinstance(searchlf_p, (int, float)):
                     raise e
@@ -55566,8 +59739,8 @@ The difference between the two GRIDMODE settings is therefore the spatial locati
         if search2f_p != "optional":
             try:
                 val = float(search2f_p)
-                if not (0.0 <= val <= 100.0):
-                    raise ValueError(f"search2f_p value {search2f_p} is not in allowed range: [0.0, 100.0]")
+                if not (0.0 <= val <= 100.0) and val != 1.0:
+                    raise ValueError(f"search2f_p value {search2f_p} is not in allowed range: [0.0, [100.0]")
             except ValueError as e:
                 if isinstance(search2f_p, (int, float)):
                     raise e
@@ -55578,8 +59751,8 @@ The difference between the two GRIDMODE settings is therefore the spatial locati
         if search3f_p != "optional":
             try:
                 val = float(search3f_p)
-                if not (0.0 <= val <= 100.0):
-                    raise ValueError(f"search3f_p value {search3f_p} is not in allowed range: [0.0, 100.0]")
+                if not (0.0 <= val <= 100.0) and val != 1.0:
+                    raise ValueError(f"search3f_p value {search3f_p} is not in allowed range: [0.0, [100.0]")
             except ValueError as e:
                 if isinstance(search3f_p, (int, float)):
                     raise e
@@ -55590,14 +59763,17 @@ The difference between the two GRIDMODE settings is therefore the spatial locati
         if invdistp_p != "optional":
             try:
                 val = float(invdistp_p)
-                if not (0.0 <= val <= 100.0):
-                    raise ValueError(f"invdistp_p value {invdistp_p} is not in allowed range: [0.0, 100.0]")
+                if not (0.0 <= val <= 100.0) and val != 1.0:
+                    raise ValueError(f"invdistp_p value {invdistp_p} is not in allowed range: [0.0, [100.0]")
             except ValueError as e:
                 if isinstance(invdistp_p, (int, float)):
                     raise e
 
         if invdistp_p != "optional":
             command += " @invdistp=" + str(invdistp_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -55614,6 +59790,9 @@ The difference between the two GRIDMODE settings is therefore the spatial locati
                 z_f="optional",
                 fields_f=['optional'],
                 keys_f=['optional'],
+                in_f="optional",
+                bhid_f="optional",
+                in2_f="optional",
                 lag_p="required",
                 lagtol_p='-',
                 nlags_p=25,
@@ -55643,6 +59822,7 @@ The difference between the two GRIDMODE settings is therefore the spatial locati
                 addcon_p=0,
                 laymeth_p=0,
                 spacing_p=100,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -56065,6 +60245,21 @@ The lower shaded area represents the intersection of the volume of regularizatio
             Default=Undefined
             Required=No
 
+        in:  : Any
+            No
+            Default=
+            Required=No
+
+        bhid:  : 
+            Borehole identification field. Used with:
+            Default=
+            Required=No
+
+        in:  : Any
+            No
+            Default=
+            Required=No
+
         Parameters:
         -----------
 
@@ -56378,6 +60573,15 @@ The lower shaded area represents the intersection of the volume of regularizatio
         if z_f != "optional":
             command += " *z=" + z_f
 
+        if in_f != "optional":
+            command += " *in=" + in_f
+
+        if bhid_f != "optional":
+            command += " *bhid=" + bhid_f
+
+        if in2_f != "optional":
+            command += " *in=" + in2_f
+
         if fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 30, "*")
 
@@ -56402,8 +60606,8 @@ The lower shaded area represents the intersection of the volume of regularizatio
         if nlags_p != "optional":
             try:
                 val = float(nlags_p)
-                if not (1.0 <= val <= 9999.0):
-                    raise ValueError(f"nlags_p value {nlags_p} is not in allowed range: [1.0, 9999.0]")
+                if not (1.0 <= val <= 9999.0) and val != 25.0:
+                    raise ValueError(f"nlags_p value {nlags_p} is not in allowed range: [1.0, [9999.0]")
             except ValueError as e:
                 if isinstance(nlags_p, (int, float)):
                     raise e
@@ -56420,8 +60624,8 @@ The lower shaded area represents the intersection of the volume of regularizatio
         if azi_p != "optional":
             try:
                 val = float(azi_p)
-                if not (0.0 <= val <= 360.0):
-                    raise ValueError(f"azi_p value {azi_p} is not in allowed range: [0.0, 360.0]")
+                if not (0.0 <= val <= 360.0) and val != 0.0:
+                    raise ValueError(f"azi_p value {azi_p} is not in allowed range: [0.0, [360.0]")
             except ValueError as e:
                 if isinstance(azi_p, (int, float)):
                     raise e
@@ -56441,8 +60645,8 @@ The lower shaded area represents the intersection of the volume of regularizatio
         if dip_p != "optional":
             try:
                 val = float(dip_p)
-                if not (-90.0 <= val <= 90.0):
-                    raise ValueError(f"dip_p value {dip_p} is not in allowed range: [-90.0, 90.0]")
+                if not (-90.0 <= val <= 90.0) and val != 0.0:
+                    raise ValueError(f"dip_p value {dip_p} is not in allowed range: [-90.0, [90.0]")
             except ValueError as e:
                 if isinstance(dip_p, (int, float)):
                     raise e
@@ -56453,8 +60657,8 @@ The lower shaded area represents the intersection of the volume of regularizatio
         if verang_p != "optional":
             try:
                 val = float(verang_p)
-                if not (-90.0 <= val <= 90.0):
-                    raise ValueError(f"verang_p value {verang_p} is not in allowed range: [-90.0, 90.0]")
+                if not (-90.0 <= val <= 90.0) and val != 90.0:
+                    raise ValueError(f"verang_p value {verang_p} is not in allowed range: [-90.0, [90.0]")
             except ValueError as e:
                 if isinstance(verang_p, (int, float)):
                     raise e
@@ -56537,6 +60741,9 @@ The lower shaded area represents the intersection of the volume of regularizatio
         if spacing_p != "optional":
             command += " @spacing=" + str(spacing_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -56547,6 +60754,7 @@ The lower shaded area represents the intersection of the volume of regularizatio
                 out_o="required",
                 keys_f=['optional'],
                 keytol_p=1e-05,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -56617,6 +60825,9 @@ This process belongs to a group of four similar ones within the Datamine process
         if keytol_p != "optional":
             command += " @keytol=" + str(keytol_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -56633,6 +60844,7 @@ This process belongs to a group of four similar ones within the Datamine process
                 splits_p="required",
                 zmin_p="required",
                 zmax_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -56787,8 +60999,8 @@ The output from this process is an (evaluation) results file and optionally the 
         if density_p != "optional":
             try:
                 val = float(density_p)
-                if not (0.001 <= val <= 99999.0):
-                    raise ValueError(f"density_p value {density_p} is not in allowed range: [0.001, 99999.0]")
+                if not (0.001 <= val <= 99999.0) and val != 1.0:
+                    raise ValueError(f"density_p value {density_p} is not in allowed range: [0.001, [99999.0]")
             except ValueError as e:
                 if isinstance(density_p, (int, float)):
                     raise e
@@ -56802,8 +61014,8 @@ The output from this process is an (evaluation) results file and optionally the 
         if splits_p != "optional":
             try:
                 val = float(splits_p)
-                if not (0.0 <= val <= 3.0):
-                    raise ValueError(f"splits_p value {splits_p} is not in allowed range: [0.0, 3.0]")
+                if not (0.0 <= val <= 3.0) and val != 0.0:
+                    raise ValueError(f"splits_p value {splits_p} is not in allowed range: [0.0, [3.0]")
             except ValueError as e:
                 if isinstance(splits_p, (int, float)):
                     raise e
@@ -56823,6 +61035,9 @@ The output from this process is an (evaluation) results file and optionally the 
         if zmax_p != "optional":
             command += " @zmax=" + str(zmax_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -56832,6 +61047,7 @@ The output from this process is an (evaluation) results file and optionally the 
                 points_i="required",
                 wiretr_i="required",
                 wirept_i="required",
+                perimin_i="optional",
                 out_o="required",
                 x_f="optional",
                 y_f="optional",
@@ -56845,6 +61061,7 @@ The output from this process is an (evaluation) results file and optionally the 
                 toleranc_p=0,
                 checkrot_p=1,
                 outside_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -56996,6 +61213,12 @@ This option may be useful if you are coding points within classification surface
             input points file with new values
             Required=Yes
 
+        perimin: String Data
+            Optional perimeter input file to control area over which input points are considered.
+            Only points either inside or outside the supplied perimeters are coded depending on the
+            value of the @**OUTSIDE** parameter.
+            Required=No
+
         Output Files:
         -------------
 
@@ -57127,6 +61350,9 @@ This option may be useful if you are coding points within classification surface
         if wirept_i != "optional":
             command += " &wirept=" + wirept_i
 
+        if perimin_i != "optional":
+            command += " &perimin=" + perimin_i
+
         if out_o == "required":
             raise ValueError("out_o is required.")
 
@@ -57226,6 +61452,9 @@ This option may be useful if you are coding points within classification surface
         if outside_p != "optional":
             command += " @outside=" + str(outside_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -57239,6 +61468,7 @@ This option may be useful if you are coding points within classification surface
                 distance_p="required",
                 toleranc_p="required",
                 surfblnd_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -57354,6 +61584,9 @@ This option may be useful if you are coding points within classification surface
         if surfblnd_p != "optional":
             command += " @surfblnd=" + str(surfblnd_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -57370,6 +61603,7 @@ This option may be useful if you are coding points within classification surface
                 extn_p="required",
                 gridinc_p="required",
                 tr_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -57506,6 +61740,9 @@ The data limits are detected automatically and the trend surface is only used be
         if tr_p != "optional":
             command += " @tr=" + str(tr_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -57526,6 +61763,7 @@ The data limits are detected automatically and the trend surface is only used be
                 cellzmin_p="required",
                 cellzmax_p=10,
                 checkrot_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -57735,8 +61973,8 @@ The **WIRETYPE** parameter is used to define the type of wireframe model to be f
         if cellxmin_p != "optional":
             try:
                 val = float(cellxmin_p)
-                if not (0.0 <= val <= 10000.0):
-                    raise ValueError(f"cellxmin_p value {cellxmin_p} is not in allowed range: [0.0, 10000.0]")
+                if not (0.0 <= val <= 10000.0) and val != 2.5:
+                    raise ValueError(f"cellxmin_p value {cellxmin_p} is not in allowed range: [0.0, [10000.0]")
             except ValueError as e:
                 if isinstance(cellxmin_p, (int, float)):
                     raise e
@@ -57747,8 +61985,8 @@ The **WIRETYPE** parameter is used to define the type of wireframe model to be f
         if cellxmax_p != "optional":
             try:
                 val = float(cellxmax_p)
-                if not (0.5 <= val <= 10000.0):
-                    raise ValueError(f"cellxmax_p value {cellxmax_p} is not in allowed range: [0.5, 10000.0]")
+                if not (0.5 <= val <= 10000.0) and val != 10.0:
+                    raise ValueError(f"cellxmax_p value {cellxmax_p} is not in allowed range: [0.5, [10000.0]")
             except ValueError as e:
                 if isinstance(cellxmax_p, (int, float)):
                     raise e
@@ -57762,8 +62000,8 @@ The **WIRETYPE** parameter is used to define the type of wireframe model to be f
         if cellymin_p != "optional":
             try:
                 val = float(cellymin_p)
-                if not (0.0 <= val <= 10000.0):
-                    raise ValueError(f"cellymin_p value {cellymin_p} is not in allowed range: [0.0, 10000.0]")
+                if not (0.0 <= val <= 10000.0) and val != 2.5:
+                    raise ValueError(f"cellymin_p value {cellymin_p} is not in allowed range: [0.0, [10000.0]")
             except ValueError as e:
                 if isinstance(cellymin_p, (int, float)):
                     raise e
@@ -57774,8 +62012,8 @@ The **WIRETYPE** parameter is used to define the type of wireframe model to be f
         if cellymax_p != "optional":
             try:
                 val = float(cellymax_p)
-                if not (0.5 <= val <= 10000.0):
-                    raise ValueError(f"cellymax_p value {cellymax_p} is not in allowed range: [0.5, 10000.0]")
+                if not (0.5 <= val <= 10000.0) and val != 10.0:
+                    raise ValueError(f"cellymax_p value {cellymax_p} is not in allowed range: [0.5, [10000.0]")
             except ValueError as e:
                 if isinstance(cellymax_p, (int, float)):
                     raise e
@@ -57789,8 +62027,8 @@ The **WIRETYPE** parameter is used to define the type of wireframe model to be f
         if cellzmin_p != "optional":
             try:
                 val = float(cellzmin_p)
-                if not (0.0 <= val <= 10000.0):
-                    raise ValueError(f"cellzmin_p value {cellzmin_p} is not in allowed range: [0.0, 10000.0]")
+                if not (0.0 <= val <= 10000.0) and val != 2.5:
+                    raise ValueError(f"cellzmin_p value {cellzmin_p} is not in allowed range: [0.0, [10000.0]")
             except ValueError as e:
                 if isinstance(cellzmin_p, (int, float)):
                     raise e
@@ -57801,8 +62039,8 @@ The **WIRETYPE** parameter is used to define the type of wireframe model to be f
         if cellzmax_p != "optional":
             try:
                 val = float(cellzmax_p)
-                if not (0.5 <= val <= 1000.0):
-                    raise ValueError(f"cellzmax_p value {cellzmax_p} is not in allowed range: [0.5, 1000.0]")
+                if not (0.5 <= val <= 1000.0) and val != 10.0:
+                    raise ValueError(f"cellzmax_p value {cellzmax_p} is not in allowed range: [0.5, [1000.0]")
             except ValueError as e:
                 if isinstance(cellzmax_p, (int, float)):
                     raise e
@@ -57813,14 +62051,17 @@ The **WIRETYPE** parameter is used to define the type of wireframe model to be f
         if checkrot_p != "optional":
             try:
                 val = float(checkrot_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"checkrot_p value {checkrot_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.0:
+                    raise ValueError(f"checkrot_p value {checkrot_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(checkrot_p, (int, float)):
                     raise e
 
         if checkrot_p != "optional":
             command += " @checkrot=" + str(checkrot_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -57839,6 +62080,7 @@ The **WIRETYPE** parameter is used to define the type of wireframe model to be f
                 pincr_p="optional",
                 azincr_p="optional",
                 dipincr_p="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -57972,7 +62214,7 @@ The **WIRETYPE** parameter is used to define the type of wireframe model to be f
             try:
                 val = float(azincr_p)
                 if not (0.0 <= val <= 180.0):
-                    raise ValueError(f"azincr_p value {azincr_p} is not in allowed range: [0.0, 180.0]")
+                    raise ValueError(f"azincr_p value {azincr_p} is not in allowed range: [0.0, [180.0]")
             except ValueError as e:
                 if isinstance(azincr_p, (int, float)):
                     raise e
@@ -57984,13 +62226,16 @@ The **WIRETYPE** parameter is used to define the type of wireframe model to be f
             try:
                 val = float(dipincr_p)
                 if not (-90.0 <= val <= 90.0):
-                    raise ValueError(f"dipincr_p value {dipincr_p} is not in allowed range: [-90.0, 90.0]")
+                    raise ValueError(f"dipincr_p value {dipincr_p} is not in allowed range: [-90.0, [90.0]")
             except ValueError as e:
                 if isinstance(dipincr_p, (int, float)):
                     raise e
 
         if dipincr_p != "optional":
             command += " @dipincr=" + str(dipincr_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -58000,8 +62245,12 @@ The **WIRETYPE** parameter is used to define the type of wireframe model to be f
     def xvalid(self,
                 in_i="required",
                 srcparm_i="optional",
+                estparm_i="optional",
+                vmodparm_i="optional",
+                vgram_i="optional",
                 xvsamps_o="optional",
                 xvstats_o="optional",
+                sampout_o="optional",
                 x_f="optional",
                 y_f="optional",
                 z_f="optional",
@@ -58012,6 +62261,7 @@ The **WIRETYPE** parameter is used to define the type of wireframe model to be f
                 dens_f_f="optional",
                 sminfac_p=0.0001,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -58091,6 +62341,25 @@ Option 7 is not available if multiple fields are being cross-validated ie if the
             volume may be defined. All fields are numeric:
             Required=No
 
+        estparm: 
+            Estimation parameter file. Each record in the file describes an estimation method and
+            its associated parameters. The fields are dependent on the estimation methods selected.
+            General fields:
+            Required=No
+
+        vmodparm: 
+            Variogram model parameter file. Each record in this file defines a variogram model type
+            and its parameters. Only the VREFNUM field is compulsory.
+            Required=No
+
+        vgram: Variogram - Experimental
+            Experimental variogram file, as created by the variogram calculation process
+            [VGRAM](<vgram.md>). This experimental variogram file will have been used by the
+            variogram fitting process [VARFIT](<varfit.md>) in order to derive the variogram model
+            defined by **VMODPARM** . This is only required if you want to use access the variogram
+            display and fitting process **VARFIT** from within **XVALID**.
+            Required=No
+
         Output Files:
         -------------
 
@@ -58106,6 +62375,10 @@ Option 7 is not available if multiple fields are being cross-validated ie if the
             summarised below. If the file already contains all 23 fields then additional records are
             appended to the file. If the file does not contain all 23 fields, or if the file does
             not exist, then a new file is created.
+            Required=No
+
+        sampout: Undefined
+            Output sample file containing details of weights for each sample for each estimate.
             Required=No
 
         Fields:
@@ -58186,11 +62459,23 @@ Option 7 is not available if multiple fields are being cross-validated ie if the
         if srcparm_i != "optional":
             command += " &srcparm=" + srcparm_i
 
+        if estparm_i != "optional":
+            command += " &estparm=" + estparm_i
+
+        if vmodparm_i != "optional":
+            command += " &vmodparm=" + vmodparm_i
+
+        if vgram_i != "optional":
+            command += " &vgram=" + vgram_i
+
         if xvsamps_o != "optional":
             command += " &xvsamps=" + xvsamps_o
 
         if xvstats_o != "optional":
             command += " &xvstats=" + xvstats_o
+
+        if sampout_o != "optional":
+            command += " &sampout=" + sampout_o
 
         if x_f != "optional":
             command += " *x=" + x_f
@@ -58219,8 +62504,8 @@ Option 7 is not available if multiple fields are being cross-validated ie if the
         if sminfac_p != "optional":
             try:
                 val = float(sminfac_p)
-                if not (0.0 <= val <= 1.0):
-                    raise ValueError(f"sminfac_p value {sminfac_p} is not in allowed range: [0.0, 1.0]")
+                if not (0.0 <= val <= 1.0) and val != 0.0001:
+                    raise ValueError(f"sminfac_p value {sminfac_p} is not in allowed range: [0.0, [1.0]")
             except ValueError as e:
                 if isinstance(sminfac_p, (int, float)):
                     raise e
@@ -58239,6 +62524,9 @@ Option 7 is not available if multiple fields are being cross-validated ie if the
 
         if print_p != "optional":
             command += " @print=" + str(print_p)
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"

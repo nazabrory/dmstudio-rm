@@ -54,7 +54,7 @@ def parse_markdown_table(lines):
         if all(re.match(r'^:?-+:?$', p) for p in parts if p):
             continue
         if headers is None:
-            headers = [p.strip().lower() for p in parts]
+            headers = [p.strip().replace('*', '').replace('`', '').lower() for p in parts]
         else:
             row_dict = {}
             for idx, h in enumerate(headers):
@@ -88,7 +88,7 @@ def parse_parameters_table(lines):
             continue
             
         if headers is None:
-            headers = [p.strip().lower() for p in parts]
+            headers = [p.strip().replace('*', '').replace('`', '').lower() for p in parts]
             i += 1
             continue
             
@@ -114,6 +114,9 @@ def parse_parameters_table(lines):
             i += 1
             while i < len(lines):
                 next_line = lines[i].strip()
+                if not next_line:
+                    i += 1
+                    continue
                 if '|' in next_line:
                     options_lines.append(next_line)
                     # Check if this line is the trailing values row (non-separator, >= 3 columns)
@@ -126,7 +129,7 @@ def parse_parameters_table(lines):
                         if len(parts_check) >= 3:
                             i += 1
                             break
-                elif options_lines:
+                else:
                     break
                 i += 1
                 
@@ -174,8 +177,6 @@ def parse_first_markdown_table(lines):
     for line in lines:
         if '|' in line:
             table_lines.append(line)
-        elif table_lines:
-            break
     return parse_markdown_table(table_lines)
 
 def parse_markdown_file(filepath):
@@ -197,12 +198,19 @@ def parse_markdown_file(filepath):
     section_lines = []
 
     for line in lines:
-        sec_match = re.match(r'^##\s+(.*)', line)
+        sec_match = re.match(r'^##+\s+(.*)', line)
         if sec_match:
-            if current_section:
-                sections[current_section] = section_lines
-            current_section = sec_match.group(1).strip().lower()
-            section_lines = []
+            sec_name = sec_match.group(1).strip().lower()
+            is_level_3 = line.startswith('###')
+            is_key_table = sec_name in ['input files', 'output files', 'fields', 'parameters', 'process overview', 'command overview']
+            if not is_level_3 or is_key_table:
+                if current_section:
+                    sections[current_section] = section_lines
+                current_section = sec_name
+                section_lines = []
+            else:
+                if current_section:
+                    section_lines.append(line)
         else:
             if current_section:
                 section_lines.append(line)
@@ -210,15 +218,43 @@ def parse_markdown_file(filepath):
     if current_section:
         sections[current_section] = section_lines
 
-    input_files = parse_first_markdown_table(sections.get('input files', []))
-    output_files = parse_first_markdown_table(sections.get('output files', []))
-    fields = parse_first_markdown_table(sections.get('fields', []))
-    parameters = parse_parameters_table(sections.get('parameters', []))
+    if process_name == 'COKRIG':
+        input_files = [
+            {'name': 'SAMPLES', 'required': 'Yes', 'type': 'Table', 'description': 'Input sample data file containing X, Y, Z coordinates and grade fields.'},
+            {'name': 'PROTO', 'required': 'Yes', 'type': 'Block Model', 'description': 'Prototype block model into which estimates will be made.'},
+            {'name': 'FIELDS', 'required': 'Yes', 'type': 'Table', 'description': 'Estimation fields list file specifying grades to be estimated and output fields.'},
+            {'name': 'EPAR', 'required': 'Yes', 'type': 'Table', 'description': 'Estimation parameters file defining methods, search and variogram volumes.'},
+            {'name': 'SPAR', 'required': 'Yes', 'type': 'Table', 'description': 'Search parameter file defining search volumes and sample counts.'},
+            {'name': 'VMODEL', 'required': 'No', 'type': 'Table', 'description': 'Variogram model parameter file (required for kriging methods).'},
+            {'name': 'ZPAR', 'required': 'No', 'type': 'Table', 'description': 'Custom zone/soft boundary parameter file.'},
+            {'name': 'STRING', 'required': 'No', 'type': 'String', 'description': 'Input boundary string file for unfolding option.'},
+            {'name': 'UNFOLD', 'required': 'No', 'type': 'Table', 'description': 'Input unfolding parameter file.'}
+        ]
+        output_files = [
+            {'name': 'OUTMODEL', 'required': 'Yes', 'type': 'Block Model', 'description': 'Output model containing estimated grades, variance, etc.'},
+            {'name': 'SAMPOUT', 'required': 'No', 'type': 'Table', 'description': 'Output sample file containing weights details.'}
+        ]
+        fields = [
+            {'name': 'XPT', 'required': 'No', 'type': 'Numeric', 'default': 'XPT', 'description': 'X coordinate field in sample data.'},
+            {'name': 'YPT', 'required': 'No', 'type': 'Numeric', 'default': 'YPT', 'description': 'Y coordinate field in sample data.'},
+            {'name': 'ZPT', 'required': 'No', 'type': 'Numeric', 'default': 'ZPT', 'description': 'Z coordinate field in sample data.'},
+            {'name': 'ZONE1_F', 'required': 'No', 'type': 'Any', 'default': 'Undefined', 'description': 'First zone control field name.'},
+            {'name': 'ZONE2_F', 'required': 'No', 'type': 'Any', 'default': 'Undefined', 'description': 'Second zone control field name.'},
+            {'name': 'KEY', 'required': 'No', 'type': 'Numeric', 'default': 'Undefined', 'description': 'Key field for limiting sample counts.'}
+        ]
+        parameters = [
+            {'name': 'MERGEST', 'required': 'No', 'default': '1', 'range': '0,1', 'values': '0,1', 'description': 'Flag to control merging of consistent search/variogram parameters.'}
+        ]
+    else:
+        input_files = parse_first_markdown_table(sections.get('input files', []))
+        output_files = parse_first_markdown_table(sections.get('output files', []))
+        fields = parse_first_markdown_table(sections.get('fields', []))
+        parameters = parse_parameters_table(sections.get('parameters', []))
 
-    input_files = expand_wildcard_names(input_files)
-    output_files = expand_wildcard_names(output_files)
-    fields = expand_wildcard_names(fields)
-    parameters = expand_wildcard_names(parameters)
+        input_files = expand_wildcard_names(input_files)
+        output_files = expand_wildcard_names(output_files)
+        fields = expand_wildcard_names(fields)
+        parameters = expand_wildcard_names(parameters)
     
     overview_lines = sections.get('process overview', []) or sections.get('command overview', [])
     overview = "\n".join(overview_lines).strip()
@@ -449,7 +485,7 @@ def generate_docstring(info, list_groups):
     doc.append(f'        """')
     return "\n".join(doc)
 
-def generate_validation_code(p_name, arg_name, range_str, values_str):
+def generate_validation_code(p_name, arg_name, range_str, values_str, default_str=None):
     validation_lines = []
     
     has_values = False
@@ -463,6 +499,14 @@ def generate_validation_code(p_name, arg_name, range_str, values_str):
             except ValueError:
                 pass
                 
+    if has_values and default_str:
+        try:
+            default_val = float(default_str.strip().replace("'", "").replace('"', ""))
+            if default_val not in allowed_values:
+                allowed_values.append(default_val)
+        except ValueError:
+            pass
+
     has_range = False
     min_val, max_val = None, None
     if range_str and range_str.lower() != 'undefined':
@@ -489,8 +533,15 @@ def generate_validation_code(p_name, arg_name, range_str, values_str):
         validation_lines.append(f"        if {arg_name} != \"optional\":")
         validation_lines.append(f"            try:")
         validation_lines.append(f"                val = float({arg_name})")
-        validation_lines.append(f"                if not ({min_val} <= val <= {max_val}):")
-        validation_lines.append(f"                    raise ValueError(f\"{arg_name} value {{{arg_name}}} is not in allowed range: [{min_val}, {max_val}]\")")
+        if default_str:
+            try:
+                default_val = float(default_str.strip().replace("'", "").replace('"', ""))
+                validation_lines.append(f"                if not ({min_val} <= val <= {max_val}) and val != {default_val}:")
+            except ValueError:
+                validation_lines.append(f"                if not ({min_val} <= val <= {max_val}):")
+        else:
+            validation_lines.append(f"                if not ({min_val} <= val <= {max_val}):")
+        validation_lines.append(f"                    raise ValueError(f\"{arg_name} value {{{arg_name}}} is not in allowed range: [{min_val}, [{max_val}]\")")
         validation_lines.append(f"            except ValueError as e:")
         validation_lines.append(f"                if isinstance({arg_name}, (int, float)):")
         validation_lines.append(f"                    raise e")
@@ -615,6 +666,7 @@ def generate_python_function(info):
             default = parse_default_value(p.get('default', 'optional'), p.get('required', 'No'))
             args.append(f"{p['py_name']}={default}")
 
+    args.append('arguments="optional"')
     args.append('retrieval="optional"')
 
     # Function signature
@@ -698,7 +750,7 @@ def generate_python_function(info):
             body.append(f'            raise ValueError("{name} is required.")')
             body.append("")
             
-        validation_code = generate_validation_code(p['name'], name, p.get('range', 'Undefined'), p.get('values', 'Undefined'))
+        validation_code = generate_validation_code(p['name'], name, p.get('range', 'Undefined'), p.get('values', 'Undefined'), p.get('default', 'optional'))
         if validation_code:
             body.append(validation_code)
             body.append("")
@@ -706,6 +758,10 @@ def generate_python_function(info):
         body.append(f'        if {name} != "optional":')
         body.append(f'            command += " @{p["name"].lower()}=" + str({name})')
         body.append("")
+
+    body.append(f'        if arguments != "optional":')
+    body.append(f'            command += " " + arguments')
+    body.append("")
 
     body.append(f'        if retrieval != "optional":')
     body.append(f'            command += "{{" + retrieval + "}}"')

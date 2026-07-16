@@ -99,39 +99,10 @@ class init(object):
 
         return field_string;
 
-    def cokrig(self,
-                retrieval="optional"):
-
-        r"""
-        COKRIG
-        ------
-        COKRIG performs grade estimation using univariate and multivariate methods, including ordinary, simple kriging, inverse distance weighting and nearest neighbour. 
-
-This process is used as part of the [Advanced Estimation](<../STUDIO_RM/Multivariate_Introduction.md>) wizard, although it can also be accessed independently via the command line as a standalone process.
-
-        Input Files:
-        ------------
-
-        Output Files:
-        -------------
-
-        Fields:
-        -------
-
-        Parameters:
-        -----------
-
-        """
-        command = "cokrig "
-
-        if retrieval != "optional":
-            command += "{" + retrieval + "}"
-
-        self.run_command(command)
-
     def comres(self,
                 reserve_o="required",
                 zone_f="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -249,99 +220,8 @@ Once the primary and secondary classification is complete the **RESERVE** file w
         if zone_f != "optional":
             command += " *zone=" + zone_f
 
-        if retrieval != "optional":
-            command += "{" + retrieval + "}"
-
-        self.run_command(command)
-
-    def estima(self,
-                retrieval="optional"):
-
-        r"""
-        ESTIMA
-        ------
-        The **ESTIMA** process provides a choice of methods for grade estimation of a block model.
-
-For in-depth conceptual information on the **ESTIMA** process, and grade estimation in general, see [Grade Estimation Introduction](<../STUDIO_RM/Grade%20Estimate%20Overview.md>).
-
-**ESTIMA** provides the following grade estimation methods:
-
-  * Nearest Neighbor (NN).
-
-  * Inverse Power of Distance [IPD].
-
-  * Ordinary Kriging (OK).
-
-  * Simple Kriging.
-
-  * Log Kriging.
-
-  * Sichel's T Estimator.
-
-  * Ordinary Macro Kriging
-
-  * Simple Macro Kriging
-
-  * F-value
-
-  * Lagrange multiplier
-
-Key ESTIMA features:
-
-  * Multiple grades can be estimated in a single run.
-
-  * The same grade can be estimated by different methods.
-
-  * Different search volumes and estimation parameters can be used for the different grades.
-
-  * Rectangular or ellipsoidal search volume with anisotropy.
-
-  * Restriction of number of samples by octant.
-
-  * Restriction of number of samples by key field.
-
-  * Estimation by zone, with separate parameters for each zone.
-
-  * Wide selection of variogram model types for both normal and lognormal kriging.
-
-  * Automatic transformation of data if the &PROTO model is a rotated model.
-
-  * Unfolding option available for all estimation types.
-
-  * Optimization of sample searching to improve processing speed.
-
-  * Parent cell estimation.
-
-  * Selective update of a partial model.
-
-If the input **& PROTO** model contains cells and sub-cells then values are interpolated into the existing cell structure. If **& PROTO** is empty then cells and sub-cells are created if there are sufficient samples within the search volume.
-
-**ESTIMA** requires a search volume to be defined. This is the volume, centered on the cell being estimated, which contains the samples to be used for grade estimation. In fact more than one search volume may be defined, so that different grades can have different search volumes. The parameters describing the search volume(s) are supplied using the Search Volume Parameter file **& SRCPARM**.
-
-**Note** : **ESTIMA** parameter files can be imported and transformed for use in **[COKRIG](<cokrig.md>)** using the Advanced Estimation console's **[Parameters](<../STUDIO_RM/Multivariate_Import_Parameters.md>)** panel).
-
-**ESTIMA** also requires a set of estimation parameters to be defined for each grade to be estimated. These parameters are also supplied to **ESTIMA** using a file - in this case the Estimation Parameter file. It will include items such as the estimation method, the search volume reference number and for example the power, if Inverse Power of Distance is selected.
-
-**Note** : Search volume parameter files exported from the Advanced Estimation console cannot be used as an input to the **ESTIMA** process, or the **[ESTIMATE](<estimate.md>)** screen.
-
-**ESTIMA** estimation methods include Nearest Neighbor, Inverse Power of Distance, and Sichel's t Estimator. MOD also includes Ordinary Kriging with a single structure spherical model variogram. The additional options in EGS are a choice of variogram models, lognormal kriging and Simple Kriging. Please consult your local Datamine office if you would like further information on these modules.
-
-**Note** : When **COKRIG** or **ESTIMA** run Dynamic Anisotropy and less than 3 angles are used, the process replaces the missing angles with angles from the selected search or variogram.
-
-        Input Files:
-        ------------
-
-        Output Files:
-        -------------
-
-        Fields:
-        -------
-
-        Parameters:
-        -----------
-
-        """
-        command = "estima "
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -349,6 +229,7 @@ If the input **& PROTO** model contains cells and sub-cells then values are inte
         self.run_command(command)
 
     def estimate(self,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -379,12 +260,16 @@ Related topics and activities
         """
         command = "estimate "
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
         self.run_command(command)
 
     def export(self,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -421,6 +306,9 @@ The file is exported in the chosen format.
         """
         command = "export "
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -428,6 +316,7 @@ The file is exported in the chosen format.
 
     def fdin(self,
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -486,6 +375,9 @@ The output model file is not written in IJK order, and must subsequently be sort
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -494,6 +386,7 @@ The output model file is not written in IJK order, and must subsequently be sort
     def fxin(self,
                 out_o="required",
                 filetype_p=1,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -545,678 +438,8 @@ The output model file is not written in IJK order, and must subsequently be sort
         if filetype_p != "optional":
             command += " @filetype=" + str(filetype_p)
 
-        if retrieval != "optional":
-            command += "{" + retrieval + "}"
-
-        self.run_command(command)
-
-    def grade(self,
-                retrieval="optional"):
-
-        r"""
-        GRADE
-        -----
-        **Note** : This is a _superprocess_ and running it may have an effect on other Datamine files in the project.
-
-Interpolate a single grade into a block model using basic interpolation methods:
-
-  * Nearest Neighbour
-
-The Nearest Neighbour interpolation method simply assigns to the subcell the grade of the nearest sample. The definition of 'nearest' takes into account the anisotropy and orientation of the search ellipsoid. The Inverse Power of Distance method also takes account of the anisotropy and orientation of the search volume when assigning weights to the samples.
-
-  * Inverse Power of Distance
-
-For Inverse Power of Distance and Ordinary Kriging you may record the number of samples which are used to make each estimate. This is done by specifying a **NUMSAM** field. 
-
-  * Ordinary Kriging
-
-If you select Ordinary Kriging then you must also define a one or two structure spherical model variogram. It is assumed that any anisotropy in the variogram ranges has the same orientation as the search volume, but the actual values of the ranges are independent of the dimensions of the search volume. For Ordinary Kriging you may also record the kriged variance of the estimate by specifying a **VARIANCE** field.
-
-Note: Only one grade field can be interpolated at a time. **[COKRIG](<cokrig.md>)** should be used when multiple grade fields need to be interpolated at a time.
-
-For any method, you must specify an [input prototype block model](<../COMMON/filetype.md#BlockMod>), and an input sample data file. If the input prototype model contains cells and subcells then values are interpolated into the existing cell structure. If the prototype model is empty then cells and subcells are created if there are sufficient samples within the search volume.  
-  
-For kriging, a search volume is defined by a 3D ellipsoid which is centered on each subcell of the model in turn, and is used to select the samples for interpolating that subcell. You must define the lengths for the three axes of the ellipsoid, which may be different if you want an anisotropic volume. If you want a spherical search volume then set all three axes equal to the radius of the required sphere. You may orientate the search ellipsoid by specifying three sets of rotation angles and axes. The definition of the rotation angles and axes is described in section 3 of the Grade Estimation User Guide.  
-  
-You may select to use the zone control option by specifying a **ZONE** field. This will restrict the samples that are used for making the estimate to have the same **ZONE** value as the prototype model subcell. For example if both the prototype model and sample data files include a numeric rocktype field **ROCK** , then specifying **ZONE**(ROCK) will ensure that subcells which are rocktype N will be estimated using samples which are rocktype N.
-
-The samples from the input sample file &**IN** can be weighted by specifying a **LENGTH** field.
-
-**Note** : It frequently happens that samples are not evenly distributed around the subcell being estimated, but are clustered together. One way of minimizing this problem is to divide the search volume into octants and ensure that a minimum number of octants have samples in them. This is defined using the **MINOCT** , **MINPEROC** and **MAXPEROC** parameters.
-
-### Input Files
-
-**Name** |  **I/O Status** |  **Required** |  **Type** |  **Description**  
----|---|---|---|---  
-PROTO |  Input |  Yes |  Block Model prototype |  Input prototype model. This must contain at least the fields **XC** , **YC** , **ZC** , **XINC** , **YINC** , **ZINC** , **XMORIG** , **YMORIG** , **ZMORIG** , **NX** , **NY** , **NZ** , **IJK**.  If the file contains cells and subcells, then these cells and subcells will be copied to the output model with the new grade field added. If the file does not contain cells and subcells then they will be created if there is sufficient data within the search ellipsoid.  
-IN |  Input |  Yes |  Drillhole |  Input sample data. This must contain the X, Y and Z coordinates of each sample and the grade field (**VALUE**) to be estimated. This will usually be a drillhole file, but can be any file containing the four required fields  
-  
-### Output Files
-
-**Name** |  **I/O Status** |  **Required** |  **Type** |  **Description**  
----|---|---|---|---  
-MODEL |  Output |  Yes |  Block Model |  Output interpolated model. This will include all the fields in the input prototype model plus the estimated grade field (**VALUE**). In addition the number of samples field (**NUMSAM**) and the variance field (**VARIANCE**) will be included if they have been specified
-
-        Input Files:
-        ------------
-
-        Output Files:
-        -------------
-
-        Fields:
-        -------
-
-        Parameters:
-        -----------
-
-        """
-        command = "grade "
-
-        if retrieval != "optional":
-            command += "{" + retrieval + "}"
-
-        self.run_command(command)
-
-    def indest(self,
-                x_f="optional",
-                y_f="optional",
-                z_f="optional",
-                zone1_f_f="optional",
-                zone2_f_f="optional",
-                key_f="optional",
-                length_f_f="optional",
-                dens_f_f="optional",
-                discmeth_p="optional",
-                xpoints_p=1,
-                ypoints_p=1,
-                zpoints_p=1,
-                xdspace_p="optional",
-                ydspace_p="optional",
-                zdspace_p="optional",
-                parent_p="optional",
-                mindisc_p=1,
-                copyval_p="optional",
-                fvaltype_p="optional",
-                fstep_p="optional",
-                xmin_p="optional",
-                xmax_p="optional",
-                ymin_p="optional",
-                ymax_p="optional",
-                zmin_p="optional",
-                zmax_p="optional",
-                xsubcell_p=1,
-                ysubcell_p=1,
-                zsubcell_p=1,
-                order_p="optional",
-                grmethod_p="optional",
-                pgfields_p="optional",
-                retrieval="optional"):
-
-        r"""
-        INDEST
-        ------
-        **Note** : This is a _superprocess_ and running it may have an effect on other Datamine files in the project.
-
-The INDEST process uses the Indicator Estimation (IE) method to estimate grades into a block model using the cumulative distribution function (CDF) of indicator transformed sample grades
-
-To operate, INDEST needs a series of threshold values between the smallest and largest grade values. These threshold values, referred to as cutoffs, are used to numerically build the CDF of each block in the model. For each cutoff, data in the search volume are transformed into 0s and 1s: 1s if the data are greater than the threshold, and 0s if they are less than or equal. It then estimates the probability that the block grade is greater than the threshold value, using one of the standard estimation methods. This is usually kriging, but INDEST allows other methods such as Nearest Neighbour or Inverse Power of Distance to be used. Performing this operation for each cutoff across the range of the sample data approximates the CDF for the model cell. After the CDF is built, it is post processed to calculate the indicator estimated grade.
-
-INDESTuses the ESTIMAprocess to do the estimation for each cutoff. For further details of ESTIMA.
-
-If you are using Indicator Kriging (IK) then you must already have calculated a variogram for each cutoff, and stored the models in the Variogram Model file. The[VGRAM](<vgram.md>)process has specific features for calculating indicator variograms.
-
-For each cutoff INDESTcalculates the following data which can optionally be stored in the **Output Model** file:
-
-  * The proportion (fraction) of the model subcell which is above cutoff.
-
-  * The grade of the proportion of the subcell which lies above cutoff.
-
-The main output from INDESTis the grade above a cutoff of zero, ie the indicator estimated grade of the total subcell.
-
-### Estimation Parameter File
-
-In order to useINDESTyou must specify one record in the Estimation Parameter File &**ESTPARM** for each cutoff. This requires the numeric field **CUTOFF** to be included in the file.
-
-The * **VALUE_IN** field is the grade in the input sample &**IN** file to which the cutoffs are applied. Note that this is different from the use of the * **VALUE_IN** field when using ESTIMATE for Indicator Estimation.
-
-If the * **VALUE_OU** field is not specified then the * **VALUE_IN** field will be created in the output model file to hold the indicator estimated grade. If a * **VALUE_OU** field is specified in the first record of the Estimation Parameter File, then this value will be used for the indicator estimated grade in the output model file
-
-You can only estimate one set of indicators in a single run. In other words all the **VALUE_IN** fields must be the same. Also when using **INDEST** you cannot estimate a grade using non indicator methods in the same run.
-
-If you are using zone control then you must explicitly specify all combinations of zone field(s) in the Estimation Parameter File. You cannot use the option that is available in ESTIMA that allows you to specify an absent data zone field value that then applies to all zones that are not explicitly identified in&ESTPARM.
-
-If you are using zone control then you may use different cutoffs for different zones. However the PRABn and GRABn fields in the output model file must then be handled very carefully! The maximum number of cutoff values is 24.
-
-Fields for indicator estimation:
-
-  * **BINGRADE** : Used when **GRMETHOD** =4 to set the grade below the cutoff
-
-  * **ABVGRADE** : Sets the grade above the cutoff (only used for the top bin)
-
-### Grade Above Cutoff
-
-The calculation of the grade above each cutoff requires that the average grade between each successive pair of cutoffs be specified. For example if cutoff grades of 2, 5, 6.5 and 9.5g/t are selected then average grades are required for the ranges:
-
-From  |  To  
----|---  
-0 |  2  
-2 |  5  
-5 |  6.5  
-6.5 |  9.5  
-9.5 |  ∞  
-  
-Four methods are available to specify the average grade for each range, controlled by parameter @**GRMETHOD** :
-
-GRMETHOD  |  Description  
----|---  
-1 |  Average of minimum and maximum cutoff values. The grade above the highest cutoff is calculated as the highest cutoff plus half the difference between the highest and second highest cutoffs.  
-2 |  Calculated by INDEST from the grades of the samples in the &**IN** file.  
-3 |  Calculated by INDEST from the grades of the samples in the &**IN** file. However for the top bin (above the highest cutoff) the median grade is calculated.  
-4 |  Values are specified by the user, using the **BINGRADE** and **ABVGRADE** fields in the &**ESTPARM** file. The **BINGRADE** field contains the grade below the cutoff and the **ABVGRADE** field the grade above the cutoff. The ABVGRADE field is therefore only used for the top bin.  
-  
-**GRMETHOD** of 4 is illustrated in the following table:
-
-CUTOFF  | BINGRADE |  ABVGRADE   
----|---|---  
-2 |  1.3 |  -  
-5 |  3.6 |  -  
-6.5 |  5.7 |   
-9.5 |  7.8 |  11.1  
-  
-The values used by INDEST can be recorded by specifying an output &**AVGRADES** file.
-
-### Indicators
-
-Indicator values are calculated for each sample in the input sample &**IN** file for each cutoff. An indicator takes the value:
-
-0 ‑ the grade is less than or equal to the cutoff.
-
-1 ‑ the grade is above the cutoff.
-
-The indicator values can be saved by specifying an output &**INDICATE** file.
-
-###  Output Model 
-
-Fields **PRAB1 ... PRAB** n will be created in the Output Model file to store the proportion of the subcell above each cutoff. These are calculated directly by ESTIMA. Then the fields **GRAB1 ... GRAB** n are calculated during the post-processing to store the corresponding grade above each cutoff. The grade above cutoff values (**GRABn**) are calculated from the proportion and average grade between each pair of cutoffs. For example:
-
-Cutoff Number  |  Cutoff  |  PRABn  |  Calculation   
----|---|---|---  
-4 |  9.5 |  0.1 |  GRAB4= 11.1 (This figure is taken directly from the ABVGRADE field)  
-3 |  6.5 |  0.3 |  GRAB3= {0.1x11.1 + (0.3‑0.1)x7.8} / 0.3 = 8.9  
-2 |  5 |  0.6 |  GRAB2= {0.1x11.1 + (0.3‑0.1)x7.8 + (0.6‑0.3)x5.7} / 0.6 = 7.3  
-1 |  2 |  0.85 |  GRAB1= {0.1x11.1 + (0.3‑0.1)x7.8 + (0.6‑0.3)x5.7 + (0.85‑0.6)x3.6} / 0.85 = 6.21  
-0 |  0 |  1 |  Indicator Grade=0.1x11.1 + (0.3‑0.1)x7.8 + (0.6‑0.3)x5.7 \+ (0.85‑0.6)x3.6 + (1.0‑0.85)x1.3 = 5.48  
-  
-The **PRABn** and **GRABn** fields will be stored in the output &**MODEL** file if parameter @PGFIELDS is set to 1.
-
-### Order Relation
-
-One of the main drawbacks of the indicator estimation method is the Order Relation Problem. This will occur if the proportion of the subcell above cutoff n is estimated to be less than the proportion above cutoff n+1. ie PRAB(n) < PRAB(n+1). Three options are available to correct for this, controlled by parameter ORDER:
-
-=1: Downwards.  
-=2: Upwards.  
-=3: Average of methods 1 and 2.
-
-The recommended method (and default) is 3.
-
-### Input Files
-
-Name |  I/O Status |  Required |  Type |  Description  
----|---|---|---|---  
-PROTO |  Input |  Yes |  Block_Model_File |  Input model prototype. This is a standard block model file containing the 13 compulsory fields. It may also contain the rotated model fields. If it includes cells then it must be sorted on IJK.  
-IN |  Input |  Yes |  Undefined |  Input sample data. This must contain X,Y and Z fields and at least one grade field.  
-SRCPARM |  Input |  Yes |  Undefined |  Search volume parameter file.  This contains 24 compulsory fields defining the search volume and the number of samples needed for grade estimation. More than one search volume may be defined. All fields are numeric:
-
-  * SREFNUM: Search volume reference number.
-  * SMETHOD: Search volume shape.
-  *     * 1 = 3D rectangle
-    * 2 = ellipsoid.
-  * SDIST1: Max search distance in direction 1.
-  * SDIST2: Max search distance in direction 2.
-  * SDIST3: Max search distance in direction 3.
-  * SANGLE1: First rotation angle for search vol.
-  * SANGLE2: Second rotation angle.
-  * SANGLE3: Third rotation angle.
-  * SAXIS1: Axis for 1st rotation (1=X,2=Y,3=Z).
-  * SAXIS2: Axis for 2nd rotation (1=X,2=Y,3=Z).
-  * SAXIS3: Axis for 3rd rotation (1=X,2=Y,3=Z).
-  * MINNUM1: Min number of samples, 1st search vol.
-  * MAXNUM1: Max number of samples, 1st search vol.
-  * SVOLFAC2: Axis multiplying factor,2nd search vol.
-  * MINNUM2: Min number of samples, 2nd search vol.
-  * MAXNUM2: Max number of samples, 2nd search vol.
-  * SVOLFAC3: Axis multiplying factor,3rd search vol.
-  * MINNUM3: Min number of samples, 3rd search vol.
-  * MAXNUM3: Max number of samples, 3rd search vol.
-  * OCTMETH: Octant method flag.
-    * 0=no octant search
-    * 1=use octants
-  * MINOCT: Minimum number of octants to be filled.
-  * MINPEROC: Minimum number of samples in an octant.
-  * MAXPEROC: Maximum number of samples in an octant.
-  * MAXKEY: Maximum number of samples with the same key value within an octant.
-
-  
-ESTPARM |  Input |  Yes |  Undefined |  Estimation parameter file. Each record in the file describes an estimation method and its associated parameters. The fields are dependent on the estimation methods selected. All fields are optional except for **VALUE_IN** , **SREFNUM** and **CUTOFF**. General fields:
-
-  * VALUE_IN: Grade field to be estimated.
-  * SREFNUM: Search volume reference number.
-  * CUTOFF: Cutoff grade for indicator calculation.
-  * VALUE_OU: Output indicator estimated grade field to be created in **MODEL** (Default is **VALUE_IN**). The required field name must be specified in the first record of the Estimation Parameter file. Values in subsequent records will be ignored.
-  * {ZONE1_F}: A/N 1st field for zonal estimation. The actual name of the field is given by the **ZONE1_F** field. e.g. **ZONE1_F**(**ROCK**).
-  * {ZONE2_F}: A/N 2nd field for zonal estimation.
-  * NUMSAM_F: Field to be created in MODEL for the number of samples.
-  * SVOL_F: Field to be created in MODEL for dynamic search volume number.
-  * VAR_F: Field to be created in MODEL for variance of estimate.
-  * MINDIS_F: Field to be created in MODEL for distance to nearest sample.
-  * IMETHOD: Estimation method.
-    1. Nearest neighbour (NN)
-    2. Inverse power of distance (IPD)
-    3. Ordinary Kriging (OK)
-    4. Simple Kriging (SK)
-    5. Sichel's T Estimator
-
-**Fields for IPD:**
-
-  * ANISO: Anisotropy method:
-    1. No anisotropy
-    2. Use search volume anisotropy
-    3. Use ANANGLEn
-  * ANANGLE1: N Anisotropy angle 1.
-  * ANANGLE2: N Anisotropy angle 2.
-  * ANANGLE3:N Anisotropy angle 3.
-  * ANDIST1: N Anisotropy distance 1.
-  * ANDIST2: N Anisotropy distance 2.
-  * ANDIST3: N Anisotropy distance 3.
-  * POWER: N Power of distance for weighting.
-  * ADDCON: N Constant added to distance.
-
-Fields for kriging:
-
-  * VREFNUM: Variogram model reference number.
-  * LOG: N Lognormal variogram flag. 0 = normal kriging. 1 = lognormal kriging.
-  * KRIGNEGW: N Treatment of -ve weights: 0 = -ve weights kept and used. 1 = ignore samples with -ve weights
-  * KRIGVARS: N Treatment of variance > sill: 0 = write variance to MODEL. 1 = set variance to sill. Fields for lognormal kriging:
-  * GENCASE: N Calculation method: 0 = Rendu's method. 1 = General case.
-  * DEPMEAN: N Deposit mean [If 0 then use kriged estimate]. Fields for general case:
-  * TOL: N Tolerance for convergence.
-  * **MAXITER** : N Maximum number of iterations. Fields for simple kriging:
-  * **LOCALMNP** : N Method for calculation of local mean: 1 = use field defined in PROTO 2 = use mean within search vol.
-  * LOCALM_F: Name of local mean field in PROTO; used if LOCALMNP=1
-
-Fields for indicator estimation
-
-  * **BINGRADE** : Used when **GRMETHOD** =4 to set the grade below the cutoff
-
-  * **ABVGRADE** : Sets the grade above the cutoff (only used for the top bin)
-
-  
-VMODPARM |  Input |  No |  Variogram \- Model |  Variogram model parameter file.  Each record in this file defines a variogram model type and its parameters. Only the VREFNUM field is compulsory.
-
-  * VREFNUM: Model variogram reference number.
-  * VANGLE1: Variogram anisotropy angle 1.
-  * VANGLE2: Variogram anisotropy angle 2.
-  * VANGLE3: Variogram anisotropy angle 3.
-  * VAXIS1: Model variogram rotation axis 1.
-  * VAXIS2: Model variogram rotation axis 2.
-  * VAXIS3: Model variogram rotation axis 3.
-  * NUGGET: Nugget variance.
-  * ST1: Variogram model type for structure 1.
-    1. Spherical
-    2. Power
-    3. Exponential
-    4. Gaussian
-    5. De Wijsian
-  * ST1PAR1: 1st parameter of structure 1 [Range 1 for spherical model].
-  * ST1PAR2: 2nd parameter of structure 1 [Range 2 for spherical model].
-  * ST1PAR3: 3rd parameter of structure 1 [Range 3 for spherical model].
-  * ST1PAR4: 4th parameter of structure 1 [C variance for spherical model].
-  * STn: Variogram model type for structure n. STnPARp pth parameter for structure n, where n<=9.
-
-  
-  
-### Output Files
-
-Name |  I/O Status |  Required |  Type |  Description  
----|---|---|---|---  
-MODEL |  Output |  No |  Block Model File |  Output model containing estimated grades, variance etc.  
-AVGRADES |  Output |  No |  Undefined |  Output file containing cutoff grade ranges and average grade used for each range. It will include zone field(s), if any, plus the following fields: 
-
-  * **BIN** : bin or grade range number 
-  * **LO_CUT** : lower cutoff grade 
-  * **UP_CUT** : upper cutoff grade 
-  * **NSAMPLES** : number of samples in IN file lying within the bin 
-  * **BINGRADE** : bin grade used for indicator kriging. This is dependent on the **GRMETHOD** parameter . 
-  * **SAMPMEAN** : mean grade of samples in IN file lying within the bin 
-
-  
-INDICATE |  Output |  No |  Undefined |  Output indicator file. This is a copy of the sample input IN file, but also includes the 0/1 indicator values for each cutoff  
-SAMPOUT |  Output |  No |  Undefined |  Output sample file containing details of weights for each sample for each cell estimated.
-
-        Input Files:
-        ------------
-
-        Output Files:
-        -------------
-
-        Fields:
-        -------
-
-        x: Numeric : IN
-            X coordinate of sample data in IN file. If not specified, then X is assumed.
-            Default=Undefined
-            Required=No
-
-        y: Numeric : IN
-            Y coordinate of sample data in IN file. If not specified, then Y is assumed.
-            Default=Undefined
-            Required=No
-
-        z: Numeric : IN
-            Z coordinate of sample data in IN file. If not specified, then Z is assumed.
-            Default=Undefined
-            Required=No
-
-        zone1_f: Any : IN
-            First field for zonal control.
-            Default=Undefined
-            Required=No
-
-        zone2_f: Any : IN
-            Second field for zonal control.
-            Default=Undefined
-            Required=No
-
-        key: Numeric : IN
-            Key field used to specify the field limiting the number of samples for estimation. The
-            field must exist in the IN file.
-            Default=Undefined
-            Required=No
-
-        length_f: Numeric : IN
-            Field used for length weighting in IPD. The field must exist in the IN file.
-            Default=Undefined
-            Required=No
-
-        dens_f: Numeric : IN
-            Field used for density weighting in IPD. The field must exist in the IN file.
-            Default=Undefined
-            Required=No
-
-        Parameters:
-        -----------
-
-        discmeth:
-            Cell discretisation method:
-            Range=
-            Values=
-            Default=
-            Required=No
-
-        xpoints:
-            Number of discretisation points in X. (1)
-            Range=Undefined
-            Values=Undefined
-            Default=1
-            Required=No
-
-        ypoints:
-            Number of discretisation points in Y. (1)
-            Range=Undefined
-            Values=Undefined
-            Default=1
-            Required=No
-
-        zpoints:
-            Number of discretisation points in Z. (1)
-            Range=Undefined
-            Values=Undefined
-            Default=1
-            Required=No
-
-        xdspace:
-            Distance between discretisation points in X if DISCMETH=2. The default gives just one
-            point.
-            Range=Undefined
-            Values=Undefined
-            Default=Undefined
-            Required=No
-
-        ydspace:
-            Distance between discretisation points in Y if DISCMETH=2. The default gives just one
-            point.
-            Range=Undefined
-            Values=Undefined
-            Default=Undefined
-            Required=No
-
-        zdspace:
-            Distance between discretisation points in Z if DISCMETH=2. The default gives just one
-            point.
-            Range=Undefined
-            Values=Undefined
-            Default=Undefined
-            Required=No
-
-        parent:
-            Flag to control parent cell estimation:
-            Range=
-            Values=
-            Default=
-            Required=No
-
-        mindisc:
-            Minimum number of discretisation points. Only used if PARENT=2. The default is (1).
-            Range=Undefined
-            Values=Undefined
-            Default=1
-            Required=No
-
-        copyval:
-            Flag controlling copying of values from PROTO to MODEL if there is insufficient data to
-            estimate them:
-            Range=
-            Values=
-            Default=
-            Required=No
-
-        fvaltype:
-            Flag for cell size approximation for F values:
-            Range=
-            Values=
-            Default=
-            Required=No
-
-        fstep:
-            Step size for cell approximation. This is only used if **FVALTYPE** =2.
-            Range=Undefined
-            Values=Undefined
-            Default=Undefined
-            Required=No
-
-        xmin:
-            Minimum X value for model updating. The default is the X model origin.
-            Range=Undefined
-            Values=Undefined
-            Default=Undefined
-            Required=No
-
-        xmax:
-            Maximum X value for model updating. The default is the maximum X value for **PROTO**.
-            Range=Undefined
-            Values=Undefined
-            Default=Undefined
-            Required=No
-
-        ymin:
-            Minimum Y value for model updating. The default is the Y model origin.
-            Range=Undefined
-            Values=Undefined
-            Default=Undefined
-            Required=No
-
-        ymax:
-            Maximum Y value for model updating. The default is the maximum Y value for **PROTO**.
-            Range=Undefined
-            Values=Undefined
-            Default=Undefined
-            Required=No
-
-        zmin:
-            Minimum Z value for model updating. The default is the Z model origin.
-            Range=Undefined
-            Values=Undefined
-            Default=Undefined
-            Required=No
-
-        zmax:
-            Maximum Z value for model updating. The default is the maximum Z value for **PROTO**.
-            Range=Undefined
-            Values=Undefined
-            Default=Undefined
-            Required=No
-
-        xsubcell:
-            Number of subcells per parent cell in X if **PROTO** is empty. The default is (1).
-            Range=Undefined
-            Values=Undefined
-            Default=1
-            Required=No
-
-        ysubcell:
-            Number of subcells per parent cell in Y if **PROTO** is empty. The default is (1).
-            Range=Undefined
-            Values=Undefined
-            Default=1
-            Required=No
-
-        zsubcell:
-            Number of subcells per parent cell in Z if **PROTO** is empty. The default is (1).
-            Range=Undefined
-            Values=Undefined
-            Default=1
-            Required=No
-
-        order:
-            Order relation correction method:
-            Range=
-            Values=
-            Default=
-            Required=No
-
-        grmethod:
-            Method for specifying average grade within each cutoff range:
-            Range=
-            Values=
-            Default=
-            Required=No
-
-        pgfields:
-            Flag to select whether the proportion above cutoff fields (PRABn) and the grade above
-            cutoff fields (GRABn) should be included in the output MODEL file:
-            Range=
-            Values=
-            Default=
-            Required=No
-
-        """
-        command = "indest "
-
-        if x_f != "optional":
-            command += " *x=" + x_f
-
-        if y_f != "optional":
-            command += " *y=" + y_f
-
-        if z_f != "optional":
-            command += " *z=" + z_f
-
-        if zone1_f_f != "optional":
-            command += " *zone1_f=" + zone1_f_f
-
-        if zone2_f_f != "optional":
-            command += " *zone2_f=" + zone2_f_f
-
-        if key_f != "optional":
-            command += " *key=" + key_f
-
-        if length_f_f != "optional":
-            command += " *length_f=" + length_f_f
-
-        if dens_f_f != "optional":
-            command += " *dens_f=" + dens_f_f
-
-        if discmeth_p != "optional":
-            command += " @discmeth=" + str(discmeth_p)
-
-        if xpoints_p != "optional":
-            command += " @xpoints=" + str(xpoints_p)
-
-        if ypoints_p != "optional":
-            command += " @ypoints=" + str(ypoints_p)
-
-        if zpoints_p != "optional":
-            command += " @zpoints=" + str(zpoints_p)
-
-        if xdspace_p != "optional":
-            command += " @xdspace=" + str(xdspace_p)
-
-        if ydspace_p != "optional":
-            command += " @ydspace=" + str(ydspace_p)
-
-        if zdspace_p != "optional":
-            command += " @zdspace=" + str(zdspace_p)
-
-        if parent_p != "optional":
-            command += " @parent=" + str(parent_p)
-
-        if mindisc_p != "optional":
-            command += " @mindisc=" + str(mindisc_p)
-
-        if copyval_p != "optional":
-            command += " @copyval=" + str(copyval_p)
-
-        if fvaltype_p != "optional":
-            command += " @fvaltype=" + str(fvaltype_p)
-
-        if fstep_p != "optional":
-            command += " @fstep=" + str(fstep_p)
-
-        if xmin_p != "optional":
-            command += " @xmin=" + str(xmin_p)
-
-        if xmax_p != "optional":
-            command += " @xmax=" + str(xmax_p)
-
-        if ymin_p != "optional":
-            command += " @ymin=" + str(ymin_p)
-
-        if ymax_p != "optional":
-            command += " @ymax=" + str(ymax_p)
-
-        if zmin_p != "optional":
-            command += " @zmin=" + str(zmin_p)
-
-        if zmax_p != "optional":
-            command += " @zmax=" + str(zmax_p)
-
-        if xsubcell_p != "optional":
-            command += " @xsubcell=" + str(xsubcell_p)
-
-        if ysubcell_p != "optional":
-            command += " @ysubcell=" + str(ysubcell_p)
-
-        if zsubcell_p != "optional":
-            command += " @zsubcell=" + str(zsubcell_p)
-
-        if order_p != "optional":
-            command += " @order=" + str(order_p)
-
-        if grmethod_p != "optional":
-            command += " @grmethod=" + str(grmethod_p)
-
-        if pgfields_p != "optional":
-            command += " @pgfields=" + str(pgfields_p)
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -1226,6 +449,7 @@ SAMPOUT |  Output |  No |  Undefined |  Output sample file containing details of
     def inpddf(self,
                 out_o="required",
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -1317,6 +541,9 @@ The following messages are output to the display when using INPDDF with a catalo
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -1325,6 +552,7 @@ The following messages are output to the display when using INPDDF with a catalo
     def inpfil(self,
                 out_o="required",
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -1382,6 +610,9 @@ The data may come either from the keyboard, or from a system file external to th
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -1390,6 +621,7 @@ The data may come either from the keyboard, or from a system file external to th
     def inpfml(self,
                 out_o="required",
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -1465,6 +697,9 @@ The data format may come either from the file description, entered when the Data
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -1473,6 +708,7 @@ The data format may come either from the file description, entered when the Data
     def inputc(self,
                 out_o="required",
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -1528,6 +764,9 @@ Blank lines within the external file are loaded (as far as the record count is c
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -1535,6 +774,7 @@ Blank lines within the external file are loaded (as far as the record count is c
 
     def inputd(self,
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -1603,6 +843,9 @@ OK, ok, YES, Y or y to end DD.
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -1610,6 +853,7 @@ OK, ok, YES, Y or y to end DD.
 
     def link(self,
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -1652,6 +896,9 @@ The database file name is attached to symbolic file &**OUT**. The name of the ex
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -1660,6 +907,7 @@ The database file name is attached to symbolic file &**OUT**. The name of the ex
     def listdr(self,
                 out_o="optional",
                 fieldnam_f="optional",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -1701,6 +949,9 @@ Wildcarding is supported and an output catalogue file can be generated. Filename
         if fieldnam_f != "optional":
             command += " *fieldnam=" + fieldnam_f
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -1710,6 +961,7 @@ Wildcarding is supported and an output catalogue file can be generated. Filename
                 print_p=0,
                 level_p=0,
                 encrypt_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -1815,6 +1067,9 @@ Note: The !**LOADCF** process deletes the stack file <name>.STK, where <name> is
         if encrypt_p != "optional":
             command += " @encrypt=" + str(encrypt_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -1823,6 +1078,7 @@ Note: The !**LOADCF** process deletes the stack file <name>.STK, where <name> is
     def monaco(self,
                 out_o="required",
                 nrecs_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -1901,6 +1157,9 @@ To generate random number output with MONACO:
         if nrecs_p != "optional":
             command += " @nrecs=" + str(nrecs_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -1913,6 +1172,7 @@ To generate random number output with MONACO:
                 print_p=0,
                 sort_p=0,
                 longname_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2085,12 +1345,16 @@ The "AND" operator has higher precedence than "OR". Parentheses (brackets) may b
         if longname_p != "optional":
             command += " @longname=" + str(longname_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
         self.run_command(command)
 
     def picted(self,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2240,6 +1504,9 @@ The **PICTED** process is terminated.
         """
         command = "picted "
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -2248,6 +1515,7 @@ The **PICTED** process is terminated.
     def protom(self,
                 out_o="required",
                 rotmod_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2423,6 +1691,9 @@ Whatever the value of ROTMOD the user is finally prompted for the cell dimension
         if rotmod_p != "optional":
             command += " @rotmod=" + str(rotmod_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -2430,6 +1701,7 @@ Whatever the value of ROTMOD the user is finally prompted for the cell dimension
 
     def protop(self,
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2474,6 +1746,9 @@ The user may define three values for X and Y defining the scale (X SCALE), and m
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -2481,6 +1756,7 @@ The user may define three values for X and Y defining the scale (X SCALE), and m
 
     def quig(self,
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2513,6 +1789,9 @@ The user may define three values for X and Y defining the scale (X SCALE), and m
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -2525,6 +1804,7 @@ The user may define three values for X and Y defining the scale (X SCALE), and m
                 distrib_p="required",
                 ps_f=['optional'],
                 seed_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2648,6 +1928,9 @@ The type of random distribution is primarily dictated by DISTRIB. Each option su
         if seed_p != "optional":
             command += " @seed=" + str(seed_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -2658,6 +1941,7 @@ The type of random distribution is primarily dictated by DISTRIB. Each option su
                 text_f="optional",
                 width_p=80,
                 print_p=0,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2722,8 +2006,8 @@ In the external file the key is prefixed by the characters . Specification of an
         if width_p != "optional":
             try:
                 val = float(width_p)
-                if not (1.0 <= val <= 132.0):
-                    raise ValueError(f"width_p value {width_p} is not in allowed range: [1.0, 132.0]")
+                if not (1.0 <= val <= 132.0) and val != 80.0:
+                    raise ValueError(f"width_p value {width_p} is not in allowed range: [1.0, [132.0]")
             except ValueError as e:
                 if isinstance(width_p, (int, float)):
                     raise e
@@ -2743,6 +2027,9 @@ In the external file the key is prefixed by the characters . Specification of an
         if print_p != "optional":
             command += " @print=" + str(print_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -2750,6 +2037,7 @@ In the external file the key is prefixed by the characters . Specification of an
 
     def secdef(self,
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2928,12 +2216,16 @@ Data is saved to a Section Definition file. This file can contain multiple secti
         if out_o != "optional":
             command += " &out=" + out_o
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
         self.run_command(command)
 
     def setenv(self,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2958,12 +2250,16 @@ Data is saved to a Section Definition file. This file can contain multiple secti
         """
         command = "setenv "
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
         self.run_command(command)
 
     def sortx(self,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -2988,6 +2284,9 @@ See [MGSORT Process](<mgsort.md>).
         """
         command = "sortx "
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -2997,6 +2296,7 @@ See [MGSORT Process](<mgsort.md>).
                 wiretr_o="required",
                 wirept_o="required",
                 sid_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -3066,12 +2366,16 @@ See [MGSORT Process](<mgsort.md>).
         if sid_p != "optional":
             command += " @sid=" + str(sid_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
         self.run_command(command)
 
     def surlog(self,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -3128,6 +2432,9 @@ The reading of the input system file in **SURLOG** is controlled by user-defined
         """
         command = "surlog "
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -3136,6 +2443,7 @@ The reading of the input system file in **SURLOG** is controlled by user-defined
     def sustp2(self,
                 out_o="required",
                 direct_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -3194,6 +2502,9 @@ The last point on a SURPAC string file is not output if it matches the first poi
         if direct_p != "optional":
             command += " @direct=" + str(direct_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -3202,6 +2513,7 @@ The last point on a SURPAC string file is not output if it matches the first poi
     def sustpe(self,
                 out_o="required",
                 direct_p="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -3260,12 +2572,16 @@ The user is required to know the orientation of the string file coordinates ie s
         if direct_p != "optional":
             command += " @direct=" + str(direct_p)
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
         self.run_command(command)
 
     def syspar(self,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -3294,6 +2610,9 @@ Related topics and activities
         """
         command = "syspar "
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
@@ -3301,6 +2620,7 @@ Related topics and activities
 
     def tdin(self,
                 out_o="required",
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -3333,757 +2653,8 @@ Related topics and activities
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if retrieval != "optional":
-            command += "{" + retrieval + "}"
-
-        self.run_command(command)
-
-    def unfold(self,
-                out_o="required",
-                quads_o="optional",
-                x_f="optional",
-                y_f="optional",
-                z_f="optional",
-                section_f="optional",
-                boundary_f="optional",
-                wstag_f="optional",
-                bstag_f="optional",
-                tag_f="optional",
-                unitname_f="optional",
-                hangwall_f="optional",
-                footwall_f="optional",
-                ucsa_f="optional",
-                ucsb_f="optional",
-                ucsc_f="optional",
-                linkmode_p=3,
-                ucsamode_p=2,
-                ucsbmode_p=3,
-                ucscmode_p=2,
-                plane_p=1,
-                hangid_p="optional",
-                footid_p="optional",
-                unitid_p="optional",
-                tolrnc_p=0,
-                ucsalimt_p=1,
-                orgtag_p='-',
-                retrieval="optional"):
-
-        r"""
-        UNFOLD
-        ------
-        Transforms a set of X,Y,Z data into an Unfolded Coordinate System [UCS] as defined by a stratified geological unit.
-
-**UNFOLD** is the process for unfolding a stratified unit. The main purpose of unfolding strata is to calculate the stratigraphical distances between points - for example, Figure 1, below, shows 2 drillhole samples either side of an anticline. The standard geometrical distance between them is a straight line, however, from a geological point of view, the distance separating them is a line following the anticline structure (shown as dashed line). It is this distance, called the stratigraphical or natural or unfolded distance, that would then be used in variogram calculation and grade estimation.
-
-This unfolding technique involves transforming the standard coordinates (orthogonal X,Y,Z axes) of every sample to an unfolded coordinate system (UCS). The UCS axes are not straight lines, and are not orthogonal to each other.
-
-[![](../Images/unfold1.gif)](<javascript:void\(0\);>)
-
-Figure 1: Geometrical and Stratigraphical Distances Between Two Points
-
-![](../Images/image001.gif) |  Standard geometrical distance between A and B. Calculated from standard orthogonal X, Y, Z axes.  
----|---  
-![](../Images/image002.gif) |  Stratigraphical distance between A and B. Calculated from unfolded coordinate system (UCS) axes.  
-  
-Figure 2, further below, shows a simple example of sections through a stratified deposit. A plan showing the strike of the orebody is also shown in this figure. The unfolded coordinate system (UCS) has 3 axes, A, B and C:
-
-  * A - hangingwall-footwall direction (perpendicular to the orebody);
-
-  * B - down-dip (along the centre line between hangingwall and footwall);
-
-  * C - along strike.
-
-The **UNFOLD** process is used to calculate the **UCS** coordinates of desurveyed drillhole data. Variogram analysis can then be undertaken based on the **UCS**. The parameters of the variogram model are therefore calculated in the UCS. A model with cells and subcells within the folded stratified unit is created using standard methods. This model is defined using the world coordinate system.
-
-### Methodology
-
-The following method is illustrated with structural interpretations on vertical sections. However the method can also be applied when the interpretations are in plan. Structural interpretations must be provided as digitized strings on vertical sections. At a minimum, two structural strings on two sections are required to define the UCS coordinates of samples in the stratified unit. The structural strings will often be the hangingwall and footwall as shown in Figure 2, below.
-
-The method involves creating a series of hexahedrons modelling the stratified unit. Such a hexahedron is shown in Figure 3, below, where it is defined by 6 surfaces:
-
-BH1 BF1 CF1 CH1 BH2 BF2 CF2 CH2  |  Surfaces between adjacent hangingwall and footwall points within a section. Because the sections themselves are planar, these surfaces are planar. All points on each of these surfaces have the same `along strike' (UCSC) coordinate.  
----|---  
-BH1 BH2 CH2 CH1 BF1 BF2 CF2 CF1  |  Surfaces between sections and between adjacent points on the hangingwall or footwall respectively. All points on each of these surfaces have the same `across strike' (UCSA) coordinate.  
-BH1 BH2 BF2 BF1 CH1 CH2 CF2 CF1  |  Surfaces between sections and between points on the hangingwall and footwall.  
-  
-Any point Q lying within the stratified unit will lie within one of these hexahedrons. The UCS coordinates of the point can then be calculated by interpolation within the hexahedron.
-
-[![](../Images/unfold2.gif)](<javascript:void\(0\);>)
-
-Figure 2: Coordinate Axes in the UCS
-
-[![](../Images/unfold3.gif)](<javascript:void\(0\);>)
-
-Figure 3: Hexahedron Defined by 6 Surfaces
-
-### Unfolded Coordinate System (UCS)
-
-The three reference axes are:
-
-  * A - hangingwall-footwall direction (perpendicular to the orebody);
-
-  * B - down-dip (along the centre line between hangingwall and footwall);
-
-  * C - along strike.
-
-UCS values may be scaled in one of four ways to define the relative position of data within and across the sections:
-
-  1. Normalised. A normalised coordinate is a value between 0 and 1 describing the distance as a proportion of the total distance along the axis.
-
-  2. Adjusted. An adjusted coordinate is the normalised coordinate value multiplied by the average length of the appropriate axis (see Section 1.2.6), based on the data from all sections.
-
-  3. True Length. The true length coordinate is the distance from the UCS origin measured in standard units.
-
-  4. World Coordinates. Where appropriate, a UCS value can correspond to one of the standard (orthogonal X,Y,Z) axes.
-
-The true length coordinate approximates the distance from the origin of the UCS coordinate system of the selected axis, but is measured in the standard coordinate system units.
-
-  * For UCSA, this provides a measure of width or true width.
-
-  * For UCSB it is the distance along the dip-direction of the strata.
-
-  * UCSC defaults to the `adjusted' units - this is generally satisfactory as UCSC should correspond to the direction of the fold axis.
-
-### Creation of Links
-
-The method of creating the hexahedrons involves linking footwall and hangingwall strings within a section. The user defines these links when digitizing the strings using a similar method to tagging in wireframing. Figure 4, below, shows an example where points AH to FH have been linked to AF to FF respectively.
-
-Each of these links joins points on the hangingwall and footwall that the user considers have the same `down-dip' (UCSB) coordinate. It is not essential for the first and last points on each string to be linked. Any points on a string before the first linked point or after the last linked point will be ignored.
-
-If you don't define any links between the hangingwall and footwall, the algorithm automatically creates one between the first points, and one between the last points of each string.
-
-In order to calculate the A and B coordinates of any point Q, the process takes every digitized point on the hangingwall, and creates a corresponding point on the footwall with the same down-dip distance, taking into account the links defined by the user. This is illustrated in Figure 5, below, which is an enlargement of Figure 4. In this example points A, B, C, D, E and F have been defined as linked by the user.
-
-For all other digitized points on the hangingwall (H1 , H2 , etc) and footwall (F1 , F2 , etc) strings, the linking is done automatically as follows:
-
-[![](../Images/unfold4.gif)](<javascript:void\(0\);>)
-
-Figure 4: User Defined Links
-
-The distance AH H1 is calculated as a fraction of the distance AH BH measured along the hangingwall. A new point I is then created on the footwall, where I has the same fractional distance measured from AF as H1 does from AH
-    
-    
-    AH H1 /AH H1 H2 BH = AF I1 /AF F1 BF
-
-and similarly:
-    
-    
-    BH H3 H4 /BH H3 H4 H5 CH = BF I4 /BF CF
-
-This process is repeated for each digitized point Hi on the hangingwall \- pairing it with a new point Ii on the footwall as illustrated in Figure 5, below. The reverse process is then undertaken, creating points on the hangingwall which correspond to digitized points Fi on the footwall. This reverse process is not shown in Figure 5. By joining up the pairs of points at the same fractional distances, a series of quadrilaterals are created. Point Q will lie within one of these quadrilaterals (CH CF I6 H6 ) as illustrated in Figure 5.
-
-### Calculation of USCA and B Coordinates
-
-Consider first the two dimensional problem of calculating the normalized A and B coordinates of point Q as illustrated in Figure 5. It is assumed for this calculation that Q lies on the sectional plane which includes the structural interpretations.
-
-`Points AM , M1 , M2 , BM , M3 , ..., FM` are the midpoints of the link lines and provide a reference line for the down-dip axes.
-
-Coordinate A of point Q is calculated by first identifying the quadrilateral within which the point lies i.e. CH CF I6 H6 . A straight line is the drawn through Q intersecting the hangingwall at QH , and the footwall at QF . The line is drawn such that the hangingwall and footwall intersections are at the same proportional distance in CH H6 and CF I6 respectively:
-    
-    
-    CH QH /CH H6 = CF QF /CF I6 = CM QM /CM M6
-
-The normalized value of coordinate A is calculated as:
-    
-    
-    AN = QH Q/QH QF
-
-The normalized value of coordinate B is calculated as:
-    
-    
-    BN = AM BM CM QM /AM BM CM DM EM FM
-
-### Points Between Sections
-
-The method described so far assumed that point Q lies exactly on section. In order to calculate the A and B coordinates for a point lying between sections k and k+1 the above process must be extended to three dimensions. This involves linking points between sections in a similar manner to the linking within sections described previously. In the following description AH , BH etc are again used to denote points linked by the user, and Hi are intermediate points on the strings which are linked automatically. However it should be noted that although a point on the hangingwall may be linked by the user to a point on the footwall within a section, it is not necessary that the same point is linked by the user to a point on the next section.
-
-Point AH on section k is linked to point AH on section k+1, point BH on section k is linked to point BH on section k+1, and similarly for C to H. Links are always from hangingwall to hangingwall. Each digitized point H on section k is linked to a point on section k+1. Linking is also applied from points on section k+1 back to section k.
-
-Any point Q whose coordinates are to be estimated then lies within a wireframe hexahedron. Slicing this shape with a vertical plane through Q parallel to the sections will create a quadrilateral. This is then used to calculate coordinates A and B, as described previously.
-
-You create links only between hangingwall and footwall points, within any sections. Links between footwalls on adjacent sections are always done within the process. The reason for this is that once three links have been defined, the fourth can be automatically determined from the other three. It is therefore unnecessary for the user to define footwall to footwall links, and could lead to inconsistency in the data if it were allowed.
-
-The method described in this section assumes that the sectional interpretations are parallel. If this is not the case, then an intermediate plane through point Q is created using a similar method to that described previously.
-
-Figure 6, below, shows a plan view of the sections. Each section line (eg SH SH ) represents the maximum extent of projection of the hangingwall and footwall onto plan. A line is drawn through Q such that the intersections TH and TF divide the hangingwall and footwall in the same proportions:
-    
-    
-    SH TH /SH UH = SF TF /SF UF
-
-[![](../Images/unfold5.gif)](<javascript:void\(0\);>)
-
-Figure 5: Automatic Links
-
-### Calculation of UCSC Coordinate
-
-In the majority of cases the sections on which the structures have been defined will be parallel. If this is not the case then it is assumed that the sections are perpendicular to the strike, as illustrated in the plan view in Figure 6, below - that is, all points on any given section have the same `along strike' (UCSC) coordinate.
-
-The total distance along strike is estimated by creating a reference point on each section and calculating the length of the line joining these reference points. This reference vector therefore defines the average strike length and direction.
-
-The reference point on each section is the origin (defined by @ORGTAG), or if this is not specified, it is 0.5 of the distance along the median line (axis B). The reference vector is calculated between each pair of sections. The actual length of the vector between sections i and i+1 is denoted by Vi . The length of the C axis is then the sum of all Vi 's. This is denoted as CLEN which is R1 R2 R3 R4 in Figure 6.
-
-Figure 6 is a plan showing point Q lying between sections 3 and 4. The normalized along strike coordinate C of point Q is calculated as:
-    
-    
-    CN = R1 R2 R3 RQ /CLEN
-
-[![](../Images/unfold6.gif)](<javascript:void\(0\);>)
-
-Figure 6: Calculation of Along Strike Coordinate C
-
-### UCS Coordinate Units
-
-When the UCS coordinates of point Q are calculated, an intermediate section plane will have been interpolated and a number of `normalized', `adjusted' and `true length' measures are available to generate the required UCS A, B and C coordinates.
-
-The normalized coordinates (**AN** , **BN** , **CN**) of point Q as calculated previously all lie between 0 and 1. They represent a proportion of the total distance along each axis, and so it is not easy to relate these values to actual distances. The normalized coordinate space is equivalent to unfolding and stretching the stratified unit into a unit cube.
-
-In the generation of the quadrilaterals, a number of average measures are calculated. The average length of axis C is **CLEN** as described previously. The average length of the across strike axis A (**ALEN**), and the down-dip axis B (**BLEN**) are calculated as follows.
-
-Figure 5 shows the median line AM BM CM DM EM FM for section k. The length of this line is denoted **BLEN** . The average length of the down-dip axis is then calculated as the weighted average of the k **BLEN** values over all sections. The weights used are the distance of influence of each section ie k half way to the next section measured along the C axis.
-
-For each section the area enclosed by the hangingwall, footwall, and the top and bottom links is calculated. This is then divided by the length of the median line **BLENK** for that section to calculate the average across strike width, denoted as **WK** for section k. The average length of axis A, **ALEN** , is then calculated as the weighted average of WK over all sections.
-
-The relationship between the normal coordinates of point Q (AN , BN , CN ) and the adjusted coordinates (AA , BA , CA ) is then:
-    
-    
-    AA = AN  * ALEN
-    
-    
-    BA = BN  * BLEN
-    
-    
-    CA  = CN * CLEN
-
-For the intermediate section associated with point Qm, a local estimate of the length of the across strike width (axis A), and the down dip distance (axis B) is calculated. These distances define the `true length' coordinates for point Q. Where appropriate, any one of the original (X, Y, Z) world coordinate values can be assigned to be a UCS coordinate axis.
-
-The selection of the most appropriate coordinate system for the UCS axes will be dictated by the fold structure, the available digitized strings, and the requirements of variogram modelling and kriging (or other interpolation methods). Several coordinate systems may be of interest - for example, to interpolate block grades by stratigraphic position, and also prepare contours of true thickness in long section.
-
-The default parameters for **UNFOLD** are as follows:
-
-  * @**UCSAMODE** = 2 to calculate the relative position in the stratified unit from the `adjusted' coordinate.
-
-  * @**UCSBMODE** = 3 to calculate the unfolded position appropriate to each section.
-
-  * @**UCSCMODE** = 2 to calculate the approximate position along the fold axis based on an `adjusted' coordinate.
-
-The relative position of samples in the unfolded coordinate system is strongly influenced by the use of an origin, within section and between section strings, and the selection of `normalized', `adjusted' and `true length' coordinates. It is recommended that the position of samples in the unfolded coordinate system be plotted to verify the results of the unfolding process.
-
-### File Handling
-
-The following files are used by the UNFOLD process:
-
-#### &IN - Input Data File
-
-This file holds the standard X,Y,Z coordinate values which are to be transformed into the UCS. The values are held in the fields *X,*Y,*Z.
-
-#### &STRING \- Input Boundary Strings
-
-This file holds strings that define the hangingwall and footwall of each stratum on each section. It is a standard string file with the fields **PVALUE, PTN, XP,YP, ZP**. It must also include:
-
-* **BOUNDARY** |  Boundary identifier. A numeric field identifying the boundary represented by each string. Obviously its value must be constant for all points in a string.  
----|---  
-* **SECTION** |  Section identifier. A numeric field identifying the section number of each string. If sections are West-East then * **SECTION** could hold the Northing value.  
-  
-The file may contain some or all of the optional fields:
-
-* **WSTAG** |  Within section tags. A numeric field holding tag values used to link between the hangingwall and footwall strings within sections. The values in this field will be ignored if @**LINKMODE** =1 or 3.  
----|---  
-* **BSTAG** |  Between section tags. A numeric field holding tag values used to link between hangingwall strings on adjacent sections. The values in this field will be ignored if @**LINKMODE** =2 or 3.  
-* **TAG** |  Tag. A numeric field holding tag values used to link strings either within or between sections. The precise usage of the values in this field is controlled by @**LINKMODE**. A tag value of 0 or - indicates that the point is not linked.  
-  
-The &STRING must be sorted by *SECTION, *BOUNDARY, PTN. It is assumed that the section numbering system is such that sorting by *SECTION will ensure that physically adjacent sections are adjacent in the &STRING file.
-
-#### &UNITDEF \- Input Unit Definitions
-
-This optional file must contain the fields:
-
-* **UNITNAME** |  A numeric or alpha field holding the name of a stratigraphical unit defined by strings in the &**STRING** file.  
----|---  
-* **FOOTWALL** |  A numeric field holding the value of the * **BOUNDARY** field for strings in the &**STRING** file that define the footwall of the stratigraphical unit.  
-* **HANGWALL** |  A numeric field holding the value of the * **BOUNDARY** field for strings in the &**STRING** file that define the hangingwall of the stratigraphical unit.  
-  
-#### &OUT \- Output Data File
-
-The output data file contains all the fields of the &IN file plus:
-
-* **UNITNAME** |  Stratigraphical unit name. A numeric or alpha field defining the unit in which each data point lies.  
----|---  
-* **UCSA** |  Unfolded Coordinate System (UCS) A coordinate. A numeric field holding the hangingwall-footwall direction coordinate.  
-* **UCSB** |  Unfolded Coordinate System (UCS) B coordinate. A numeric field holding the down-dip coordinate.  
-* **UCSC** |  Unfolded Coordinate System (UCS) C co -ordinate. A numeric field holding the along strike coordinate.  
-  
-The &**OUT** file may not be the same as the &**IN** file, ie, in-place operation is not allowed. The &**OUT** file will not necessarily be in the same order as the &**IN** file. The &**OUT** file will contain all data records from the &**IN** input file for which **UNFOLD** could calculate UCS coordinates. Any data points that are outside the unfolding quadrilaterals are not written to &**OUT** (unless @**TOLRNC** is used).
-
-#### &QUADS \- Output Unfolding Quadrilaterals
-
-The linkages between points effectively form a type of wireframe. The wireframing used in **UNFOLD** is based on quadrilaterals rather than triangles, and therefore uses non planar surfaces, as described previously.
-
-The quadrilaterals can be output to an optional &**QUADS** file. This is a standard perimeter file (**PVALUE, PTN, XP, YP, ZP**) with additional fields **BLOCKTYP** , * **UNITNAME** and * **SECTION**. Field **BLOCKTYP** has the following values:
-
-  1. Quadrilateral joining adjacent hangingwall and footwall points within the same section which have the same downdip coordinate (eg, BH1 BH2 CF1 CH1 in Figure 3);
-
-  2. Quadrilateral joining hangingwall and footwall points on one section with points on the adjacent section (eg, BH1 BH2 CH2 CH1 in Figure 3);
-
-  3. A special case of **BLOCKTYP** = 2, defining a downdip reference plane where UCSB=0. This is described further on.
-
-### Detailed Features
-
-#### Link Points
-
-It should be noted that it is permissible for a single point on one string to be linked to two points on the other wall, or to two points on the next section.
-
-User-defined link points between sections need not link continuously from a point on one string, to a point on the next string, to a point on the next string, and so on. Hence a point with tag value N may occur on the first three sections, but there may be no tag with value N on the fourth. A tag with the value N may then be reused on the fifth and subsequent sections.
-
-#### Multiple Units
-
-In all examples so far it has been assumed that there is just a single stratified structure with a hangingwall and a footwall. In practice there may be a series of stratified units as illustrated in Figure 7\. The footwall of the first unit becomes the hangingwall of the second unit, and so on. Each unit is treated independently, so that the UCS coordinates for unit i are based on the thickness, downdip distance and along strike distance for the individual unit number i.
-
-Rather than run UNFOLD multiple times, once for each unit, the process has been designed to allow the definition of multiple units, which are all processed in a single run. The UCS coordinates are written to the output file together with a unit identifier.
-
-It is possible for overlapping strata to be defined using the &UNITDEF file. If this does happen and a point to be transformed lies in two or more units then it will be shown in the output file as lying in the first unit, in the order in which they are defined in the &UNITDEF file.
-
-#### Unit Definition
-
-The definition of a stratified unit is controlled either by a unit definition file or by parameter, with the file taking priority if both methods are specified. The &**UNITDEF** file contains the three fields * **HANGWALL** , * **FOOTWALL** and * **UNITNAME**. * **HANGWALL** and * **FOOTWALL** are the values of the * **BOUNDARY** field from the &STRINGS file. The * **UNITNAME** field may be alpha or numeric, and is included in the &**OUT** file for each sample.
-
-If the parameter method is used to select a single unit then @**HANGID** and @**FOOTID** must both be specified. The @**UNITID** parameter is optional. The unit name field in the &**OUT** file is created according to the following rules:
-
-  * If a &**UNITDEF** file is specified, then: the * **UNITNAME** field will be copied from this file. It can therefore be either alpha or numeric depending on its type in the &**UNITDEF** file.
-
-  * If a &**UNITDEF** file is not specified, then:
-
-    * if a * **UNITNAME** field exists in the &IN file, then * **UNITNAME** field will be copied from the &IN file.
-
-  * if a * **UNITNAME** field does not exist in the &IN file, then
-
-    * if parameter @**UNITID** is - or is not specified, then a field **UNITNAME** is created as an 8 character alpha field, and all values set to WITHIN.
-
-    * if parameter @**UNITID** is specified, then a field **UNITNAME** is created as numeric, and all values are set to the value specified.
-
-[![](../Images/unfold7.gif)](<javascript:void\(0\);>)
-
-Figure 7: Multiple Stratified Units
-
-### Data Outside the Unit (@TOLRNC and @UCSALIMT)
-
-The linking method used here effectively defines a type of wireframe. It should be noted that in general it is not possible therefore to calculate the UCS coordinates of any point lying outside this wireframe. If the volume of influence of the first and last sections can be extrapolated geologically outside the wireframe, then the extent of the wireframe should be adjusted. In practice this means that the user should create two new sections before the first and after the last, which contain copies of all strings on the first and last respectively.
-
-It is possible that a sample can be identified geologically as lying within a certain unit, yet it lies outside the hangingwall or footwall surface of the wireframe. This would happen if the actual unit varied non linearly between the interpreted sections. In these circumstances it is still possible to calculate UCS coordinates by use of the @**TOLRNC** parameter.
-
-This defines a margin, expressed as a fraction of the hangingwall-footwall distance UCSA, within which a sample can lie and still be assigned UCS coordinates. In most cases, the value for @**TOLRNC** would not need to be more than a few percent, but if necessary, can be set to much larger value. For example if @**TOLRNC** is set to 0.05 (i.e. 5%) then the normalized value of UCSA may lie between -0.05 and 1.05. This tolerance value only applies to the UCSA hangingwall-footwall direction.
-
-Note that if @**TOLRNC** is used when **UNFOLD** is processing several stratified units (ie, when a &**UNITDEF** is specified), a record from the &IN file may occur more than once in the &**OUT** file. For example, a sample lying near the 'unit 1'/'unit 2' boundary of figure 7 may be selected as being in unit 1 with a normalized UCSA coordinate of 0.99. If @**TOLRNC** =0.05, it may also be selected as being in unit 2 with a normalized UCSA coordinate of -- 0.01. It will therefore occur twice in the &OUT file. 
-
-If the @**TOLRNC** parameters is used, each stratigraphic unit should be processed in **UNFOLD** separately, and only those samples belonging to the stratigraphic unit should be supplied.
-
-The Parameter @UCSALIMT is used in conjunction with @**TOLRNC** to define the limits of the **UCSA** coordinate if **UCSAMODE** =1 or 2 and . This parameter provides additional control on normalized (@**UCSAMODE** =1) and adjusted (@**UCSAMODE** =2) coordinate values as follows:
-
-  1. UCSA coordinates can be <0 and >1 as described above (This is the default).
-  2. UCSA coordinates can be <0, but if they are calculated as >1, then will be reset to 1.
-
-  3. UCSA coordinates can be >1, but if they are calculated as <0, then are reset to 0.
-
-  4. UCSA coordinates that are calculated as <0 or >1 are reset to 0 and 1 respectively.
-
-The above description is in terms of the normalized UCSA value (@**UCSAMODE** =1). If adjusted (@**UCSAMODE** =2) is selected then the coordinate is calculated as the normalized value multiplied by the average thickness in the direction of the UCSA axis.
-
-### Direction of Axes
-
-The UCSA coordinate values always increase from the hangingwall to the footwall of each unit. For instance, if the UCSA values are normalized they will vary from 0 on the hangingwall, to 1 on the footwall.
-
-The UCSB coordinates increase in the same direction as the digitized boundary strings. In all the illustrations so far it is assumed that the strings go from top to bottom, and the UCSB coordinates therefore increase with depth. However, if the strings were digitized from bottom to top, then the origin of axis UCSB will be at the bottom of each section.
-
-Another method of changing the origin for the UCSB axis is by using the @ORGTAG parameter. This selects the tag number which defines the origin position from which the UCSB coordinate is measured. UCSB coordinates are then measured as positive in the direction towards the last digitized point, and negative towards the first digitized point on the string.
-
-The UCSC coordinates increase in the order in which the strings occur in the &STRING file. For example, with West East section strings sorted by increasing Northing, the UCSC coordinates increase with Northing. The UCSC axes direction could be reversed by changing the order of the &STRING file data by using a different *SECTION field.
-
-### Non-Continuous Units
-
-If one or both strings do not exist on an intermediate section, then there will be a break in the wireframe. For the purpose of calculating the along strike distance CLEN, the two sections either side of the break will be joined with a single line connection. This is illustrated in Figure 8. **BOUNDARY** 's 3 and 7 exist on sections 1, 2, 5 and 6, but not on sections 3 or 4. Therefore unit A only exists between sections 1 and 2, and between 5 and 6.
-
-If a unit pinches out on a section then the user may represent this by defining coincident hangingwall and footwall strings on intermediate sections. This is illustrated in Figure 9, below.
-
-[![](../Images/unfold8.gif)](<javascript:void\(0\);>)
-
-Figure 8: Break in Continuity of a Unit
-
-[![](../Images/unfold9.gif)](<javascript:void\(0\);>)
-
-Figure 9: Pinching Out a Unit
-
-### Input Files
-
-Name |  Description |  I/O Status |  Required |  Type  
----|---|---|---|---  
-IN |  Input file containing the X,Y and Z fields of points in the world coordinate system which are to be transformed to the UCS. |  Input |  Yes |  Undefined  
-STRING |  Input string file holding the boundary strings which define the stratified unit[s]. 7 fields are compulsory: **SECTION , BOUNDARY , PVALUE,XP,YP,ZP** and **PTN**. 3 optional fields are **WSTAG , BSTAG** and **TAG**.  The file must be sorted on **SECTION , BOUNDARY PTN,** with **SECTION** being the primary keyfield. It is assumed that the section numbering system is such that sorting on **SECTION** will ensure that physically adjacent sections are adjacent in the **STRING** file. |  Input |  Yes |  String  
-UNITDEF |  Optional input file containing the **BOUNDARY** value for the hangingwall and footwall of each stratified unit. It must contain the 3 fields: **UNITNAME** , **HANGWALL** and **FOOTWALL**.  If **UNITDEF** is not defined, the stratified unit must be defined by **UNITID** , **HANGID**. |  Input |  No |  Undefined
-
-        Input Files:
-        ------------
-
-        Output Files:
-        -------------
-
-        out: Undefined
-            The output file contains all the fields from the **IN** file plus the UCS coordinate
-            fields **UCSA** , **UCSB** and **UCSC** , and the **UNITNAME** field. The **OUT** file
-            must be different from the **IN** file.
-            Required=Yes
-
-        quads: Undefined
-            Optional output file containing the quadrilaterals linking hangingwall and footwall
-            points within and between sections. The file contains 8 fields: **PVALUE, PTN, XP, YP,
-            ZP BLOCKTYP, SECTION** and **UNITNAME**.
-            Required=No
-
-        Fields:
-        -------
-
-        x: Numeric : IN
-            The numeric field name in the IN file holding the data X co-ordinate, in world
-            coordinates. The default field name is X.
-            Default=Undefined
-            Required=No
-
-        y: Numeric : IN
-            The numeric field name in the IN file holding the data Y co-ordinate, in world
-            coordinates. The default field name is Y.
-            Default=Undefined
-            Required=No
-
-        z: Numeric : IN
-            The numeric field name in the IN file holding the data Z co-ordinate, in world
-            coordinates. The default field name is Z.
-            Default=Undefined
-            Required=No
-
-        section: Numeric : STRING
-            The numeric field name in the **STRING** file holding the section identifier. The
-            default field name is **SECTION**.
-            Default=Undefined
-            Required=No
-
-        boundary: Numeric : STRING
-            The numeric field name in the **STRING** file holding the boundary identifier. The
-            default field name is **BOUNDARY**.
-            Default=Undefined
-            Required=No
-
-        wstag: Numeric : STRING
-            Within Section **TAG**. A numeric tag field in the **STRING** file, defining the
-            stratigraphical links between hangingwall and footwall points on strings within the same
-            section. A value of 0 or - means that the point is not linked. The default field name is
-            **WSTAG**.
-            Default=Undefined
-            Required=No
-
-        bstag: Numeric : STRING
-            Between Section **TAG**. A numeric tag field in the **STRING** file, defining the
-            stratigraphical links between 2 points on strings on adjacent sections with the same
-            **BOUNDARY**. A value of 0 or - means that the point is not linked. The default field
-            name is **BSTAG**.
-            Default=Undefined
-            Required=No
-
-        tag: Numeric : STRING
-            A numeric tag field in the **STRING** file, defining both the stratigraphical links
-            between points on strings within the same section, and between points on adjacent
-            sections with the same **BOUNDARY**. A value of 0 or - means that the point is not
-            linked. The default field name is **TAG**.
-            Default=Undefined
-            Required=No
-
-        unitname: Any : UNITDEF
-            An alpha or numeric field in the **UNITDEF** file defining the name or number of the
-            unit. The default field name is **UNITNAME**.
-            Default=Undefined
-            Required=No
-
-        hangwall: Any : UNITDEF
-            A numeric field in the **UNITDEF** file which defines the **BOUNDARY** value of the
-            hangingwall for each **UNITNAME**. The default field name is **HANGWALL**.
-            Default=Undefined
-            Required=No
-
-        footwall: Numeric : UNITDEF
-            A numeric field in the **UNITDEF** file which defines the **BOUNDARY** value of the
-            footwall for each **UNITNAME**. The default field name is **FOOTWALL**.
-            Default=Undefined
-            Required=No
-
-        ucsa: Numeric : OUT
-            The name of the A coordinate field in the UCS measured perpendicular to the strings
-            within a section [across strike]. The field is created in the **OUT** file and has the
-            default name of **UCSA**.
-            Default=Undefined
-            Required=No
-
-        ucsb: Numeric : OUT
-            The name of the B coordinate field in the UCS measured parallel to the boundary strings
-            [down dip]. This field is created in the **OUT** file and has the default name of
-            **UCSB**.
-            Default=Undefined
-            Required=No
-
-        ucsc: Numeric : OUT
-            The name of the C coordinate field in the UCS measured from section to section [along
-            strike]. This field is created in the **OUT** file and has the default name of **UCSC**.
-            Default=Undefined
-            Required=No
-
-        Parameters:
-        -----------
-
-        linkmode:
-            The method by which links between strings are created. Options: 0: \- Within section
-            links are defined by the **WSTAG** field, or by the **TAG** field if **WSTAG** does not
-            exist. Between section links are defined by the **BSTAG** field, or by the **TAG** field
-            if **BSTAG** does not exist.; 1: \- Within section links are defined automatically.
-            Between section links are defined by the **BSTAG** field, or by the **TAG** field if
-            **BSTAG** does not exist.; 2: \- Within section links are defined by the **WSTAG**
-            field, or by the **TAG** field if **WSTAG** does not exist. Between section links are
-            defined automatically.; 3: Within section links are defined automatically. Between
-            section links are defined automatically. For simple structures it is not essential to
-            define tag points on the strings; using the default value (3) ensures that automatic
-            linking will be applied both within and between sections.
-            Range=0,3
-            Values=0,1,2,3
-            Default=3
-            Required=No
-
-        ucsamode:
-            The type of UCSA coordinate written to the OUT file. Default (2). Options: 1: \-
-            coordinates are normalised.; 2: \- coordinates are adjusted.; 3: \- coordinates are true
-            length.; 4: \- coordinates are world X value.; 5: \- coordinates are world Y value.; 6:
-            \- coordinates are world Z value.
-            Range=1,6
-            Values=1,2,3,4,5,6
-            Default=2
-            Required=No
-
-        ucsbmode:
-            The type of UCSB coordinate written to the OUT file. Default (3). Options: 1: \-
-            coordinates are normalised.; 2: \- coordinates are adjusted.; 3: \- coordinates are true
-            length.; 4: \- coordinates are world X value.; 5: \- coordinates are world Y value.; 6:
-            \- coordinates are world Z value.
-            Range=1,6
-            Values=1,2,3,4,5,6
-            Default=3
-            Required=No
-
-        ucscmode:
-            The type of UCSC coordinate written to the OUT file. Default (2). Options: 1: \-
-            coordinates are normalised.; 2: \- coordinates are adjusted.; 3: \- coordinates are true
-            length.; 4: \- coordinates are world X value.; 5: \- coordinates are world Y value.; 6:
-            \- coordinates are world Z value.
-            Range=1,6
-            Values=1,2,3,4,5,6
-            Default=2
-            Required=No
-
-        plane:
-            The plane of the structural interpretations defined in the **STRING** file. Default
-            (1). 1 - vertical sectional interpretation. 2 - interpretation in plan.
-            Range=1,2
-            Values=1,2
-            Default=1
-            Required=No
-
-        hangid:
-            The value of the field **BOUNDARY** in the **STRING** file that defines the hangingwall
-            of the unit. It will be used if the **UNITDEF** file is not defined.
-            Range=Undefined
-            Values=Undefined
-            Default=Undefined
-            Required=No
-
-        footid:
-            The value of the field **BOUNDARY** in the **STRING** file that defines the footwall of
-            the unit. It will be used if the **UNITDEF** file is not defined.
-            Range=Undefined
-            Values=Undefined
-            Default=Undefined
-            Required=No
-
-        unitid:
-            If **HANGID** and **FOOTID** are used then the corresponding unit number is defined by
-            parameter **UNITID**.
-            Range=Undefined
-            Values=Undefined
-            Default=Undefined
-            Required=No
-
-        tolrnc:
-            Tolerance in the calculation of the **UCSA** coordinate expressed as a proportion of
-            the UCSA width. The default is (0).
-            Range=Undefined
-            Values=Undefined
-            Default=0
-            Required=No
-
-        ucsalimt:
-            Flag to define the limits of the **UCSA** coordinate if **UCSAMODE** =1 or 2 and
-            **TOLRNC** >0\. The options below are defined in terms of the Normalized mode
-            [**UCSAMODE** =1]. Default (1) Options: 1: UCSA values can be less than 0 and greater
-            than 1; 2: UCSA values can be less than 0. Values calculated as greater than 1 are reset
-            to 1; 3: UCSA values calculated as less than 0 are reset to 0. Values can be greater
-            than 1; 4: UCSA values calculated as less than 0 are reset to 0. Values calculated as
-            greater than 1 are reset to 1
-            Range=1,4
-            Values=1,2,3,4
-            Default=1
-            Required=No
-
-        orgtag:
-            Tag number of points which define the origin surface from which the UCSB coordinate is
-            measured. The default surface if **ORGTAG** is undefined (-) is created from the first
-            points on each of the hangingwall and footwall strings.
-            Range=Undefined
-            Values=Undefined
-            Default=-
-            Required=No
-
-        """
-        command = "unfold "
-
-        if out_o == "required":
-            raise ValueError("out_o is required.")
-
-        if out_o != "optional":
-            command += " &out=" + out_o
-
-        if quads_o != "optional":
-            command += " &quads=" + quads_o
-
-        if x_f != "optional":
-            command += " *x=" + x_f
-
-        if y_f != "optional":
-            command += " *y=" + y_f
-
-        if z_f != "optional":
-            command += " *z=" + z_f
-
-        if section_f != "optional":
-            command += " *section=" + section_f
-
-        if boundary_f != "optional":
-            command += " *boundary=" + boundary_f
-
-        if wstag_f != "optional":
-            command += " *wstag=" + wstag_f
-
-        if bstag_f != "optional":
-            command += " *bstag=" + bstag_f
-
-        if tag_f != "optional":
-            command += " *tag=" + tag_f
-
-        if unitname_f != "optional":
-            command += " *unitname=" + unitname_f
-
-        if hangwall_f != "optional":
-            command += " *hangwall=" + hangwall_f
-
-        if footwall_f != "optional":
-            command += " *footwall=" + footwall_f
-
-        if ucsa_f != "optional":
-            command += " *ucsa=" + ucsa_f
-
-        if ucsb_f != "optional":
-            command += " *ucsb=" + ucsb_f
-
-        if ucsc_f != "optional":
-            command += " *ucsc=" + ucsc_f
-
-        if linkmode_p != "optional":
-            try:
-                val = float(linkmode_p)
-                if val not in [0.0, 1.0, 2.0, 3.0]:
-                    raise ValueError(f"linkmode_p value {linkmode_p} is not in allowed values: [0, 1, 2, 3]")
-            except ValueError as e:
-                if isinstance(linkmode_p, (int, float)):
-                    raise e
-
-        if linkmode_p != "optional":
-            command += " @linkmode=" + str(linkmode_p)
-
-        if ucsamode_p != "optional":
-            try:
-                val = float(ucsamode_p)
-                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]:
-                    raise ValueError(f"ucsamode_p value {ucsamode_p} is not in allowed values: [1, 2, 3, 4, 5, 6]")
-            except ValueError as e:
-                if isinstance(ucsamode_p, (int, float)):
-                    raise e
-
-        if ucsamode_p != "optional":
-            command += " @ucsamode=" + str(ucsamode_p)
-
-        if ucsbmode_p != "optional":
-            try:
-                val = float(ucsbmode_p)
-                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]:
-                    raise ValueError(f"ucsbmode_p value {ucsbmode_p} is not in allowed values: [1, 2, 3, 4, 5, 6]")
-            except ValueError as e:
-                if isinstance(ucsbmode_p, (int, float)):
-                    raise e
-
-        if ucsbmode_p != "optional":
-            command += " @ucsbmode=" + str(ucsbmode_p)
-
-        if ucscmode_p != "optional":
-            try:
-                val = float(ucscmode_p)
-                if val not in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]:
-                    raise ValueError(f"ucscmode_p value {ucscmode_p} is not in allowed values: [1, 2, 3, 4, 5, 6]")
-            except ValueError as e:
-                if isinstance(ucscmode_p, (int, float)):
-                    raise e
-
-        if ucscmode_p != "optional":
-            command += " @ucscmode=" + str(ucscmode_p)
-
-        if plane_p != "optional":
-            try:
-                val = float(plane_p)
-                if val not in [1.0, 2.0]:
-                    raise ValueError(f"plane_p value {plane_p} is not in allowed values: [1, 2]")
-            except ValueError as e:
-                if isinstance(plane_p, (int, float)):
-                    raise e
-
-        if plane_p != "optional":
-            command += " @plane=" + str(plane_p)
-
-        if hangid_p != "optional":
-            command += " @hangid=" + str(hangid_p)
-
-        if footid_p != "optional":
-            command += " @footid=" + str(footid_p)
-
-        if unitid_p != "optional":
-            command += " @unitid=" + str(unitid_p)
-
-        if tolrnc_p != "optional":
-            command += " @tolrnc=" + str(tolrnc_p)
-
-        if ucsalimt_p != "optional":
-            try:
-                val = float(ucsalimt_p)
-                if val not in [1.0, 2.0, 3.0, 4.0]:
-                    raise ValueError(f"ucsalimt_p value {ucsalimt_p} is not in allowed values: [1, 2, 3, 4]")
-            except ValueError as e:
-                if isinstance(ucsalimt_p, (int, float)):
-                    raise e
-
-        if ucsalimt_p != "optional":
-            command += " @ucsalimt=" + str(ucsalimt_p)
-
-        if orgtag_p != "optional":
-            command += " @orgtag=" + str(orgtag_p)
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"
@@ -4091,6 +2662,7 @@ UNITDEF |  Optional input file containing the **BOUNDARY** value for the hanging
         self.run_command(command)
 
     def ver(self,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -4119,12 +2691,16 @@ Note: Selecting [1] in the PRINT drop-down list displays the update history.
         """
         command = "ver "
 
+        if arguments != "optional":
+            command += " " + arguments
+
         if retrieval != "optional":
             command += "{" + retrieval + "}"
 
         self.run_command(command)
 
     def xrun(self,
+                arguments="optional",
                 retrieval="optional"):
 
         r"""
@@ -4146,6 +2722,9 @@ Note: Selecting [1] in the PRINT drop-down list displays the update history.
 
         """
         command = "xrun "
+
+        if arguments != "optional":
+            command += " " + arguments
 
         if retrieval != "optional":
             command += "{" + retrieval + "}"

@@ -176,7 +176,7 @@ def search_commands(query):
 
 
 # ---------------------------------------------------------------------------
-# Native Datamine file reader (replaces proprietary pyrpa dependency)
+# Native Datamine file reader 
 # ---------------------------------------------------------------------------
 
 def read_datamine(filepath):
@@ -185,7 +185,7 @@ def read_datamine(filepath):
     -------------
 
     Read a Datamine binary file (.dm or .dmx) into a pandas DataFrame using
-    the DmFile.DmTableADO COM object. No proprietary dependencies required.
+    the DmFile.DmTableADO COM object. 
 
     Parameters:
     -----------

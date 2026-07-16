@@ -57,13 +57,15 @@ try:
     try:
         project = oScript.ActiveProject
         if project is not None:
-            print(f"  [OK] Active Project via ActiveProject: {project.Name}")
+            proj_name = getattr(project, 'Title', getattr(project, 'Name', 'Unknown Project'))
+            print(f"  [OK] Active Project via ActiveProject: {proj_name}")
         else:
             print("  [WARN] ActiveProject is None - trying alternative methods...")
             # Try Projects collection
             if hasattr(oScript, 'Projects') and oScript.Projects.Count > 0:
                 project = oScript.Projects(1)
-                print(f"  [OK] Got project via Projects(1): {project.Name}")
+                proj_name = getattr(project, 'Title', getattr(project, 'Name', 'Unknown Project'))
+                print(f"  [OK] Got project via Projects(1): {proj_name}")
             else:
                 print("  [WARN] No projects found in Projects collection")
     except Exception as e:
@@ -118,11 +120,14 @@ print("[TEST 4] List Project Files")
 dm_files = []
 if project is not None:
     try:
-        project_dir = project.Directory
-        print(f"  Project Directory: {project_dir}")
-        if os.path.exists(project_dir):
-            os.chdir(project_dir)
-            dm_files = [f for f in os.listdir(project_dir) if f.endswith('.dm')]
+        project_dir = getattr(project, 'Folder', getattr(project, 'Directory', None))
+        if project_dir is not None:
+            print(f"  Project Directory: {project_dir}")
+            if os.path.exists(project_dir):
+                os.chdir(project_dir)
+                dm_files = [f for f in os.listdir(project_dir) if f.endswith('.dm')]
+        else:
+            raise AttributeError("Neither Folder nor Directory properties are available on project object")
     except Exception as e:
         print(f"  [WARN] Could not get project directory: {e}")
         print("  Falling back to current working directory...")
@@ -304,8 +309,9 @@ if oScript is not None:
         if hasattr(oScript, 'Caption'):
             print(f"  Studio Caption: {oScript.Caption}")
         if project is not None:
-            if hasattr(project, 'Directory'):
-                print(f"  Project Directory: {project.Directory}")
+            project_dir = getattr(project, 'Folder', getattr(project, 'Directory', None))
+            if project_dir is not None:
+                print(f"  Project Directory: {project_dir}")
             if hasattr(project, 'Files') and hasattr(project.Files, 'Count'):
                 print(f"  Project Files Count: {project.Files.Count}")
         results['studio_props'] = 'PASS'

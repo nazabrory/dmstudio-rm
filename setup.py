@@ -17,5 +17,5 @@ setup(name='dmstudio',
       license='MIT',
       packages=['dmstudio'],
       include_package_data=True,
-      package_data={'':['LICENCES.txt'], '':['README.md']},
+      package_data={'': ['LICENSE.txt', 'README.md']},
       zip_safe=False)

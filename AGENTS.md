@@ -14,16 +14,23 @@ To run tests or examples, the environment must be configured as follows:
 2. **Open Project**: Open **`Project.rmproj`** in Datamine Studio RM before executing any script that interacts with COM.
 3. **Environment Setup**:
    ```bash
-   # Option A: Standard venv setup (creates .venv, installs deps, installs package editable)
+   # Option A: Conda environment setup (Recommended)
+   # Assumes conda is installed. Uses the environment.yml file.
+   conda env create -f environment.yml
+   conda activate dmstudio
+   pip install -e .
+
+   # Option B: Standard venv setup via uv (Fast alternative)
+   # Assumes uv is installed.
+   uv venv
+   .venv\Scripts\activate
+   uv pip install -r requirements.txt
+   uv pip install -e .
+   uv pip install jupyterlab
+
+   # Option C: Legacy PowerShell/CMD setup scripts
    setup_env.bat        # CMD (one-click setup)
    .\setup_env.ps1      # PowerShell (one-click setup)
-
-   # Option B: Conda environment setup
-   conda create --name dmstudio python=3.9 -y
-   conda activate dmstudio
-   conda install -y pandas numpy nbformat -c conda-forge
-   pip install pywin32 mcp
-   pip install -e .
    ```
 4. **Active COM Session**: The COM library connects to the running instance of Studio RM. Keep the application open with `Project.rmproj` active.
 

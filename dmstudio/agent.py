@@ -238,7 +238,7 @@ def read_datamine(filepath):
             row = {}
             for i, fname in enumerate(field_names, start=1):
                 try:
-                    row[fname] = table.GetValue(i)
+                    row[fname] = table.GetColumn(i)
                 except Exception:
                     row[fname] = None
             rows.append(row)

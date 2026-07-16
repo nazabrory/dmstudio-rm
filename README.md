@@ -1,6 +1,6 @@
 # dmstudio: Datamine Studio RM Python Scripting
 
-**dmstudio** is a user-friendly Python package designed for geologists and engineers to automate **Datamine Studio RM** workflows. It translates complex Datamine macro syntax into readable, interactive Python commands. The entire workflow is designed to run in interactive **Jupyter Notebooks**, where you can run processes and analyze results step-by-step.
+**dmstudio** is a user-friendly Python package designed for geologists and engineers to automate **Datamine Studio RM** workflows. It translates complex Datamine macro syntax into readable, interactive Python commands. The entire workflow is designed to run in interactive **JupyterLab** (or Jupyter Notebooks), where you can run processes and analyze results step-by-step.
 
 > **Unofficial Disclaimer & Licensing**  
 > This is a community-maintained library and is **NOT** an official product of Datamine Software. Datamine Software does not provide support or warranties for this package. 
@@ -31,36 +31,39 @@ To prevent cluttering your actual project folder with library source code, confi
    ```
 
 ### Step 3: Install the Package in Your Environment
-By installing the library in "editable mode" (`-e`), the Python environment will know how to load `dmstudio` from any directory without needing to copy the package folder into your project folder.
+By installing the library in **editable mode** (`-e`), the Python environment will link to the repository source folder. This allows scripts running in any directory (such as your clean project folder) to import `dmstudio` without copying any package files. Any changes you make to the package code are immediately available.
 
 1. Open your terminal or Command Prompt.
 2. Navigate to the folder where you cloned this repository:
    ```cmd
    cd C:\DatamineTools\dmstudio-rm3
    ```
-3. Choose one of the environment options below to set up and install the package:
+3. Choose one of the environment options below (assuming you have Conda or `uv` installed):
 
 #### Option A: Using Conda (Recommended)
+Use the provided `environment.yml` to create a dedicated environment with all dependencies and JupyterLab:
 ```cmd
-# Create and activate environment
-conda create --name dmstudio python=3.9 -y
+# Create the environment from environment.yml
+conda env create -f environment.yml
+
+# Activate the environment
 conda activate dmstudio
 
-# Install dependencies and install package in editable mode
-conda install -y pandas numpy nbformat -c conda-forge
-pip install pywin32 mcp
+# Install the dmstudio package in editable mode
 pip install -e .
 ```
 
-#### Option B: Using Pip and Virtual Environments (Standard)
+#### Option B: Using uv (Fast Alternative)
+Create a virtual environment and install dependencies instantly using [uv](https://github.com/astral-sh/uv):
 ```cmd
-# Create and activate virtual environment
-python -m venv .venv
+# Create and activate a virtual environment
+uv venv
 .venv\Scripts\activate
 
-# Install dependencies and install package in editable mode
-pip install -r requirements.txt
-pip install -e .
+# Install dependencies, JupyterLab, and the package in editable mode
+uv pip install -r requirements.txt
+uv pip install jupyterlab
+uv pip install -e .
 ```
 
 ### Step 4: Run the Connection Diagnostic
@@ -74,19 +77,44 @@ Before scripting, verify that Python can talk to your running Studio RM session:
 
 ---
 
-## 🚀 How to Run the Jupyter Notebook Tutorials
+## 🚀 Running JupyterLab & Tutorials
 
-Instead of writing scripts or typing in the terminal, you can run everything inside interactive notebooks. 
+Because the repository is kept in a separate folder (`C:\DatamineTools\dmstudio-rm3`) from your actual project workspace (`C:\DatamineProjects\MyMineProject`), you should run JupyterLab from the correct directory depending on your goal:
 
-To open the tutorials:
-1. Open your terminal in your project folder.
-2. Activate your environment (Conda: `conda activate dmstudio` / Pip: `.venv\Scripts\activate`).
-3. Start the Jupyter Notebook interface:
+### 1. Running the Included Tutorials
+To run the library's built-in tutorials and explore sample Datamine database files:
+1. **Open Datamine Studio RM**: Open the tutorial project **`C:\DatamineTools\dmstudio-rm3\tutorials\Project.rmproj`** in Datamine Studio RM. (Do not use your own project for running tutorials, as they rely on the included sample databases).
+2. **Open Terminal**: Navigate to the **repository folder**:
    ```cmd
-   jupyter notebook
+   cd C:\DatamineTools\dmstudio-rm3
    ```
-4. A browser window will open automatically. Navigate to the `tutorials/` folder and click on **`Holes3D_Tutorial.ipynb`** (Recommended) to run a complete drillhole de-surveying workflow.
+3. **Activate Environment**: `conda activate dmstudio` or `.venv\Scripts\activate`.
+4. **Start JupyterLab**:
+   ```cmd
+   jupyter lab
+   ```
+5. **Run Tutorial**: Open the `tutorials/` folder in the JupyterLab sidebar and double-click **`Holes3D_Tutorial.ipynb`** (Recommended) to run a drillhole de-surveying workflow.
 
+### 2. Scripting in your own Project Folder
+To write and run notebooks for your own geological databases:
+1. **Open Datamine Studio RM**: Open your own project file (e.g. `C:\DatamineProjects\MyMineProject\MyProject.rmproj`) in Datamine Studio RM.
+2. **Open Terminal**: Navigate to your **clean project folder**:
+   ```cmd
+   cd C:\DatamineProjects\MyMineProject
+   ```
+3. **Activate Environment**: `conda activate dmstudio` or `.venv\Scripts\activate`.
+4. **Start JupyterLab**:
+   ```cmd
+   jupyter lab
+   ```
+5. **Script your Workflow**: Create a new notebook (`.ipynb`) here. Since `dmstudio` is installed in editable mode, you can import it directly and run commands:
+   ```python
+   from dmstudio import dmcommands
+   cmd = dmcommands.init(version='StudioRM')
+   ```
+   Datamine will automatically read/write files in your project directory.
+> [!IMPORTANT]                                                                                                
+> **Keep Datamine and Python Workspaces Aligned**  
 ---
 
 ## 💡 How it Works (Simple Python Example)
@@ -114,73 +142,59 @@ cmd.copy(in_i='sorted_assays', out_o='high_grade_assays', retrieval="AU > 1.5")
 
 ---
 
-## 🤖 How to Use the AI Capabilities (Step-by-Step)
+## 🤖 How to Use the AI Capabilities
 
-This repo supports the Model Context Protocol (MCP) to let AI assistants (like Claude Desktop or Google Antigravity) control Datamine and generate notebooks for you.
+You can use agentic AI assistants to automate Datamine scripting, inspect file structures, and build Jupyter Notebook workflows for you.
 
-Here is how to set up and use the AI:
+### Option A: VS Code Coding Agents & Terminal Tools (Easiest & Recommended)
+If you are using modern AI coding agents that run directly in your workspace or terminal (such as **GitHub Copilot**, **Cursor**, **Roo Code**, or terminal agents like **Antigravity CLI** or **Claude Code**):
 
-### Step 1: Register the MCP Server with Your AI Client
+1. **No Complex Setup Needed**: Since these agents run directly in your project workspace, they do not require an MCP server setup. They automatically read `AGENTS.md` and `README.md` to understand how to interact with Datamine.
+2. **Workspace Data Exploration**: You can ask the agent to inspect files before writing code. For example:
+   > *"Import `dmstudio.agent` and read the first 5 rows of `_vb_assays.dmx` to see what columns we have."*
+3. **Workflow Generation**: Ask the agent to build workflows:
+   > *"Create a Jupyter Notebook `my_flow.ipynb` that loads the survey database, runs MGSORT on BHID, and performs DESURV."*
+   The agent will generate the `.ipynb` file in your workspace using the `NotebookBuilder` utility.
+4. **Execution & Auditing**: Open the generated notebook in VS Code or JupyterLab, choose your environment kernel (`dmstudio` conda environment or `.venv`), and run the cells step-by-step to inspect and execute the Datamine commands.
 
-#### For Claude Desktop:
+---
+
+### Option B: Model Context Protocol (MCP) Server (Advanced)
+If you are using external desktop AI clients (like **Claude Desktop** or external **Google Antigravity** configurations), you can expose Datamine commands as tools via MCP:
+
+#### Step 1: Register the MCP Server
+
+##### For Claude Desktop:
 1. Open the Claude Desktop configuration file:
    `%APPDATA%\Claude\claude_desktop_config.json`
-2. Add `dmstudio` to the `mcpServers` list (use absolute paths to your python executable and `mcp_server.py`):
+2. Add `dmstudio` to the `mcpServers` list. Use absolute paths to your python executable and `mcp_server.py` **located inside your repository folder** (e.g., `C:\DatamineTools\dmstudio-rm3`):
    ```json
    {
      "mcpServers": {
        "dmstudio": {
-         "command": "C:\\DatamineProjects\\MyMineProject\\.venv\\Scripts\\python.exe",
-         "args": ["C:\\DatamineProjects\\MyMineProject\\mcp_server.py"]
+         "command": "C:\\DatamineTools\\dmstudio-rm3\\.venv\\Scripts\\python.exe",
+         "args": ["C:\\DatamineTools\\dmstudio-rm3\\mcp_server.py"]
        }
      }
    }
    ```
-   *(If you are using a Conda environment, replace the command path with your Conda environment python path, e.g. `C:\\Users\\<username>\\miniconda3\\envs\\dmstudio\\python.exe`)*
-3. Restart Claude Desktop. You will see a plug icon indicating the `dmstudio` tools are loaded.
+   *(For Conda, replace the command path with your Conda environment python path, e.g. `C:\\Users\\<username>\\miniconda3\\envs\\dmstudio\\python.exe`)*
+3. Restart Claude Desktop. The plug icon indicates the `dmstudio` tools are loaded.
 
-#### For Google Antigravity:
-Add the server config to `.gemini/config/antigravity.json` using the same JSON format shown above.
+##### For Google Antigravity:
+Add the server config to `%USERPROFILE%\.gemini\config\antigravity.json` using the same JSON format shown above.
 
----
-
-### Step 2: Open Your Datamine Project
+#### Step 2: Open Your Datamine Project
 1. Open Datamine Studio RM.
-2. Load your project (e.g. `tutorials/Project.rmproj`). Keep it open in the background.
+2. Load your project (e.g., `Project.rmproj`). Keep it open in the background.
 
----
-
-### Step 3: Ask the AI to Automate Workflows
-You can now ask the AI conversational prompts. The AI will query the Datamine API definitions and generate clean notebooks for you.
-
-**Example Prompts to Try:**
+#### Step 3: Ask the AI to Automate Workflows
+Prompt the external AI client to interact with Datamine:
 * *"What Datamine commands are available in this repo?"*
 * *"Show me the parameters required for the MGSORT command."*
-* *"Search for commands related to drillhole composition."*
 * *"Create a Jupyter notebook workflow called `desurvey_flow.ipynb` that loads `_vb_collars` and `_vb_surveys`, runs the DESURV command, and saves the output to `dholes`."*
 
----
-
-### Step 4: Run & Edit the AI-Generated Notebook
-
-When you ask the AI to generate a workflow, it does not execute the Datamine commands directly (which might fail or mess up your workspace). Instead, it creates the notebook file directly in your project directory. You can run, inspect, and edit it:
-
-#### Option A: Direct Chat via VS Code Plugins / Terminal Agents (Cursor, Copilot, Roo Code, Claude Code)
-If you are using an AI coding agent running directly inside your VS Code workspace or terminal:
-- **No MCP Setup Needed**: Since these agents have direct access to your project workspace files, they do not need the MCP server setup. They can read `AGENTS.md` and `README.md` to understand the Python scripting package automatically.
-- **Workflow Generation**: Ask your agent in chat or terminal: *"Create a Jupyter Notebook `tutorials/my_flow.ipynb` that loads the survey database, runs MGSORT on BHID, and performs DESURV."* The agent will write the notebook directly using the `NotebookBuilder` utility.
-- **Workspace Data Exploration**: You can ask the agent to inspect your project files first: *"Import `dmstudio.agent` and read the first 5 rows of `tutorials/_vb_assays.dmx` to see what columns we have, then write a compositing workflow notebook."*
-- **Execution & Audit**: Open the generated notebook inside VS Code, choose your virtual environment (`.venv`) or Conda environment (`dmstudio`) as the kernel, and run cells individually. You can review, modify, and execute cells interactively.
-
-#### Option B: Registering as MCP Server (Claude Desktop / Antigravity)
-If you are using external AI applications (like Claude Desktop or Google Antigravity):
-1. Configure your client configuration files (Step 1).
-2. The AI will call the `create_jupyter_workflow` tool to write the notebook file directly to your project directory.
-3. Open the notebook in your browser or VS Code:
-   ```cmd
-   jupyter notebook tutorials/desurvey_flow.ipynb
-   ```
-4. Run the cells step-by-step to execute the Datamine commands. This keeps the AI workflow **fully transparent and auditable**.
+The AI will call the `create_jupyter_workflow` tool to write the notebook file directly to your project directory. Open the notebook in JupyterLab and run the cells step-by-step.
 
 ---
 

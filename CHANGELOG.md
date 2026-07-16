@@ -1,6 +1,22 @@
 # Changelog
 
+## 2.0.0b2 (Interactive Visualization & COM Fixes) - 2026-07-16
+
+### Bug Fixes
+- **`agent.read_datamine`:** Fixed a critical bug in [dmstudio/agent.py](file:///D:/OnGoing%20Project/dmstudio-rm3/dmstudio/agent.py#L241) where it was calling `table.GetValue(i)` instead of the correct ADO COM method `table.GetColumn(i)`, returning `None` for all values.
+- **`dm.compdh` wrapper:** Corrected input file syntax prefix from `&**in**=` to `&in=` in [dmstudio/dmcommands.py](file:///D:/OnGoing%20Project/dmstudio-rm3/dmstudio/dmcommands.py#L6806).
+- **`dm.join` wrapper:** Exposed `keys_f` field parameter mapping inside the `join` method signature in [dmstudio/dmcommands.py](file:///D:/OnGoing%20Project/dmstudio-rm3/dmstudio/dmcommands.py).
+
+### Workflow & Visualization Enhancements
+- **Interactive 3D WebGL (Plotly):** Bypassed experimental Python 3.14 + Conda on Windows fatal crashes (`0xc06d007f` in `numpy.linalg.inv`) during 3D plotting by introducing a standalone, interactive 3D WebGL HTML plot using **Plotly.js (via CDN)**. The plot is embedded inline inside JupyterLab using `IPython.display.IFrame`, avoiding C++ extension segmentation faults entirely.
+- **File Locking Workaround:** Avoided Datamine write locks by copying `comp_holes.dmx` to a temporary copy dynamically located using `oScript.ActiveProject.Folder`, reading it with pandas, cleaning up the copy, and then loading it into the active Datamine 3D view window.
+
+### Testing & Diagnostics
+- **Integration Tests:** Patched [tests/integration_test.py](file:///D:/OnGoing%20Project/dmstudio-rm3/tests/integration_test.py) and [tests/diagnose_project.py](file:///D:/OnGoing%20Project/dmstudio-rm3/tests/diagnose_project.py) to support newer Studio RM COM project properties (`.Title` and `.Folder`) while retaining safe fallbacks to legacy `.Name` and `.Directory`.
+- **Package Dependencies:** Added `matplotlib` to [environment.yml](file:///D:/OnGoing%20Project/dmstudio-rm3/environment.yml) and [requirements.txt](file:///D:/OnGoing%20Project/dmstudio-rm3/requirements.txt).
+
 ## 2.0.0b1 (Conda Support, VS Code Agents & Root Cleanup) - 2026-07-15
+
 
 ### Clean Workspace
 - Centralized all project files (`Project.rmproj`), tutorial databases (`Database/`), tutorial notebooks (`Holes3D_Tutorial.ipynb`, `Studio_RM_3.1_Examples.ipynb`), and scratch `.dmx` tables into a clean `tutorials/` subdirectory.

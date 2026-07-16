@@ -58,14 +58,17 @@ if project is None:
 
 else:
     print(f"\n[SUCCESS] Project found!")
-    print(f"Name: {project.Name}")
-    print(f"Directory: {project.Directory}")
+    name = getattr(project, 'Title', None) or getattr(project, 'Name', 'Unknown')
+    directory = getattr(project, 'Folder', None) or getattr(project, 'Directory', None)
+    
+    print(f"Name: {name}")
+    print(f"Directory: {directory}")
     print(f"Files: {project.Files.Count if hasattr(project, 'Files') else 'N/A'}")
     
     # List .dm files
     import os
-    if os.path.exists(project.Directory):
-        os.chdir(project.Directory)
+    if directory and os.path.exists(directory):
+        os.chdir(directory)
         dm_files = [f for f in os.listdir('.') if f.endswith('.dm')]
         print(f"\n.dm files in project: {len(dm_files)}")
         for f in dm_files[:5]:

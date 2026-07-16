@@ -6803,7 +6803,7 @@ By default, a dominant field value must reach a minimum proportion of the total 
             raise ValueError("in_i is required.")
 
         if in_i != "optional":
-            command += " &**in**=" + in_i
+            command += " &in=" + in_i
 
         if out_o == "required":
             raise ValueError("out_o is required.")
@@ -19510,6 +19510,7 @@ Note: Scaling is fully automatic in this process.
     def join(self,
                 inmods_i=['optional'],
                 out_o="required",
+                keys_f=['optional'],
                 subsetr_p=0,
                 subsetf_p=0,
                 cartjoin_p=0,
@@ -19620,6 +19621,9 @@ Both input files must be sorted in the order of the key fields before they can b
 
         if inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
+
+        if keys_f[0] != "optional":
+            command += self.parse_infields_list("key", keys_f, 10, "*")
 
         if subsetr_p != "optional":
             try:

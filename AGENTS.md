@@ -72,6 +72,12 @@ dmstudio-rm3/                     ← Project root (working directory for script
 
 ## 🤖 AI Agent & MCP Specifications
 
+### Local Handoffs & Workspace Context
+To support persistent context and session handovers across different AI coding tools (such as Google Antigravity, Cursor, Roo Code, Claude Code, GitHub Copilot):
+- **Local Handover Directory:** Always write session-specific handoff reports, planning notes, or temporary scratchpad scripts to the `.agents/` directory in the repository root.
+- **Gitignored:** The `.agents/` folder is explicitly gitignored in `.gitignore`, keeping the main codebase repository history clean.
+- **Accessing History:** Future AI agents should scan this directory for recent `.md` reports (e.g. `handoff_report.md`) to read previous session outcomes and continue workflows seamlessly.
+
 ### `dmstudio/agent.py`
 AI agent helper module. Import: `from dmstudio import agent`
 

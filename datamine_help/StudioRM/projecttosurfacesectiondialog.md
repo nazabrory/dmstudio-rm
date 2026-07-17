@@ -1,2 +1,0 @@
-# _ProjectStringsPoints_Dialog
-

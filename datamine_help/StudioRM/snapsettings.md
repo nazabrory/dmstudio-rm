@@ -1,2 +1,0 @@
-# _SnapMode_Dialog
-

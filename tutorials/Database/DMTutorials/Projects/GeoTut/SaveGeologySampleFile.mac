@@ -1,0 +1,27 @@
+!START GEOLOGY      
+!VARLOAD SaveGeologySampleFile.var
+
+# Macro for Studio Geo
+# Saves Geology interpretations
+!LOCDBOFF
+
+!GETSAMP  &IN($INDH1#),
+          &SAMPLE(geotable),
+		  *F1(NLITH), 
+		  *F2(ZONE),
+		  *F3(_FLAG_VS_NLITH),
+		  *F4(_FLAG_VS_ZONE),
+          @CSVOUT=1.0
+!END
+
+!ECHO 	
+!ECHO -------------------------------------------------------------------------
+!ECHO Save drillholes interpretations to "geotable.csv"
+!echo 
+!ECHO This saves a table preserving the following changes :
+!ECHO       - NLITH (with changes from assign-lithology)
+!ECHO       - _FLAG_VS_NLITH (with changes from vein turning on/off contacts)
+!ECHO       - ZONE (with changes from assign-lithology)
+!ECHO       - _FLAG_VS_ZONE (with changes from vein turning on/off contacts)
+!ECHO -------------------------------------------------------------------------
+!ECHO 	

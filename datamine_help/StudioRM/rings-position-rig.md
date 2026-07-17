@@ -1,2 +1,0 @@
-# rings-position-rig
-

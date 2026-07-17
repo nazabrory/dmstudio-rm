@@ -1,2 +1,0 @@
-# outline-storage-switch
-

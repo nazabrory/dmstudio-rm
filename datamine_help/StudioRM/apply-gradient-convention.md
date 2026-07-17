@@ -1,2 +1,0 @@
-# apply-gradient-convention
-

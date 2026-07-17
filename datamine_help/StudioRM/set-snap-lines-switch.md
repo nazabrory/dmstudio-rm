@@ -1,2 +1,0 @@
-# set-snap-lines-switch
-

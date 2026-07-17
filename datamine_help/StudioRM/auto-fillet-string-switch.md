@@ -1,2 +1,0 @@
-# auto-fillet-string-switch
-

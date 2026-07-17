@@ -1,2 +1,0 @@
-# snap-always-switch
-

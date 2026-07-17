@@ -1,0 +1,132 @@
+<html>
+
+<head>
+<meta name=vs_defaultClientScript content="JavaScript">
+
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Polygon Script</title>
+
+<script id=clientEventHandlersJS language=javascript>
+<!--
+
+var oDmApp= null;
+var oScript = null;
+
+function window_onload() {
+  AutoConnect();
+}
+
+function AutoConnect() {    
+    oScript = new ActiveXObject("DatamineStudio.ScriptHelper");
+    oScript.initialize(window);
+    oDmApp = oScript.getApplication();
+    if (oDmApp== null)	
+      return false;
+    else
+      return true;
+}
+
+function btnOK_onclick() {
+
+    oDmApp.ParseCommand("delete-file '_tmp*' 'Y'");	// Remove temporary work files
+
+//    alert("The current filter is " + tbFilter.value);
+
+    if (cbIncludePoints.checked) //  Create file from point data with XP and YP only
+    {
+        oDmApp.ActiveProject.Design.SaveAllPointsAsDmFile("_tmp001", true, "");
+        if (tbFilter.value != "")
+        {
+            oDmApp.ParseCommand("picrec  &IN=_tmp001 &OUT=_tmp001a @APPEND=0 '" + tbFilter.value + "' 'END'");
+            oDmApp.ParseCommand("copy &IN=_tmp001a &OUT=_tmp001");
+        }
+        oDmApp.ParseCommand("extra &in=_tmp001 &out=_tmp002 'XP=XPT YP=YPT erase(XPT,YPT,ZPT,SYMBOL) go'");
+    }
+
+    if (cbIncludeStrings.checked) // Create file from string data with XP and YP only
+    {
+        oDmApp.ActiveProject.Design.SaveAllStringsAsDmFile("_tmp003", true, "");
+        if (tbFilter.value != "")
+        {
+            oDmApp.ParseCommand("picrec  &IN=_tmp003 &OUT=_tmp003a @APPEND=0 '" + tbFilter.value + "' 'END'");
+            oDmApp.ParseCommand("copy &IN=_tmp003a &OUT=_tmp003");
+        }
+        oDmApp.ParseCommand("extra &in=_tmp003 &out=_tmp004 {'" + tbFilter.value + "'} 'erase(ZP,PTN,PVALUE,SYMBOL,LSTYLE) go'");
+    }
+    
+    if (cbIncludePoints.checked && cbIncludeStrings.checked) // Append string coordinates to point coordinates
+    {
+        oDmApp.ParseCommand("append &IN1=_tmp002 &IN2=_tmp004 &OUT=_tmp005 @SEQUENCE=0 @PROTODD=0 @PRINT=0");
+        oDmApp.ParseCommand("copy &IN=_tmp005 &OUT=_tmp002");
+    }
+    else if (cbIncludeStrings.checked  && !cbIncludePoints.checked)
+    {
+        oDmApp.ParseCommand("copy &IN=_tmp004 &OUT=_tmp002");
+    }
+
+    // All X,Y coordinates are now in _tmp002.  Now run CONPOL.
+
+    var command = "conpol &IN=_tmp002 &PERIMOUT=_tmp001 *X=XP *Y=YP";
+
+    if (tbExtension.value != "")
+        command += " @EXTDIS=" + tbExtension.value;
+
+    oDmApp.ParseCommand(command);
+    oDmApp.ParseCommand("proper &PERIMIN=_tmp001 &PERIMOUT=_tmp002 @TOL=0.000001 @CLOSE=1");
+
+    oDmApp.ActiveProject.Data.LoadFromProject("_tmp002"); // load new polygon into design window
+
+    oDmApp.ParseCommand("delete-file '_tmp*' 'Y'");		// Remove temporary work files
+
+}
+
+//--></script>
+<script language=javascript for=window event=onload>
+<!--
+
+return window_onload()
+//-->
+</script>
+<script language=javascript for=btnOK event=onclick>
+<!--
+
+return btnOK_onclick()
+//-->
+</script>
+</head>
+
+<body language=javascript">
+
+<div align="center">
+	<table border="1" id="table1">
+		<tr>
+			<td>Extension Distance</td>
+			<td><input type="text" name="tbExtension" size="20" value="0"></td>
+		</tr>
+		<tr>
+			<td>Filter</td>
+			<td><input type="text" name="tbFilter" size="20"></td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td>
+			<input type="checkbox" name="cbIncludePoints" value="ON" checked>Include point data</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td><input type="checkbox" name="cbIncludeStrings" value="ON">Include string data</td>
+		</tr>
+		<tr>
+			<td align="center">
+			<input type="button" value="    OK    " name="btnOK"></td>
+			<td align="center">
+			<input type="button" value="Cancel" name="btnCancel"></td>
+		</tr>
+	</table>
+</div>
+
+<p>&nbsp;</p>
+
+</body>
+
+</html>

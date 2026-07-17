@@ -1,2 +1,0 @@
-# set-to-previous-view
-

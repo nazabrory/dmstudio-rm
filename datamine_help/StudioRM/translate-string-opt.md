@@ -1,2 +1,0 @@
-# translate-string-opt
-

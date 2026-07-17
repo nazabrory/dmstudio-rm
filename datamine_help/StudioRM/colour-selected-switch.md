@@ -1,2 +1,0 @@
-# colour-selected-switch
-

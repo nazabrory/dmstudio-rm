@@ -1,2 +1,0 @@
-# toggle-loaded-data-bar
-

@@ -1,2 +1,0 @@
-# _OverlaySelection_Dialog
-

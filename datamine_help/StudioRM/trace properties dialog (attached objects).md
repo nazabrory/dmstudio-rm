@@ -1,2 +1,0 @@
-# _VR_TracesProperties_AttachedObjects
-

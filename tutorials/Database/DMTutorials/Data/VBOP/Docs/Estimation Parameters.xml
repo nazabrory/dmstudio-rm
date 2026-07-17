@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<DmDefinition precision="single" desc="FILE CREATED BY SYSTEM USING AED ON 03/12/30">
+	<DmFields>
+		<DmField name="VALUE_IN" type="alphanumeric" length="8" default=""/>
+		<DmField name="VALUE_OU" type="alphanumeric" length="8" default=""/>
+		<DmField name="SREFNUM" type="numeric" default="-"/>
+		<DmField name="ZONEF1" type="numeric" default="-"/>
+		<DmField name="ZONEF2" type="numeric" default="-"/>
+		<DmField name="NUMSAM_F" type="alphanumeric" length="8" default=""/>
+		<DmField name="SVOL_F" type="alphanumeric" length="8" default=""/>
+		<DmField name="VAR_F" type="alphanumeric" length="8" default=""/>
+		<DmField name="MINDIS_F" type="alphanumeric" length="8" default=""/>
+		<DmField name="IMETHOD" type="numeric" default="1.000"/>
+		<DmField name="ANANGLE1" type="numeric" default="1.000"/>
+		<DmField name="ANANGLE2" type="numeric" default="1.000"/>
+		<DmField name="ANANGLE3" type="numeric" default="1.000"/>
+		<DmField name="ANDIST1" type="numeric" default="1.000"/>
+		<DmField name="ANDIST2" type="numeric" default="1.000"/>
+		<DmField name="ANDIST3" type="numeric" default="1.000"/>	
+		<DmField name="POWER" type="numeric" default="2.000"/>
+		<DmField name="ADDCON" type="numeric" default="0.000"/>
+		<DmField name="VREFNUM" type="numeric" default="1.000"/>
+		<DmField name="LOG" type="numeric" default="1.000"/>
+		<DmField name="GENCASE" type="numeric" default="1.000"/>
+		<DmField name="DEPMEAN" type="numeric" default="1.000"/>
+		<DmField name="TOL" type="numeric" default="1.000"/>
+		<DmField name="MAXITER" type="numeric" default="1.000"/>
+		<DmField name="KRIGNEGW" type="numeric" default="0.000"/>
+		<DmField name="KRIGVARS" type="numeric" default="1.000"/>
+		<DmField name="LOCALMNP" type="numeric" default="2.000"/>
+		<DmField name="LOCALM_F" type="alphanumeric" length="8" default=""/>
+	</DmFields>
+</DmDefinition>

@@ -1,2 +1,0 @@
-# _Wireframe_Decimate
-

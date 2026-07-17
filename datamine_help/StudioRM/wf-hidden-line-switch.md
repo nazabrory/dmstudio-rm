@@ -1,2 +1,0 @@
-# wf-hidden-line-switch
-

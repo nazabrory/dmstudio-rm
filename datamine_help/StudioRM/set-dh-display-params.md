@@ -1,2 +1,0 @@
-# set-dh-display-params
-

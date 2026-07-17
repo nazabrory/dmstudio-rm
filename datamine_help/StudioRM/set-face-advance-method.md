@@ -1,2 +1,0 @@
-# set-face-advance-method
-

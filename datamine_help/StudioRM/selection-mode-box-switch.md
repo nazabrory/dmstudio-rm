@@ -1,2 +1,0 @@
-# selection-mode-box-switch
-

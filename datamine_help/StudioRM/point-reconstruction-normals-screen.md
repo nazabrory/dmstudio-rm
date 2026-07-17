@@ -1,2 +1,0 @@
-# point-reconstruction-normals-screen
-

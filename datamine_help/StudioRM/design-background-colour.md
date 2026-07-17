@@ -1,2 +1,0 @@
-# design-background-colour
-

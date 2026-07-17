@@ -1,2 +1,0 @@
-# spool-print-file
-

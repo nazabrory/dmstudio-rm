@@ -1,2 +1,0 @@
-# toggle-drillhole-selection
-

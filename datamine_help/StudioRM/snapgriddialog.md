@@ -1,2 +1,0 @@
-# _SnapGrid_Dialog
-

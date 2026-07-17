@@ -1,2 +1,0 @@
-# rings-rig-reversed-switch
-

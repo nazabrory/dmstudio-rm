@@ -1,2 +1,0 @@
-# Road String Projection Dialog
-

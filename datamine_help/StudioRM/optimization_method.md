@@ -1,2 +1,0 @@
-# _DeclineOptimizer_Method
-

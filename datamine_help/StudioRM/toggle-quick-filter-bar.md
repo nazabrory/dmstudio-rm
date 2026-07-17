@@ -1,2 +1,0 @@
-# toggle-quick-filter-bar
-

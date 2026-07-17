@@ -1,2 +1,0 @@
-# wireframe-section-multiple
-

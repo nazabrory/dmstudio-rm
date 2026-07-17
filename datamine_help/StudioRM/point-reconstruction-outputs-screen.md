@@ -1,2 +1,0 @@
-# point-reconstruction-outputs-screen
-

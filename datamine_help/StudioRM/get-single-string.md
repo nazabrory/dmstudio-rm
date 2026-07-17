@@ -1,2 +1,0 @@
-# get-single-string
-

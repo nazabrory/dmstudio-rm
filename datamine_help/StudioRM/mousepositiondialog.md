@@ -1,2 +1,0 @@
-# _MousePosition_Dialog
-

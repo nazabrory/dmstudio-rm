@@ -1,2 +1,0 @@
-# _DesurveySettings_Dialog
-

@@ -1,2 +1,0 @@
-# Dynamic Pit Design Dialog
-

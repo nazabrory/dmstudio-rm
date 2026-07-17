@@ -1,2 +1,0 @@
-# get-all-strings
-

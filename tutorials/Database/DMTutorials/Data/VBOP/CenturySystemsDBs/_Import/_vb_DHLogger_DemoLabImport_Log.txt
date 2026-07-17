@@ -1,0 +1,27 @@
+
+Sample No: VB4277-01 imported
+Sample No: VB4277-02 imported
+Sample No: VB4277-03 imported
+Sample No: VB4277-04 imported
+Sample No: VB4277-05 imported
+
+Failed Standard:
+----------------
+Standard Number: 	VB4277-06
+Standard Code: 		VBS1
+Element: 		AU
+Unit of Measure: 	GPT
+Analytical Technique: 	FA
+
+Sample No: VB4277-06 imported
+
+
+Hole Number: VB4277
+VB4277-01
+VB4277-02
+VB4277-03
+VB4277-04
+VB4277-05
+VB4277-06
+
+(6 results imported )

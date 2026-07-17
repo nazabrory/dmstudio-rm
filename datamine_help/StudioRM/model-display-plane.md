@@ -1,2 +1,0 @@
-# model-display-plane
-

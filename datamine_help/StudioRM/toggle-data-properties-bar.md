@@ -1,2 +1,0 @@
-# toggle-data-properties-bar
-

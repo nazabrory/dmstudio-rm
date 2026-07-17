@@ -1,2 +1,0 @@
-# create-drillhole-collars-file
-

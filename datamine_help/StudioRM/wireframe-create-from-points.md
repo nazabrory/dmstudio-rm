@@ -1,2 +1,0 @@
-# wireframe-create-from-points
-

@@ -1,2 +1,0 @@
-# open-string-file
-

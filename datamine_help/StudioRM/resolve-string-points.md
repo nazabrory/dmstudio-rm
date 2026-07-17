@@ -1,2 +1,0 @@
-# resolve-string-points
-

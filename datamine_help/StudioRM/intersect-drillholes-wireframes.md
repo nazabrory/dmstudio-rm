@@ -1,2 +1,0 @@
-# intersect-drillholes-wireframes
-

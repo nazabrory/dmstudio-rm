@@ -1,2 +1,0 @@
-# _MineTrust_RemoveProjectFile
-

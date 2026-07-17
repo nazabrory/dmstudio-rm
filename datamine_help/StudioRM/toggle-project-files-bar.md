@@ -1,2 +1,0 @@
-# toggle-project-files-bar
-

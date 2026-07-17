@@ -1,2 +1,0 @@
-# UniformConditioning - GT Curves
-

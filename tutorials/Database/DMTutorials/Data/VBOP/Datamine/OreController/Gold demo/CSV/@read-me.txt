@@ -1,0 +1,10 @@
+This folder contains drill hole data in CSV format for use in the
+Ore Controller Gold Demo system.
+
+The folder path and the file names "collars.csv", "surveys.csv" and
+"assays.csv" are specified in the Ore Controller configuration file and
+should not be changed.
+
+
+Datamine Software
+May 2015

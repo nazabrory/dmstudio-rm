@@ -1,2 +1,0 @@
-# set-adjustment-method-switch
-

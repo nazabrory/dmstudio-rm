@@ -1,2 +1,0 @@
-# Plot Overlays From Type
-

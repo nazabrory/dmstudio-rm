@@ -1,2 +1,0 @@
-# tag-string-colour
-

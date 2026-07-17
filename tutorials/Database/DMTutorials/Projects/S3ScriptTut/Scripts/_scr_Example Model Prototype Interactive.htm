@@ -1,0 +1,54 @@
+<html>
+<HEAD>
+<META name=VI60_defaultClientScript content=JavaScript>
+<title>PROTOM Interface Example</title>
+<style>body, table, input, select, option, textarea { color: buttontext; font-family: sans-serif; font-size: 8pt }
+body         { background-color: white }
+</style>
+
+<SCRIPT ID=clientEventHandlersJS LANGUAGE=javascript>
+<!--
+var oDmApp= null;
+var oScript = null;
+
+function window_onload() {
+    AutoConnect();
+}
+
+function AutoConnect() {    
+    oScript = new ActiveXObject("DatamineStudio.ScriptHelper");
+    oScript.initialize(window);
+    oDmApp = oScript.getApplication();
+    if (oDmApp== null)	
+      return false;
+    else
+      return true;
+}
+
+function btnOK_onclick()
+{
+    oDmApp.ExecuteCommand("protom");
+}
+
+//-->
+</SCRIPT>
+</HEAD>
+<BODY onload="return window_onload();">
+<table border="0">
+  <tr>
+    <td>
+      <p align="center"><font size="2"><b>Define Model Parameters</b></font></td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>
+      <p align="center"><input type="button" value="  OK  " name="btnOK" language="javascript" onclick="return btnOK_onclick()"></td>
+  </tr>
+  </table>
+<br>
+<p>&nbsp;</p>
+
+</BODY>
+</html>

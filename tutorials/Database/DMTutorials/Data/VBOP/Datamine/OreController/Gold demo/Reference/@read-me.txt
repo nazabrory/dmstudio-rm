@@ -1,0 +1,32 @@
+This folder contains reference data for use in the Ore Controller Gold Demo
+system.
+
+The files are as follows:
+
+Name:	exploration holes.dm
+Use:	A set of drill holes that is used for demonstrating proximity checks
+		when creating new drill hole patterns.
+
+Name:	fault-A-(tr|pt).dm, fault-B-(tr|pt).dm
+Use:	Describes two fault surfaces ("Fault A" and "Fault B").  These surfaces
+		may be used to demonstrate a feature of the drill hole planning
+		activity.
+
+Name:	oxide-(tr|pt).dm
+Use:	Used in the modelling activity to create a division between oxidised
+		and fresh rock.
+
+Name:	pit-survey-(tr|pt).dm
+Use:	A pit surface (topography) wireframe, used in the drill hole planning
+		and block modelling activities.  NOT USED, use 2015-06 topography from
+        the "topography" folder.
+
+Name:	pit-survey-st.dm
+Use:	A survey of toes and crests, used as a reference in each activity.
+
+Name:	resource-model.dm
+Use:	(Not currently used).
+
+
+Datamine Software
+May 2015

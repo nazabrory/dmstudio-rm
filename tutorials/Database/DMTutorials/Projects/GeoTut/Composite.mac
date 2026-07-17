@@ -1,0 +1,20 @@
+!START GC      
+!VARLOAD Composite.var
+
+!LOCDBOFF
+!COMPDH   &IN($INDH1#),
+          &OUT($OUTDH1#),*BHID(BHID),*FROM(FROM),*TO(TO),*ZONE(ZONE),
+		  *ZONE2(NLITH),*ZONE3(LITH),
+          @INTERVAL=2,@MAXGAP=0.0,@START=0.0,@MODE=2.0,
+          @REVERSE=0.0
+!ECHO 	
+!ECHO -------------------------------------------------------------------------
+!ECHO Update drillholes $INDH1#, $OUTDH1#
+!echo Composites within ZONE, NLITH, LITH, to 2 in length 
+!ECHO 	
+!ECHO -------------------------------------------------------------------------
+!ECHO 			  
+!END
+
+
+

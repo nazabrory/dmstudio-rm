@@ -1,2 +1,0 @@
-# adjust-string-in-ore
-

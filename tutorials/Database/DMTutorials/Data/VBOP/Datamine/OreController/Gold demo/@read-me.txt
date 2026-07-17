@@ -1,0 +1,11 @@
+This folder contains databases for use in the Ore Controller Gold Demo system.
+
+Name:	OC-displacement.mdb, OC-displacement.xlsx
+Use:	A database of blast displacement vectors, in Access and Excel formats.
+
+Name:	OC-drilling.accdb, OC-drilling.xlsx
+Use:	A drill hole database, in both Access and Excel formats.
+
+
+Datamine Software
+May 2015

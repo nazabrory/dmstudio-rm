@@ -1,0 +1,217 @@
+<html>
+<HEAD>
+<META name=VI60_defaultClientScript content=JavaScript>
+<title>PROTOM Interface Example</title>
+<style>body, table, input, select, option, textarea { color: buttontext; font-family: sans-serif; font-size: 8pt }
+body         { background-color: white }
+</style>
+
+<SCRIPT ID=clientEventHandlersJS LANGUAGE=javascript>
+<!--
+var oDmApp= null;
+var oScript = null;
+
+function AutoConnect() {    
+    oScript = new ActiveXObject("DatamineStudio.ScriptHelper");
+    oScript.initialize(window);
+    oDmApp = oScript.getApplication();
+    if (oDmApp== null)	
+      return false;
+    else
+      return true;
+}
+
+function window_onload() {
+    AutoConnect();
+  
+    tbMaxX.value = 1 * tbOriginX.value + tbCellSizeX.value * tbNumCellsX.value;
+    tbMaxY.value = 1 * tbOriginY.value + tbCellSizeY.value * tbNumCellsY.value;
+    tbMaxZ.value = 1 * tbOriginZ.value + tbCellSizeZ.value * tbNumCellsZ.value;
+}
+
+function btnOK_onclick()
+{
+    tbMaxX.value = 1 * tbOriginX.value + tbCellSizeX.value * tbNumCellsX.value 
+
+    // ------------------------------------------------------------------------
+    //  Define prototype model  
+    // ------------------------------------------------------------------------
+
+    var subcells = (cbSubcells.checked)? "Y" : "N";
+
+    oDmApp.ParseCommand("protom  &OUT=" + tbModel.value + "@ROTMOD=0" +
+        " N " + subcells + 
+        " " + tbOriginX.value + 
+        " " + tbOriginY.value + 
+        " " + tbOriginZ.value +
+        " " + tbCellSizeX.value +
+        " " + tbCellSizeY.value +
+        " " + tbCellSizeZ.value +
+        " " + tbNumCellsX.value +
+        " " + tbNumCellsY.value +
+        " " + tbNumCellsZ.value + " ");
+
+
+    oDmApp.ParseCommand("ddlist &IN=" + tbModel.value);
+
+    // ------------------------------------------------------------------------
+    //  Calculate coords of corners of prototype model  
+    // ------------------------------------------------------------------------
+    var extentX = tbNumCellsX.value * tbCellSizeX.value;
+    var extentY = tbNumCellsY.value * tbCellSizeY.value;
+    var extentZ = tbNumCellsZ.value * tbCellSizeZ.value;
+
+    var x1 = 1 * tbOriginX.value;
+    var y1 = 1 * tbOriginY.value;
+    var z1 = 1 * tbOriginZ.value;
+    var x2 = x1;            var y2 = y1 + extentY;  var z2 = z1;
+    var x3 = x1 + extentX;  var y3 = y2;            var z3 = z1;
+    var x4 = x3;            var y4 = y1;            var z4 = z1;
+
+    var x5 = x1;  var y5 = y1;  var z5 = z1 + extentZ;
+    var x6 = x2;  var y6 = y2;  var z6 = z5;
+    var x7 = x3;  var y7 = y3;  var z7 = z5;
+    var x8 = x4;  var y8 = y4;  var z8 = z5;
+
+    var p1 = " @point=" + x1 + "," + y1 + "," + z1 + ",1"
+    var p2 = " @point=" + x2 + "," + y2 + "," + z2 + ",1"
+    var p3 = " @point=" + x3 + "," + y3 + "," + z3 + ",1"
+    var p4 = " @point=" + x4 + "," + y4 + "," + z4 + ",1"
+    var p5 = " @point=" + x5 + "," + y5 + "," + z5 + ",1"
+    var p6 = " @point=" + x6 + "," + y6 + "," + z6 + ",1"
+    var p7 = " @point=" + x7 + "," + y7 + "," + z7 + ",1"
+    var p8 = " @point=" + x8 + "," + y8 + "," + z8 + ",1"
+
+    // ------------------------------------------------------------------------
+    //  Define strings around each side of model and endlink
+    // ------------------------------------------------------------------------
+    oDmApp.ParseCommand("new-string @attribute='COLOUR',1.0");
+    oDmApp.ParseCommand("new-string " + p1 + p2 + p3 + p4 + p1);
+    oDmApp.ParseCommand("cancel-command");
+    oDmApp.ParseCommand("end-link" + p1);
+    oDmApp.ParseCommand("cancel-command");
+    //  oDmApp.ParseCommand("erase-all 'yes'");
+
+    oDmApp.ParseCommand("zoom-all-graphics");
+
+    oDmApp.ParseCommand("new-string @attribute='COLOUR',2.0");
+    oDmApp.ParseCommand("new-string " + p5 + p6 + p7 + p8 + p5);
+    oDmApp.ParseCommand("cancel-command");
+    oDmApp.ParseCommand("end-link" + p5);
+    oDmApp.ParseCommand("cancel-command");
+    //  oDmApp.ParseCommand("erase-all 'yes'");
+
+    oDmApp.ParseCommand("new-string @attribute='COLOUR',3.0");
+    oDmApp.ParseCommand("new-string " + p1 + p5 + p8 + p4 + p1);
+    oDmApp.ParseCommand("cancel-command");
+    oDmApp.ParseCommand("end-link" + p1);
+    oDmApp.ParseCommand("cancel-command");
+    //  oDmApp.ParseCommand("erase-all 'yes'");
+
+    oDmApp.ParseCommand("new-string @attribute='COLOUR',4.0");
+    oDmApp.ParseCommand("new-string " + p4 + p8 + p7 + p3 + p4);
+    oDmApp.ParseCommand("cancel-command");
+    oDmApp.ParseCommand("end-link" + p4);
+    oDmApp.ParseCommand("cancel-command");
+    //  oDmApp.ParseCommand("erase-all 'yes'");
+
+    oDmApp.ParseCommand("new-string @attribute='COLOUR',5.0");
+    oDmApp.ParseCommand("new-string " + p3 + p7 + p6 + p2 + p3);
+    oDmApp.ParseCommand("cancel-command");
+    oDmApp.ParseCommand("end-link" + p3);
+    oDmApp.ParseCommand("cancel-command");
+    //  oDmApp.ParseCommand("erase-all 'yes'");
+
+    oDmApp.ParseCommand("new-string @attribute='COLOUR',6.0");
+    oDmApp.ParseCommand("new-string " + p2 + p6 + p5 + p1 + p2);
+    oDmApp.ParseCommand("cancel-command");
+    oDmApp.ParseCommand("end-link" + p2);
+    oDmApp.ParseCommand("cancel-command");
+    //  oDmApp.ParseCommand("erase-all 'yes'");
+
+    oDmApp.ParseCommand("update-visualiser-objects");
+}
+
+function X_onchange() {
+    tbMaxX.value = 1 * tbOriginX.value + tbCellSizeX.value * tbNumCellsX.value;
+}
+
+function Y_onchange() {
+    tbMaxY.value = 1 * tbOriginY.value + tbCellSizeY.value * tbNumCellsY.value;
+}
+
+function Z_onchange() {
+    tbMaxZ.value = 1 * tbOriginZ.value + tbCellSizeZ.value * tbNumCellsZ.value;
+}
+
+function btBrowse_onclick() {
+    var oDmBrowser = oDmApp.ActiveProject.Browser;
+    oDmBrowser.TypeFilter = oScript.DmFileType.dmBlockModel;
+    oDmBrowser.Show(true); // allow user to select any file
+    tbModel.value = oDmBrowser.FilePath; // fetch the pathname to the file
+}
+
+//-->
+</SCRIPT>
+</HEAD>
+<BODY onload="return window_onload();">
+<table border="0">
+  <tr>
+    <td colspan="4">
+      <p align="center"><font size="2"><b>Define Model Parameters</b></font></td>
+  </tr>
+  <tr>
+    <td colspan="4">Output Model&nbsp;&nbsp; <input type="text" size="20" name="tbModel" value="protomod">&nbsp;
+      <input type="button" value="Browse ..." name="btBrowse" LANGUAGE=javascript onclick="return btBrowse_onclick()"></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td align="center">&nbsp; X&nbsp; </td>
+    <td align="center">&nbsp; Y&nbsp; </td>
+    <td align="center">&nbsp; Z&nbsp; </td>
+  </tr>
+  <tr>
+    <td>Origin</td>
+    <td>
+      <p align="right"><input type="text" size="10" name="tbOriginX" value="0" LANGUAGE=javascript onchange="return X_onchange()"  style="text-align: Right"></p>
+    </td>
+    <td>
+      <p align="right"><input type="text" size="10" name="tbOriginY" value="0" LANGUAGE=javascript onchange="return Y_onchange()"  style="text-align: Right"></p>
+    </td>
+    <td>
+      <p align="right"><input type="text" size="10" name="tbOriginZ" value="0" LANGUAGE=javascript onchange="return Z_onchange()"  style="text-align: Right"></p>
+    </td>
+  </tr>
+  <tr>
+    <td>Cell Size</td>
+    <td><input type="text" size="10" name="tbCellSizeX" value="10" LANGUAGE=javascript onchange="return X_onchange()"  style="text-align: Right"></td>
+    <td><input type="text" size="10" name="tbCellSizeY" value="10" LANGUAGE=javascript onchange="return Y_onchange()"  style="text-align: Right"></td>
+    <td><input type="text" size="10" name="tbCellSizeZ" value="10" LANGUAGE=javascript onchange="return Z_onchange()"  style="text-align: Right"></td>
+  </tr>
+  <tr>
+    <td>No.of Cells&nbsp;&nbsp; </td>
+    <td><input type="text" size="10" name="tbNumCellsX" value="1" LANGUAGE=javascript onchange="return X_onchange()" style="text-align: Right"></td>
+    <td><input type="text" size="10" name="tbNumCellsY" value="1" LANGUAGE=javascript onchange="return Y_onchange()" style="text-align: Right"></td>
+    <td><input type="text" size="10" name="tbNumCellsZ" value="1" LANGUAGE=javascript onchange="return Z_onchange()" style="text-align: Right"></td>
+  </tr>
+  <tr>
+    <td>Maximum</td>
+    <td><input size="10" name="tbMaxX" readonly style="background-color: #CCCCCC; text-align: Right"></td>
+    <td><input size="10" name="tbMaxY" readonly style="background-color: #CCCCCC; text-align: Right"></td>
+    <td><input size="10" name="tbMaxZ" readonly style="background-color: #CCCCCC; text-align: Right"></td>
+  </tr>
+  <tr>
+    <td colspan="4">
+      <p align="center">&nbsp; <input type="checkbox" value="ON" name="cbSubcells" checked>
+      Allow sub-cells</td>
+  </tr>
+  <tr>
+    <td colspan="4">
+      <p align="center"><input type="button" value="  OK  " name="btnOK" language="javascript" onclick="return btnOK_onclick()"></td>
+  </tr>
+  </table>
+<br>
+<p>&nbsp;</p>
+
+</BODY>
+</html>

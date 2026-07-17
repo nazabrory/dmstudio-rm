@@ -1,2 +1,0 @@
-# surface-from-samples
-

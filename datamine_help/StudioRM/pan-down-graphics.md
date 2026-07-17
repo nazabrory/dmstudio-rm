@@ -1,2 +1,0 @@
-# pan-down-graphics
-

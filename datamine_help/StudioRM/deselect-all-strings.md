@@ -1,2 +1,0 @@
-# deselect-all-strings
-

@@ -1,2 +1,0 @@
-# Isoshells Report Dialog
-

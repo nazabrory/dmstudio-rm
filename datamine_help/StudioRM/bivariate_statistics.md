@@ -1,2 +1,0 @@
-# Bivariate_Statistics
-

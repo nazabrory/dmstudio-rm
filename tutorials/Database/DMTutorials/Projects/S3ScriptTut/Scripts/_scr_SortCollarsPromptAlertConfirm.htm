@@ -1,0 +1,100 @@
+<HTML>
+
+<HEAD>
+
+<META http-equiv="Content-Type" content="text/html; charset=UTF-16">
+
+<TITLE>Command Automatically recorded html script.</TITLE>
+
+<META name="DatamineScript" content="Version3">
+
+<SCRIPT ID="clientEventHandlersJS" LANGUAGE="javascript">
+
+
+var oDmApp= null;
+var oScript = null;
+
+function AutoConnect() {    
+    oScript = new ActiveXObject("DatamineStudio.ScriptHelper");
+    oScript.initialize(window);
+    oDmApp = oScript.getApplication();
+    if (oDmApp== null)	
+      return false;
+    else
+      return true;
+}
+
+function btnExecute_onclick() {
+
+	try	{
+
+        var strCFile;
+		AutoConnect();
+
+		alert("This script Sorts the Collars File.");
+		strCFile = prompt ("Enter the name of the collars file", "dhcollar");
+		
+	    if (!confirm("The input file you have selected is:"
+                     + "\n Collars: " + strCFile 
+                     + "\n"
+                     + "\n The output file is: SortedCollars")) return;
+
+	    oDmApp.ParseCommand("sortx &IN=" + strCFile + " &OUT=SortedCollars *KEY1=BHID @BINS=5 @ORDER=1");
+
+	}
+
+	catch(e) {
+
+		alert("Failed\nReason: " + e.description);
+
+	}			
+
+}
+
+function btnHelp_onclick() {
+
+	var features  = "centre:yes;help:no;status:no;resizable:yes;dialogWidth:850px;dialogHeight:600px";
+
+	var common = "_scr_SortCollars";
+
+	window.showModalDialog(common + "/autoSaveHelp.htm", common, features);
+
+}
+
+</SCRIPT></HEAD>
+
+<BODY>
+
+<div align="left">
+
+<table border="0" cellpadding="5" cellspacing="0">
+
+<tr>
+
+<td><b>_scr_SortCollars</b></td>
+
+<td>
+<img src="../../../../../../../Program%20Files/Datamine/Studio3/html/images/dmlogo.gif" alt="Datamine: The Mining Software" width="100" height="46"></td>
+
+</tr>
+
+<tr>
+
+<td align="centre" colspan="2"></td>
+
+</tr>
+
+<tr>
+
+<td align="centre" colspan="2"><input type="button" value="Execute" name="btnExecute" language="javascript" onclick="return btnExecute_onclick()" style="width: 75"><input type="button" value="Help" name="btnHelp" language="javascript" onclick="return btnHelp_onclick()" style="width: 75"></td>
+
+</tr>
+
+</table>
+
+</div>
+
+</BODY>
+
+</HTML>
+

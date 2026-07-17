@@ -1,2 +1,0 @@
-# annotate-point-switch
-

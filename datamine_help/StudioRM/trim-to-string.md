@@ -1,2 +1,0 @@
-# trim-to-string
-

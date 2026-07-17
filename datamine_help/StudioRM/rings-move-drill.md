@@ -1,2 +1,0 @@
-# rings-move-drill
-

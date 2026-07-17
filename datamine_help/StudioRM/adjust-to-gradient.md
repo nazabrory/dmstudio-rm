@@ -1,2 +1,0 @@
-# adjust-to-gradient
-

@@ -1,2 +1,0 @@
-# make-dtm-from-objects
-

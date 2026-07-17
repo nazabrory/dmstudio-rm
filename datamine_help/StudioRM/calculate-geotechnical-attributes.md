@@ -1,2 +1,0 @@
-# calculate-geotechnical-attributes
-

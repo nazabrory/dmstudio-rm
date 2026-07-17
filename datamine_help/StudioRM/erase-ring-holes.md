@@ -1,2 +1,0 @@
-# erase-ring-holes
-

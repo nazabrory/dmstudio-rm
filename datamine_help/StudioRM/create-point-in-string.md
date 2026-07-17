@@ -1,2 +1,0 @@
-# create-point-in-string
-

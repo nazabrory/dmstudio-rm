@@ -1,2 +1,0 @@
-# redraw-strings-in-order
-

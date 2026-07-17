@@ -1,2 +1,0 @@
-# update-vr-objects-only
-

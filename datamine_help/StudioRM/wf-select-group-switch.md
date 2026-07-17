@@ -1,2 +1,0 @@
-# wf-select-group-switch
-

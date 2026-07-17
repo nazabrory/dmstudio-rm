@@ -1,2 +1,0 @@
-# Merge intersecting DTMs Dialog
-

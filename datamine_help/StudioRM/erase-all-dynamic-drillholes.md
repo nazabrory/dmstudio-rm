@@ -1,2 +1,0 @@
-# erase-all-dynamic-drillholes
-

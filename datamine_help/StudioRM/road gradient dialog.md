@@ -1,2 +1,0 @@
-# Road Gradient Dialog
-

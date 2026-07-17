@@ -1,2 +1,0 @@
-# Multivariate_Investigate_Anisotropy
-

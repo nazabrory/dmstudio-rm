@@ -1,2 +1,0 @@
-# delete-string-segment
-

@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<DmDefinition precision="single" desc="FILE CREATED BY SYSTEM USING AED ON 03/12/30">
+	<DmFields>
+		<DmField name="SREFNUM" type="numeric" default="1.000"/>
+		<DmField name="SMETHOD" type="numeric" default="2.000"/>
+		<DmField name="SDIST1" type="numeric" default="100.000"/>
+		<DmField name="SDIST2" type="numeric" default="100.000"/>
+		<DmField name="SDIST3" type="numeric" default="100.000"/>
+		<DmField name="SANGLE1" type="numeric" default="0.000"/>
+		<DmField name="SANGLE2" type="numeric" default="0.000"/>
+		<DmField name="SANGLE3" type="numeric" default="0.000"/>
+		<DmField name="SAXIS1" type="numeric" default="3.000"/>
+		<DmField name="SAXIS2" type="numeric" default="1.000"/>
+		<DmField name="SAXIS3" type="numeric" default="3.000"/>
+		<DmField name="OCTMETH" type="numeric" default="0.000"/>
+		<DmField name="MINOCT" type="numeric" default="0.000"/>
+		<DmField name="MINPEROC" type="numeric" default="0.000"/>
+		<DmField name="MAXPEROC" type="numeric" default="0.000"/>
+		<DmField name="MINNUM1" type="numeric" default="1.000"/>
+		<DmField name="MAXNUM1" type="numeric" default="20.000"/>
+		<DmField name="SVOLFAC2" type="numeric" default="0.000"/>
+		<DmField name="MINNUM2" type="numeric" default="0.000"/>
+		<DmField name="MAXNUM2" type="numeric" default="0.000"/>
+		<DmField name="SVOLFAC3" type="numeric" default="0.000"/>
+		<DmField name="MINNUM3" type="numeric" default="0.000"/>
+		<DmField name="MAXNUM3" type="numeric" default="0.000"/>
+		<DmField name="MAXKEY" type="numeric" default="0.000"/>
+	</DmFields>
+</DmDefinition>

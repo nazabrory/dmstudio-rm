@@ -1,2 +1,0 @@
-# combine-strings-attrib
-

@@ -1,2 +1,0 @@
-# outline-inside-switch-off
-

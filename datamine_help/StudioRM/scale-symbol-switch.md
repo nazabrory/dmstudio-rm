@@ -1,2 +1,0 @@
-# scale-symbol-switch
-

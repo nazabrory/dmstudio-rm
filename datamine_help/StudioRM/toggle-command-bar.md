@@ -1,2 +1,0 @@
-# toggle-command-bar
-

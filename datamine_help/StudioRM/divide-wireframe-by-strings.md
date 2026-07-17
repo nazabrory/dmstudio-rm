@@ -1,2 +1,0 @@
-# divide-wireframe-by-strings
-

@@ -1,2 +1,0 @@
-# circle-by-three-points
-

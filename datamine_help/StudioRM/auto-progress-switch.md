@@ -1,2 +1,0 @@
-# auto-progress-switch
-

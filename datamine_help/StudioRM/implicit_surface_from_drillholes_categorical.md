@@ -1,2 +1,0 @@
-# Implicit_Surface_From_Drillholes_Categorical
-

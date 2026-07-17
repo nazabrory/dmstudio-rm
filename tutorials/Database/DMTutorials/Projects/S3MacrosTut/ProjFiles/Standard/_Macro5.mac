@@ -1,0 +1,79 @@
+!START 1    Grade Est Stats
+
+# ====================================================================
+#  Subroutine Calls
+# ====================================================================
+
+!GOSUB SUB1
+
+!GOSUB SUB2
+
+!GOSUB SUB3
+
+!GOTO THE_END
+
+# ====================================================================
+#  Calculate statistics and create prototype block model
+# ====================================================================
+
+!SUB1:REM
+
+!STATS    &IN(samples),&OUT(x1)
+
+!PROTOM   &OUT(x2),@ROTMOD=0.0
+n
+N
+5610
+4580
+275
+40
+40
+10
+30
+26
+1
+       
+!RETURN
+
+# ====================================================================
+#  Estimate grade, calculate and display statistics
+# ====================================================================
+
+!SUB2:REM
+
+!GRADE    &PROTO(x2),&IN(samples),&MODEL(x3),*X(XPT),*Y(YPT),
+          *Z(ZPT),*VALUE(AU),*LENGTH(LENGTH),@SDIST1=100.0,
+          @SDIST2=100.0,@SDIST3=100.0,@SANGLE1=0.0,@SAXIS1=3.0,
+          @SANGLE2=0.0,@SAXIS2=1.0,@SANGLE3=0.0,@SAXIS3=3.0,
+          @MINNUM=3.0,@MAXNUM=20.0,@MINOCT=0.0,@MINPEROC=1.0,
+          @MAXPEROC=0.0,@IMETHOD=2.0,@POWER=2.0,@NSTRUCT=1.0,
+          @NUGGET=0.0,@ST1VAR=1.0,@ST1RANG1=100.0,@ST1RANG2=100.0,
+          @ST1RANG3=100.0,@ST2VAR=1.0,@ST2RANG1=100.0,@ST2RANG2=100.0,
+          @ST2RANG3=100.0,@PARENT=0.0,@XPOINTS=3.0,@YPOINTS=3.0,
+          @ZPOINTS=3.0,@XSUBCELL=1.0,@YSUBCELL=1.0,@ZSUBCELL=1.0
+
+!STATS    &IN(x3),&OUT(x4),*F1(AU)
+
+!LIST     &IN(x1),*F1(FIELD),*F2(MINIMUM),*F3(MAXIMUM),*F4(RANGE),
+          *F5(MEAN),@PROMPT=20.0
+
+!LIST     &IN(x4),*F1(FIELD),*F2(MINIMUM),*F3(MAXIMUM),*F4(RANGE),
+          *F5(MEAN),@PROMPT=20.0
+
+!RETURN
+
+# ====================================================================
+#  Delete temporary files
+# ====================================================================
+
+!SUB3:REM
+       
+!DIR    &OUT(xcat),x?
+
+!DELETE   &IN(xcat),@CONFIRM=0.0
+
+!RETURN
+
+!THE_END:REM
+
+!END

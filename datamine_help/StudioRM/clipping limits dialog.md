@@ -1,2 +1,0 @@
-# _ClippingLimits_Dialog
-

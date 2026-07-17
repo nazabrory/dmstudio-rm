@@ -1,2 +1,0 @@
-# query-current-file-filters
-

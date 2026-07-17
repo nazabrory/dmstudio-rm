@@ -1,2 +1,0 @@
-# IndependentView_Dialog
-

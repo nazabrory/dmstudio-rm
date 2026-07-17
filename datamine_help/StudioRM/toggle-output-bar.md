@@ -1,2 +1,0 @@
-# toggle-output-bar
-

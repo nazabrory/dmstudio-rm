@@ -1,2 +1,0 @@
-# define-new-rosette
-

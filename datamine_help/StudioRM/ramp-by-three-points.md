@@ -1,2 +1,0 @@
-# ramp-by-three-points
-

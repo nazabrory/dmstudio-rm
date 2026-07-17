@@ -1,2 +1,0 @@
-# polygon-intersection-delete-originals
-

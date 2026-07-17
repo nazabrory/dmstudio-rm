@@ -1,2 +1,0 @@
-# sequence-strings-plane
-

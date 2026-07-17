@@ -1,2 +1,0 @@
-# fast-string-evaluation-switch
-

@@ -355,6 +355,109 @@ def dialog_dismiss_context(title='Studio RM', interval=1.0):
         t.join(timeout=interval * 2)
 
 
+def initialize_sandbox(notebook_folder, files_to_copy=None):
+    '''
+    initialize_sandbox
+    ------------------
+
+    Initialize the active Datamine project sandbox.
+    Changes Python's working directory to the active project folder,
+    validates that it is the test_sandbox, and copies any local/required files.
+
+    Parameters:
+    -----------
+    notebook_folder: str
+        The absolute or relative path to the folder containing the notebook,
+        typically obtained via os.path.dirname(os.path.abspath('__file__')).
+    files_to_copy: list of str, optional
+        A list of specific filenames to copy from the help database to the sandbox.
+    '''
+    import os
+    import shutil
+    import sys
+    from dmstudio import initialize
+
+    notebook_folder = os.path.abspath(notebook_folder)
+
+    # 1. Connect to Datamine Studio RM COM Application
+    try:
+        oScript = initialize.studio('StudioRM')
+    except Exception as e:
+        raise RuntimeError(
+            "Could not connect to Datamine Studio RM. "
+            "Please ensure Datamine Studio RM is open and licensed."
+        ) from e
+
+    # 2. Get active project folder
+    project = oScript.ActiveProject
+    if project is None:
+        raise RuntimeError(
+            "No active project in Studio RM! "
+            "Please open 'tutorials/test_sandbox/Project.rmproj' inside Studio RM first."
+        )
+
+    active_folder = os.path.abspath(project.Folder)
+
+    # 3. Find repo root dynamically
+    repo_root = notebook_folder
+    while True:
+        if os.path.exists(os.path.join(repo_root, 'pyproject.toml')) or os.path.exists(os.path.join(repo_root, 'AGENTS.md')):
+            break
+        parent = os.path.dirname(repo_root)
+        if parent == repo_root:
+            # Fallback if not found
+            repo_root = os.path.abspath(os.path.join(notebook_folder, '..', '..', '..', '..'))
+            break
+        repo_root = parent
+
+    expected_sandbox = os.path.abspath(os.path.join(repo_root, 'tutorials', 'test_sandbox'))
+
+    # 4. Enforce that the active project matches test_sandbox
+    if os.path.normpath(active_folder).lower() != os.path.normpath(expected_sandbox).lower():
+        raise RuntimeError(
+            f"Active Datamine Project ({active_folder}) does not match the test sandbox ({expected_sandbox}).\n"
+            "Please open 'tutorials/test_sandbox/Project.rmproj' inside Datamine Studio RM first!"
+        )
+
+    # 5. Change current working directory to active folder (sandbox)
+    os.chdir(active_folder)
+    print(f"Working directory changed to active project folder: {active_folder}")
+
+    # 6. Ensure active_folder is in sys.path so 'import dmdir' works locally
+    if active_folder not in sys.path:
+        sys.path.insert(0, active_folder)
+
+    # 7. Copy any local tutorial files (excluding project metadata and notebooks) from notebook_folder to active_folder
+    if os.path.normpath(notebook_folder).lower() != os.path.normpath(active_folder).lower():
+        for filename in os.listdir(notebook_folder):
+            file_lower = filename.lower()
+            if file_lower in ('project.rmproj', 'dmstusub.dat', '__pycache__', '.ipynb_checkpoints', 'dmdir.py', '__init__.py') or file_lower.endswith('.ipynb'):
+                continue
+            if file_lower.startswith('project.rmproj.'):
+                continue
+            src_file = os.path.join(notebook_folder, filename)
+            if os.path.isfile(src_file):
+                dst_file = os.path.join(active_folder, filename)
+                shutil.copy2(src_file, dst_file)
+                print(f"Copied local notebook asset: {filename}")
+
+    # 8. Copy database files if requested
+    if files_to_copy:
+        help_db = os.path.join(repo_root, 'tutorials', 'Database', 'DMTutorials', 'Data', 'VBOP', 'Datamine')
+        if not os.path.exists(help_db):
+            raise FileNotFoundError(f"Tutorial Database folder not found at: {help_db}")
+
+        for filename in files_to_copy:
+            src = os.path.join(help_db, filename)
+            local_name = "t_" + filename.replace("_vb_", "")
+            dst = os.path.join(active_folder, local_name)
+            if os.path.exists(src):
+                shutil.copy2(src, dst)
+                print(f"Initialized database dataset: {local_name}")
+            else:
+                print(f"Warning: Source {filename} not found in database at {help_db}.")
+
+
 def download_tutorials(target_dir):
     '''
     download_tutorials

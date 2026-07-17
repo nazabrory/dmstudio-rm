@@ -1,2 +1,0 @@
-# string-with-interpolation
-

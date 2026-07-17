@@ -1,2 +1,0 @@
-# _LegendWizard_Filter
-

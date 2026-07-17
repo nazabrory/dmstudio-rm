@@ -1,2 +1,0 @@
-# gaussian-wireframe-from-points
-

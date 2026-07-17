@@ -1,2 +1,0 @@
-# _TransformCoordinates_Dialog
-

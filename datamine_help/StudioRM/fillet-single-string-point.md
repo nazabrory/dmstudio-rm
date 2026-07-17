@@ -1,2 +1,0 @@
-# fillet-single-string-point
-

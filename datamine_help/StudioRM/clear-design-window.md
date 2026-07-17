@@ -1,2 +1,0 @@
-# clear-design-window
-

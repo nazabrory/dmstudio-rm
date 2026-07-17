@@ -1,2 +1,0 @@
-# wf-intersection-switch
-

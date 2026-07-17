@@ -1,0 +1,115 @@
+<html>
+
+<head>
+<meta name=vs_defaultClientScript content="JavaScript">
+<meta http-equiv="Content-Language" content="en-gb">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Shovel Script</title>
+
+<script id=clientEventHandlersJS language=javascript>
+
+var varfile = "Shovel.var";
+var oDmApp= null;
+var oScript = null;
+
+function window_onload() {
+    AutoConnect();
+    tbInfo.value = "";
+}
+
+function AutoConnect() {    
+    oScript = new ActiveXObject("DatamineStudio.ScriptHelper");
+    oScript.initialize(window);
+    oDmApp = oScript.getApplication();
+    if (oDmApp== null)	
+      return false;
+    else
+      return true;
+}
+
+function btnCreateShovel_onclick() {
+var intAppend = 0;
+
+  if (cbAppend.checked) {
+    intAppend = 1 ;
+//    alert ("append is set to checked");
+  }
+  
+  if (tbAzimuth.value == "") { 
+    alert ("Enter a valid Azimuth for the shovel") ;
+    return ; 
+  }
+  
+  if (tbElevation.value == "") { 
+    alert ("Enter a valid Elevation for the shovel") ;
+    return ; 
+  } 
+  
+// ok lets tell the user what to do next
+  tbInfo.value = "Please select a point in the design window" ;
+  objVars = new Object() ;
+  objVars.APPEND = intAppend ;
+  objVars.AZIM = tbAzimuth.value ;  
+  
+// Get the point in the design window that will represent E and N we will override Z 
+  strPoint = oDmApp.ActiveProject.Design.Selection.PickPoint("Select a point");
+  var aryTemp = strPoint.substr(7).split(",");
+  objVars.E = parseFloat(aryTemp[0]);
+  objVars.N = parseFloat(aryTemp[1]);
+//  objVars.Z = parseFloat(aryTemp[2]);
+  objVars.Z = tbElevation.value ;
+//  alert ("XYZ are " + strPoint) ;
+  oScript.varsave(varfile, false, objVars);
+  
+// Now run the macro
+  oDmApp.ParseCommand("xrun Shovel.mac T")
+  
+// now load the wireframe file into the design window and refresh the screen
+  tbInfo.value = "";
+  oDmApp.ExecuteCommand("unload-all-data");
+  oDmApp.ActiveProject.Data.LoadFromProject("shovtr");
+  oDmApp.ActiveProject.Data.LoadFromProject("shovpt");
+  oDmApp.ExecuteCommand("zoom-all-extents");
+//  oDmApp.ParseCommand("redraw-display");
+}
+</script>
+</head>
+
+<body LANGUAGE=javascript onload="return window_onload()">
+
+<table border="0" id="table1">
+	<tr>
+		<td colspan="2">
+		<p align="center"><b>Creating a Wireframe Shovel</b></td>
+	</tr>
+	<tr>
+		<td>
+		Shovel Azimuth</td>
+		<td>
+		<input type="text" name="tbAzimuth" size="20" value="0"></td>
+	</tr>
+	<tr>
+		<td>
+		Shovel Elevation&nbsp;&nbsp; </td>
+		<td>
+		<input type="text" name="tbElevation" size="20" value="0"></td>
+	</tr>
+	<tr>
+		<td height="24">&nbsp;</td>
+		<td height="24">
+		<input type="checkbox" name="cbAppend" value="ON">Append Shovels</td>
+	</tr>
+	<tr>
+		<td height="34" colspan="2">
+		<p align="center">
+		<input type="button" value="Create Shovel" name="btnCreateShovel" onclick="return btnCreateShovel_onclick()"></td>
+	</tr>
+	<tr>
+		<td colspan="2">
+		<input type="text" name="tbInfo" size="46" value="Please select a point in the design window"></td>
+	</tr>
+</table>
+
+</body>
+
+</html>

@@ -1,2 +1,0 @@
-# mine-tonnes-target
-

@@ -1,2 +1,0 @@
-# quick-color-points
-

@@ -1,2 +1,0 @@
-# VR Grids - Options
-

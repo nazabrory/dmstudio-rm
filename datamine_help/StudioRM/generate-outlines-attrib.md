@@ -1,2 +1,0 @@
-# generate-outlines-attrib
-

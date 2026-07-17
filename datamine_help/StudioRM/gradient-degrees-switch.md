@@ -1,2 +1,0 @@
-# gradient-degrees-switch
-

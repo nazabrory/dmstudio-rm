@@ -1,2 +1,0 @@
-# rings-save-design-planes
-

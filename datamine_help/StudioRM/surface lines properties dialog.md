@@ -1,2 +1,0 @@
-# Surface Lines Properties Dialog
-

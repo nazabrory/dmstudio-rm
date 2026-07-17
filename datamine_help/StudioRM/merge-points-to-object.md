@@ -1,2 +1,0 @@
-# merge-points-to-object
-

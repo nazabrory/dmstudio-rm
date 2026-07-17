@@ -1,2 +1,0 @@
-# zoom-all-graphics
-

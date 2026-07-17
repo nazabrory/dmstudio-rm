@@ -1,2 +1,0 @@
-# edit-coincident-points-switch
-

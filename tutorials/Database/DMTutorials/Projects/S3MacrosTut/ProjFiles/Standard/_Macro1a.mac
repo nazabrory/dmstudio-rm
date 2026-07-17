@@ -1,0 +1,18 @@
+!START MOD
+
+!STATS    &IN(samples),&OUT(x1)
+
+!PROTOM   &OUT(x2),@ROTMOD=0.0
+n
+N
+5610
+4580
+275
+40
+40
+10
+30
+26
+1
+       
+!END

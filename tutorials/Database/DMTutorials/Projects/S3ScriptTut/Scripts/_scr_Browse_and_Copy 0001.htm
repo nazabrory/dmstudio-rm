@@ -1,0 +1,97 @@
+<html>
+
+<head>
+<META name=VI60_defaultClientScript content=JavaScript>
+<meta http-equiv="Content-Language" content="en-gb">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 6.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Browse and Copy</title>
+<link rel="stylesheet" type="text/css" href="dmstyle.css">
+
+<SCRIPT ID=clientEventHandlersJS LANGUAGE=javascript>
+<!--
+var oDmApp= null;
+var oScript = null;
+var oDmBrowser;
+
+function window_onload() {
+  AutoConnect();
+}
+
+function AutoConnect() {    
+    oScript = new ActiveXObject("DatamineStudio.ScriptHelper");
+    oScript.initialize(window);
+    oDmApp = oScript.getApplication();
+    if (oDmApp== null)	
+      return false;
+    else
+      return true;
+}
+
+function btnOK_onclick() {
+
+    if (tbInputFile.value != "" && tbOutputFile.value != "") {
+        var theCommand = "copy &in=" + tbInputFile.value +
+        " &out=" + tbOutputFile.value;
+     
+        if (tbRetrieval.value != "")
+            theCommand += " {" + tbRetrieval.value + "}";
+     
+        oDmApp.ParseCommand(theCommand);
+    }
+}
+
+function DisplayBrowser() {
+    oDmBrowser = oDmApp.ActiveProject.Browser;
+    oDmBrowser.TypeFilter = oScript.DmFileType.dmNothing;
+    oDmBrowser.Show(false);
+    return oDmBrowser.FileName;
+}
+
+function btnBrowse1_onclick() {
+    tbInputFile.value = DisplayBrowser();
+}
+
+function btnBrowse2_onclick() {
+    tbOutputFile.value = DisplayBrowser();
+}
+
+//-->
+</SCRIPT>
+</head>
+
+<body>
+
+<body language=javascript onload="return window_onload()">
+
+<table border="0" cellpadding="5">
+  <tr>
+    <td colspan="3" align="center"><b>Copy a File</b>
+      </td>
+  </tr>
+  <tr>
+    <td>Input file</td>
+    <td><input type="text" size="20" name="tbInputFile"></td>
+    <td><input type="button" value="Browse ..." name="btnBrowse1" LANGUAGE=javascript onclick="return btnBrowse1_onclick()"></td>
+  </tr>
+  <tr>
+    <td>Output file</td>
+    <td><input type="text" size="20" name="tbOutputFile"></td>
+    <td><input type="button" value="Browse ..." name="btnBrowse2" LANGUAGE=javascript onclick="return btnBrowse2_onclick()"></td>
+  </tr>
+  <tr>
+    <td>Retrieval criteria</td>
+    <td><input type="text" size="20" name="tbRetrieval"></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td align="center"><input type="button" value="  OK  " name="btnOK" LANGUAGE=javascript onclick="return btnOK_onclick()"></td>
+    <td></td>
+  </tr>
+</table>
+
+</body>
+
+</html>

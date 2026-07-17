@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+<HEAD>
+<META Name="DatamineScript" Content="Version3" />
+<TITLE>_Run_Macro18.htm</TITLE>
+<SCRIPT TYPE="text/javascript">
+
+// ----------------------------------------------------------------------
+// Standard initialisation for Datamine Studio 3
+//
+var oDmApp= null;
+var oScript = null;
+function AutoConnect()
+{
+   try {
+      oScript = new ActiveXObject("DatamineStudio.ScriptHelper");
+      oScript.initialize(window);
+      oDmApp = oScript.getApplication();
+      if (oDmApp == null || oDmApp.ActiveProject == null)    //Attempt to Use the Active Datamine Session
+      {
+         alert("There are no active Studio3 projects open.\n Please open a Studio 3 project before continuing.");
+         window.close();                                                     // Closes the script window
+	     return false;
+      }else
+	      return true;
+   } 
+   catch(e) {
+      alert("Failed\nReason: " + e.description);
+      if ( oDmApp) oDmApp.Quit(); // release the session to close it down
+   }	
+   return false;		
+}
+function btnExecute_onclick()
+{
+	try	{
+		if (!AutoConnect())
+			return;
+		
+	
+	;
+
+	oDmApp.ParseCommand("xrun Macro18.mac 1")
+	
+
+	}
+	catch(e) {
+		alert("Failed\nReason: " + e.description);
+	}			
+}
+function btnHelp_onclick()
+{
+	var features = "height=600,width=400,status=yes,toolbar=no,menubar=no,location=no scrollbars=yes";
+	var common = "Run a Macro from a Script";
+	var installpath = "D:/Program Files/Datamine/Studio3/";
+	installpath = installpath.replace(" ", "%20");
+	var helpcommand = "mk:@MSITStore:" + installpath + "/Help/DatamineStudio.chm::/Studio_3_General/Concept_Studio%203%20Scripting%20Overview.htm";
+	window.open(helpcommand , common, features);
+}
+</SCRIPT>
+</HEAD>
+<BODY onunload="oDmApp = null;oScript = null;">
+<div>
+<table border="0" cellpadding="5" cellspacing="0">
+<tr>
+<td><b>Run a Macro from a Script</b>
+</td>
+<td><img src="D:/Program Files/Datamine/Studio3//html/images/dmlogo.gif" alt="Datamine: The Mining Software" width="100" height="46" /></td>
+</tr>
+<tr>
+<td align="center" colspan="2"></td>
+</tr>
+<tr>
+<td align="center" colspan="2">
+<input type="button" value="Execute" name="btnExecute" onclick="return btnExecute_onclick()" style="width: 75px" />
+<input type="button" value="Help" name="btnHelp" onclick="return btnHelp_onclick()" style="width: 75px" />
+</td>
+</tr>
+</table>
+</div>
+</BODY>
+</HTML>

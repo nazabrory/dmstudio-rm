@@ -1,2 +1,0 @@
-# berm-string-colour
-

@@ -1,2 +1,0 @@
-# VR_String Labels
-

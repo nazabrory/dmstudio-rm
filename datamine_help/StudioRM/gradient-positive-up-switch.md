@@ -1,2 +1,0 @@
-# gradient-positive-up-switch
-

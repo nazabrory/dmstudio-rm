@@ -1,2 +1,0 @@
-# wf-intersect-line-switch
-

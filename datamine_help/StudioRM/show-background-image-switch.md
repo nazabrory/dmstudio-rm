@@ -1,2 +1,0 @@
-# show-background-image-switch
-

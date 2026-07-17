@@ -1,2 +1,0 @@
-# select-string-from-file
-

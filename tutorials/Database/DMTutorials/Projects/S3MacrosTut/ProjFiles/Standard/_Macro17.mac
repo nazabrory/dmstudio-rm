@@ -1,0 +1,15 @@
+!START 1     Flag Sample File with ANOM field
+
+!PROMPT
+0
+1 Select grade field (AU,CU)[AU] > '$GrdFld#',a,2,AU,CU
+0
+
+!EXTRA  &IN(samples),&OUT(xsamples),@PRINT=1
+ANOM = 0
+!INCLUDE &FILE(formulae), *TEXT(TEXT), *KEY(KEY), @VALUE='$GrdFld#'
+
+go
+
+
+!END

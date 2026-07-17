@@ -1,2 +1,0 @@
-# Create Isoshells Dialog - Output
-

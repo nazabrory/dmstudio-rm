@@ -265,15 +265,10 @@ def generate_notebooks():
         folder_path = os.path.join(collections_dir, target_subfolder, cmd_name_lower)
         os.makedirs(folder_path, exist_ok=True)
         
-        # Copy Project.rmproj
-        dest_project = os.path.join(folder_path, 'Project.rmproj')
-        if not os.path.exists(dest_project):
-            shutil.copy(project_template, dest_project)
-            
         if cmd_name_lower in skipped:
             print(f"Handling custom-built example: {cmd_name}")
             dest_notebook = os.path.join(folder_path, f"{cmd_name_lower}_example.ipynb")
-            src_notebook = os.path.join(collections_dir, cmd_name_lower, f"{cmd_name_lower}_example.ipynb")
+            src_notebook = os.path.join(base_dir, 'tutorials', 'custom_notebooks', f"{cmd_name_lower}_example.ipynb")
             if os.path.exists(src_notebook):
                 with open(src_notebook, 'r', encoding='utf-8') as f_in:
                     nb_data = json.load(f_in)
@@ -341,9 +336,9 @@ def generate_notebooks():
             f"{doc_text_markdown}"
         )
         
-        # Cell 2: Import & Project Verification (Case-Insensitive Normalization!)
+        # Cell 2: Import & Project Verification (Initialize Sandbox)
         cell2_code = (
-            "# Step 1: Connect to Datamine and Verify Active Project\n"
+            "# Step 1: Connect to Datamine and Initialize Sandbox\n"
             "import os\n"
             "import shutil\n"
             "import glob\n"
@@ -354,15 +349,9 @@ def generate_notebooks():
             "dm_fil = dmfiles.init(version='StudioRM')\n"
             "oScript = initialize.studio('StudioRM')\n"
             "print(f\"Connected to: {oScript.Caption}\")\n\n"
-            "# Verify that the active project matches this folder (case-insensitive) to prevent writing files to the wrong place\n"
-            "active_folder = os.path.normpath(oScript.ActiveProject.Folder).lower()\n"
-            "notebook_folder = os.path.normpath(os.path.dirname(os.path.abspath('__file__'))).lower()\n\n"
-            "if active_folder != notebook_folder:\n"
-            "    raise RuntimeError(\n"
-            "        f\"Active Datamine Project ({active_folder}) does not match this notebook's folder ({notebook_folder}).\\n\"\n"
-            "        \"Please open the 'Project.rmproj' in this folder inside Datamine Studio RM first!\"\n"
-            "    )\n"
-            "print(\"Active project verified successfully.\")"
+            "# Initialize active project sandbox using the shared test_sandbox project\n"
+            "notebook_folder = os.path.normpath(os.path.dirname(os.path.abspath('__file__'))).lower()\n"
+            "agent.initialize_sandbox(notebook_folder)"
         )
         nb.add_code(cell2_code)
         
@@ -380,17 +369,14 @@ def generate_notebooks():
         )
         nb.add_code(cell3_code)
         
-        # Cell 4: Prepare Inputs (Relative pointer path, nested 4 levels now!)
+        # Cell 4: Prepare Inputs (Copy VBOP datasets dynamically)
         nb.add_markdown(
             "## Step 3: Prepare Inputs\n"
-            "We initialize the example project by copying the relevant standard datasets from the Datamine help database "
-            "locally to this folder using a `t_` prefix. Paths are resolved relatively to ensure portability."
+            "We initialize the example project by copying the relevant standard datasets from the Datamine database "
+            "locally to this sandbox folder using a `t_` prefix."
         )
         cell4_code = (
-            "# Step 3: Initialize example project dataset using relative paths\n"
-            "# Resolve relative path to repository's help database dynamically (4 levels up from subfolders)\n"
-            "repo_root = os.path.abspath(os.path.join(notebook_folder, '..', '..', '..', '..'))\n"
-            "help_db = os.path.join(repo_root, 'datamine_help', 'Database', 'DMTutorials', 'Data', 'VBOP', 'Datamine')\n\n"
+            "# Step 3: Copy VBOP datasets dynamically from Database to test_sandbox\n"
             "files_to_copy = [\n"
             "    \"_vb_assays.dmx\",\n"
             "    \"_vb_collars.dmx\",\n"
@@ -403,16 +389,7 @@ def generate_notebooks():
             "    \"_vb_SurfacePointsPt.dmx\",\n"
             "    \"_vb_SurfaceTriangles.dmx\"\n"
             "]\n\n"
-            "for filename in files_to_copy:\n"
-            "    src = os.path.join(help_db, filename)\n"
-            "    # Strip _vb_ prefix and prepend t_ for local usage\n"
-            "    local_name = \"t_\" + filename.replace(\"_vb_\", \"\")\n"
-            "    dst = os.path.join(notebook_folder, local_name)\n"
-            "    if os.path.exists(src):\n"
-            "        shutil.copy(src, dst)\n"
-            "        print(f\"Initialized dataset: {local_name}\")\n"
-            "    else:\n"
-            "        print(f\"Warning: Source {filename} not found in help database.\")"
+            "agent.initialize_sandbox(notebook_folder, files_to_copy=files_to_copy)"
         )
         nb.add_code(cell4_code)
         
@@ -462,7 +439,7 @@ def generate_notebooks():
         )
         cell6_code = (
             "# Step 5: Verify results\n"
-            f"output_file = os.path.join(notebook_folder, 't_{cmd_name_lower}_out.dmx')\n"
+            f"output_file = 't_{cmd_name_lower}_out.dmx'\n"
             "if os.path.exists(output_file):\n"
             "    df = agent.read_datamine(output_file)\n"
             "    print(f\"Output file loaded successfully. Rows: {len(df)}\")\n"
@@ -480,7 +457,7 @@ def generate_notebooks():
         cell7_code = (
             "# Step 6: Clean up temporary files and generated artifacts\n"
             "# 1. Clean up temporary files matching t_*.*\n"
-            "temp_files = glob.glob(os.path.join(notebook_folder, \"t_*.*\"))\n"
+            "temp_files = glob.glob(\"t_*.*\")\n"
             "for f in temp_files:\n"
             "    try:\n"
             "        os.remove(f)\n"
@@ -490,15 +467,14 @@ def generate_notebooks():
             "# 2. Clean up dynamic python initialization files (dmdir.py, __init__.py)\n"
             "extra_files = ['dmdir.py', '__init__.py']\n"
             "for f in extra_files:\n"
-            "    path = os.path.join(notebook_folder, f)\n"
-            "    if os.path.exists(path):\n"
+            "    if os.path.exists(f):\n"
             "        try:\n"
-            "            os.remove(path)\n"
+            "            os.remove(f)\n"
             "            print(f\"Removed {f}\")\n"
             "        except Exception as e:\n"
             "            print(f\"Failed to remove {f}: {e}\")\n\n"
             "# 3. Clean up cache directories (__pycache__)\n"
-            "pycache = os.path.join(notebook_folder, '__pycache__')\n"
+            "pycache = '__pycache__'\n"
             "if os.path.exists(pycache):\n"
             "    try:\n"
             "        shutil.rmtree(pycache)\n"

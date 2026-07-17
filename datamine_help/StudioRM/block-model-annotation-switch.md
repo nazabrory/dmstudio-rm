@@ -1,2 +1,0 @@
-# block-model-annotation-switch
-

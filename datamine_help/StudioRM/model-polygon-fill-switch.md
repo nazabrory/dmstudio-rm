@@ -1,2 +1,0 @@
-# model-polygon-fill-switch
-

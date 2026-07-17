@@ -1,2 +1,0 @@
-# create-centerlines-from-outlines
-

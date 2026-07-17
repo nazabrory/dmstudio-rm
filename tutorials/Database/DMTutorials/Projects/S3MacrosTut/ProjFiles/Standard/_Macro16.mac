@@ -1,0 +1,15 @@
+!START 1     Flag Sample File with ANOM field
+
+
+!EXTRA  &IN(samples),&OUT(xsamples),@PRINT=1
+ANOM = 0
+if (AU>=0 AND AU<600)
+  ANOM = 1
+elseif (AU>=600)
+  ANOM = 2
+end
+
+go
+
+
+!END

@@ -1,2 +1,0 @@
-# delete-all-point-annot
-

@@ -1,2 +1,0 @@
-# link-area-method-switch
-

@@ -1,2 +1,0 @@
-# Edit_Ellipsoid
-

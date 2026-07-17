@@ -1,2 +1,0 @@
-# convert-wireframe-slice-string
-

@@ -1,2 +1,0 @@
-# drillhole-eohmark-switch
-

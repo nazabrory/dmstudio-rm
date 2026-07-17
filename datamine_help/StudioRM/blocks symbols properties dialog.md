@@ -1,2 +1,0 @@
-# Blocks Symbols Properties Dialog
-

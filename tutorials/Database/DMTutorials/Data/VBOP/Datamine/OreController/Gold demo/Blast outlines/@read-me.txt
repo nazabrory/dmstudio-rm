@@ -1,0 +1,13 @@
+This folder contains blast outlines for use in the Ore Controller Gold Demo
+system.
+The file names must match the pattern specified in the Controls.xml file
+(Activity "Import blast outlines", control "wildcard", "(???)_(???).dm").
+
+The folder contains a number of Surpac-format files.  These (and this file)
+should be ignored, as they do not match the required naming convention.
+
+Blast numbers beginning with "5" (e.g. 400_501.dm) are to be mined in period 5, with oc-2015-05-topo-(tr|pt).dm for topography.  Blast numbers begging with "6" (e.g. 400_602.dm) are mined with period 6 topography.
+
+
+Datamine Software
+May 2015

@@ -1,0 +1,69 @@
+!START M1       Calculate coordinates of start and end of each sample
+# ----------------------------------------------------------------------
+# This macro calculates the following files:
+# (1) Coordinates of Start and End of every sample
+# (2) Coordinates of Start of first sample with non absent grade in each hole 
+# (3) Coordinates of End   of last  sample with non absent grade in each hole 
+# The names of the files are the same as the input file but with extensions
+# _1, _2 and _3.
+#
+# ----------------------------------------------------------------------
+!let $holes# = COMPS5
+!let $grade# = AU
+
+# ----------------------------------------------------------------------
+#  Make sure the input holes file is sorted on BHID and FROM
+# ----------------------------------------------------------------------
+!MGSORT  &IN($holes#),&OUT(T1),*KEY1(BHID),*KEY2(FROM),*KEY3(TO)
+
+# ----------------------------------------------------------------------
+#  (1) Calculate coordinates of ends of each sample
+# ----------------------------------------------------------------------
+!EXTRA  &IN(T1),&OUT($holes#_1),@PRINT=1
+XYZD = LENGTH/2
+ZD   = XYZD*sin(B0)    XYD = XYZD*cos(B0)
+XD   = XYD *sin(A0)    YD  = XYD *cos(A0)
+XSTART = X-XD    YSTART = Y-YD    ZSTART = Z+ZD
+XEND   = X+XD    YEND   = Y+YD    ZEND   = Z-ZD
+erase(XYZD, XYD, XD, YD, ZD)
+go
+
+# ----------------------------------------------------------------------
+#  (2) Select start of first sample with non absent grade in each hole
+# ----------------------------------------------------------------------
+!EXTRA  &IN($holes#_1),&OUT($holes#_2),@PRINT=1,$grade#>0
+if (BHID==prev(BHID)) delete() end
+erase(XEND, YEND, ZEND)
+go
+
+# ----------------------------------------------------------------------
+#  (3) Select end of last sample with non absent grade in each hole
+# ----------------------------------------------------------------------
+!EXTRA  &IN($holes#_1),&OUT($holes#_3),@PRINT=1,$grade#>0
+if (BHID==next(BHID)) delete() end
+erase(XSTART, YSTART, ZSTART)
+go
+
+!END
+
+!START M2       Calculate DTM for top and bottom of each hole
+# ----------------------------------------------------------------------
+#  The DTM can be created interactively in the Design or VR window or
+#  using this macro.
+#  In this macro WFTREND is used to create the DTM.  This allows the DTMs
+#  to be extended by a distance @EXTN beyind the limits of the data.
+#  The DTM files created are UPPER and LOWER.
+#  Values of the EXTN and GRIDINC parameters may need to be adjusted for
+#  other data.
+# ----------------------------------------------------------------------
+!let $holes# = COMPS5
+
+!WFTREND &POINTIN($holes#_2),&WIRETR(UPPERTR),&WIREPT(UPPERPT),
+         *XPT(XSTART),*YPT(YSTART),*ZPT(ZSTART),
+		 @EXTN=30,@GRIDINC=15,@COLOURTR=1,@COLOUR1=2
+
+!WFTREND &POINTIN($holes#_3),&WIRETR(LOWERTR),&WIREPT(LOWERPT),
+         *XPT(XEND),*YPT(YEND),*ZPT(ZEND),
+         @EXTN=30,@GRIDINC=15,@COLOURTR=1,@COLOUR1=6
+
+!END

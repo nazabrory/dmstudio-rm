@@ -1,2 +1,0 @@
-# create-new-strings-object
-

@@ -1,2 +1,0 @@
-# link-outline-pair-attribute
-

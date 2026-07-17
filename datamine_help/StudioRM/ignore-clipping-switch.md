@@ -1,2 +1,0 @@
-# ignore-clipping-switch
-

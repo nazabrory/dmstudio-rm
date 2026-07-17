@@ -1,0 +1,129 @@
+<html>
+
+<head>
+<meta name="VI60_defaultClientScript" content="JavaScript">
+<meta http-equiv="Content-Language" content="en-gb">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 6.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Script to access record and field value</title>
+<style>body, table, input, select, option, textarea { color: buttontext; font-family: sans-serif; font-size: 8pt }
+body         { background-color: white }
+</style>
+
+<SCRIPT ID=clientEventHandlersJS LANGUAGE=javascript>
+<!--
+
+var oDmApp= null;
+var oScript = null;
+var oDmFile = new ActiveXObject("DmFile.DmTableADO");
+var iCol;
+
+function window_onload() {
+    AutoConnect();
+}
+
+function AutoConnect() {    
+    oScript = new ActiveXObject("DatamineStudio.ScriptHelper");
+    oScript.initialize(window);
+    oDmApp = oScript.getApplication();
+    if (oDmApp== null)	
+      return false;
+    else
+      return true;
+}
+
+function btnBrowse_onclick() {
+    var oDmBrowser = oDmApp.ActiveProject.Browser;
+    oDmBrowser.TypeFilter = oScript.DmFileType.dmNothing;
+    oDmBrowser.Show(true); // allow user to select any file
+    tbFile.value = oDmBrowser.FileName; // fetch the pathname to the file
+    
+	oDmFile.Open(oDmBrowser.FilePath, true);
+	oDmFile.MoveFirst();
+	iCol = 1;
+
+	updateDisplay();
+}
+
+function btnNextField_onclick() {
+	if (iCol < oDmFile.Schema.FieldCount)
+		++iCol;
+	updateDisplay();
+}
+
+function btnPrevField_onclick() {
+	if (iCol > 1)
+		--iCol;
+	updateDisplay();
+}
+
+function btnMoveNext_onclick() {
+	oDmFile.MoveNext();
+	if (oDmFile.EOF)
+		oDmFile.MoveLast();
+	updateDisplay();
+}
+
+function btnMovePrevious_onclick() {
+	oDmFile.MovePrevious();
+	if (oDmFile.BOF)
+		oDmFile.MoveFirst();
+	updateDisplay();
+}
+
+function btnMoveFirst_onclick() {
+	oDmFile.MoveFirst()
+	updateDisplay();
+}
+
+function btnMoveLast_onclick() {
+	oDmFile.MoveLast();
+	updateDisplay();
+}
+
+function updateDisplay() {
+	var rec = oDmFile.GetCurrentRow();
+	var num = oDmFile.GetRowCount();
+	tbRecord.value = rec + " of " + num;
+	tbColumn.value = (iCol) + " of " + oDmFile.Schema.FieldCount;
+	tbField.value = oDmFile.Schema.GetFieldName(iCol);
+	tbValue.value = oDmFile.GetColumn(iCol);
+}
+
+//-->
+</SCRIPT>
+</head>
+
+<body language="javascript" onload="return window_onload()">
+
+<table border="0" cellpadding="5">
+  <tr>
+    <td colspan="3">
+      <p align="center"><font size="2"><b>Access fields and records</b></font></td>
+  </tr>
+  <tr>
+    <td>File</td>
+    <td style="margin-top: 10"><input type="text" size="21" name="tbFile" style="padding-left: 3"></td>
+    <td><input type="button" value="..." name="btnBrowse" style="width: 30" language="javascript" onclick="return btnBrowse_onclick()"></td>
+  </tr>
+  <tr>
+    <td>Record</td>
+    <td style="margin-top: 10"><input type="text" size="21" name="tbRecord" readonly style="padding-left: 3"></td>
+    <td><input type="button" value="|&lt;&lt;" name="btnMoveFirst" language="javascript" onclick="return btnMoveFirst_onclick()"><input type="button" value="&lt;&lt;" name="btnMovePrevious" language="javascript" onclick="return btnMovePrevious_onclick()"><input type="button" value="&gt;&gt;" name="btnMoveNext" language="javascript" onclick="return btnMoveNext_onclick()"><input type="button" value="&gt;&gt;|" name="btnMoveLast" language="javascript" onclick="return btnMoveLast_onclick()"></td>
+  </tr>
+  <tr>
+    <td>Field</td>
+    <td style="margin-top: 10"><input type="text" size="3" name="tbColumn" readonly style="width: 50; padding-left: 3"><input type="text" size="11" name="tbField" readonly style="padding-left: 3"></td>
+    <td><input type="button" value="&lt;&lt;" name="btnPrevField" language="javascript" onclick="return btnPrevField_onclick()"><input type="button" value="&gt;&gt;" name="btnNextField" language="javascript" onclick="return btnNextField_onclick()"></td>
+  </tr>
+  <tr>
+    <td>Value</td>
+    <td style="margin-top: 10"><input type="text" size="21" name="tbValue" readonly style="padding-left: 3"></td>
+    <td></td>
+  </tr>
+</table>
+
+</body>
+
+</html>

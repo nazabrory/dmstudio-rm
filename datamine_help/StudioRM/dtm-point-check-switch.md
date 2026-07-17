@@ -1,2 +1,0 @@
-# dtm-point-check-switch
-

@@ -1,0 +1,11 @@
+!START DEL
+       
+!DELETE   &IN(x1),@CONFIRM=0.0
+
+!DELETE   &IN(x2),@CONFIRM=0.0
+
+!DELETE   &IN(x3),@CONFIRM=0.0
+
+!DELETE   &IN(x4),@CONFIRM=0.0
+
+!END

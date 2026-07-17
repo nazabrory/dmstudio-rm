@@ -114,12 +114,18 @@ __init__.py
 # It is only needed when regenerating dmcommands.py via generate_wrappers.py.
 # The generated output (dmcommands.py, dmfiles.py) IS committed to the repo.
 # ---------------------------------------------------------------------------
-datamine help/
+datamine_help/
 
 # ---------------------------------------------------------------------------
 # dmstudio — Datamine Studio project database (auto-managed by Studio RM)
 # ---------------------------------------------------------------------------
-Database/
+/Database/
+
+# ---------------------------------------------------------------------------
+# Allow committing tutorial database files
+# ---------------------------------------------------------------------------
+!/tutorials/Database/
+!/tutorials/Database/**
 
 # ---------------------------------------------------------------------------
 # dmstudio — temporary test notebook outputs

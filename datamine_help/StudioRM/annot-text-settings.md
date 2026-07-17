@@ -1,2 +1,0 @@
-# annot-text-settings
-

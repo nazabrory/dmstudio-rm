@@ -1,0 +1,2 @@
+<?xml version="1.0"?>
+<FxsShapeProxyCollection><Proxies><FxsShapeProxy><Name>Profile</Name><Type>Arch</Type><Coordinates/><OriginOffset><X>0</X><Y>0</Y></OriginOffset><Width>5</Width><Height>5</Height><ArchRadius>1</ArchRadius><Diameter>1</Diameter><FloorPlane>0</FloorPlane></FxsShapeProxy><FxsShapeProxy><Name>Square</Name><Type>Rectangle</Type><Coordinates/><OriginOffset><X>0</X><Y>0</Y></OriginOffset><Width>1</Width><Height>1</Height><ArchRadius>1</ArchRadius><Diameter>1</Diameter><FloorPlane>0</FloorPlane></FxsShapeProxy></Proxies></FxsShapeProxyCollection>

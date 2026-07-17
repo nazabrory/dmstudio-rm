@@ -1,2 +1,0 @@
-# plane-by-three-points
-

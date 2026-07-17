@@ -1,0 +1,1219 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<MappingConfiguration>
+
+<MappingObjects>
+
+		<Properties>
+
+			<Attributes>
+
+				<Attribute>
+					<ColumnLabel>Heading</ColumnLabel>
+					<FieldName>Heading</FieldName>
+						<EntryProperties>
+							<Type>TEXT</Type>
+							<Default>ODN</Default>
+						</EntryProperties>
+				</Attribute>	
+				
+				<Attribute>
+					<ColumnLabel>Round Number</ColumnLabel>
+					<FieldName>Round</FieldName>
+					<EntryProperties>
+						<Type>NUMERIC</Type>
+					</EntryProperties>
+					<Default>_NONE</Default>
+				</Attribute>	
+				
+				<Attribute>
+					<ColumnLabel>Survey Station</ColumnLabel>
+					<FieldName>SurveyStnNum</FieldName>
+					<EntryProperties>
+						<Type>TEXT</Type>
+					</EntryProperties>
+					<Default>_NONE</Default>
+				</Attribute>
+				
+				<Attribute>
+					<ColumnLabel>Distance to Face</ColumnLabel>
+					<FieldName>DistanceToFace</FieldName>
+					<EntryProperties>
+						<Type>NUMERIC</Type>
+						<Default>0</Default>
+						<Minimum inclusive="TRUE">0</Minimum>
+						<Maximum inclusive="TRUE">99</Maximum>
+					</EntryProperties>
+					<Default>_NONE</Default>
+				</Attribute>
+
+				<Attribute> 
+					<ColumnLabel>Mapped By</ColumnLabel>
+					<FieldName>MappedBy</FieldName>
+					<EntryProperties>
+						<Type>LOOKUP</Type>
+						<LookupValue>Author</LookupValue>
+						<Nullable>TRUE</Nullable>
+						<Default>_NONE</Default>
+					</EntryProperties>
+					<Default>_NONE</Default>
+				</Attribute>
+							
+				<Attribute>
+					<ColumnLabel>Comment</ColumnLabel>
+					<FieldName>Comment</FieldName>
+					<EntryProperties>
+						<Type>TEXT</Type>
+					</EntryProperties>
+					<Default>_NONE</Default>
+				</Attribute>
+
+			</Attributes>
+
+		</Properties>
+
+	<Features>
+
+		<ObjectType>
+
+			<Name>Contacts</Name>
+			<Template>Demo_Contact</Template>
+			<PlotTemplate>Plot_Contact</PlotTemplate>
+
+				<Attributes>
+
+					<Attribute>
+						<ColumnLabel>ContactType</ColumnLabel>
+						<FieldName>ContactType</FieldName>
+						<EntryProperties>
+							<Type>LOOKUP</Type>
+							<LookupValue>ContactType</LookupValue>
+							<Nullable>TRUE</Nullable>
+							<Default>_NONE</Default>
+						</EntryProperties>
+					</Attribute>
+
+				</Attributes>
+
+		</ObjectType>
+			
+		<ObjectType>
+			<Name>Geology</Name>
+			<Template>Demo_Geology</Template>
+			<PlotTemplate>Plot_Geology</PlotTemplate>
+				<Attributes>				
+					
+					<Attribute>
+						<ColumnLabel>Lith</ColumnLabel>
+						<FieldName>LITH</FieldName>
+						<EntryProperties>
+							<Type>LOOKUP</Type>
+							<LookupValue>Lithology</LookupValue>
+							<Nullable>TRUE</Nullable>
+							<Default>_NONE</Default>
+						</EntryProperties>
+					</Attribute>
+
+
+					<Attribute>
+						<ColumnLabel>Qualifier</ColumnLabel>
+						<FieldName>Qualifier</FieldName>
+						<EntryProperties>
+							<Type>LOOKUP</Type>
+							<LookupValue>Qualifier1</LookupValue>
+							<Nullable>FALSE</Nullable>
+						</EntryProperties>
+					</Attribute>	
+
+			</Attributes>
+
+		</ObjectType>
+			
+		<ObjectType>
+
+			<Name>Vein</Name>
+			<Template>Demo_Vein</Template>
+			<PlotTemplate>Plot_Vein</PlotTemplate>
+
+				<Attributes>
+
+					<Attribute>
+						<ColumnLabel>Contact</ColumnLabel>
+						<FieldName>Contact</FieldName>
+						<EntryProperties>
+							<Type>LOOKUP</Type>
+							<LookupValue>ContactType</LookupValue>
+							<Nullable>TRUE</Nullable>
+							<Default>_NONE</Default>
+						</EntryProperties>
+					</Attribute>
+
+					<Attribute>
+						<ColumnLabel>Code</ColumnLabel>
+						<FieldName>Vein_Code</FieldName>
+						<EntryProperties>
+							<Type>LOOKUP</Type>
+							<LookupValue>Vein1Type</LookupValue>
+							<Nullable>TRUE</Nullable>
+							<Default>_NONE</Default>
+						</EntryProperties>
+					</Attribute>
+
+					<Attribute>
+						<ColumnLabel>Intensity</ColumnLabel>
+						<FieldName>Vein_Int</FieldName>
+						<EntryProperties>
+							<Type>LOOKUP</Type>
+							<LookupValue>Vein_Int</LookupValue>
+							<Nullable>TRUE</Nullable>
+							<Default>_NONE</Default>
+						</EntryProperties>
+					</Attribute>
+				</Attributes>
+				
+		</ObjectType>
+			
+		<ObjectType>
+
+			<Name>Structure</Name>
+			<Template>Demo_Structures</Template>
+			<PlotTemplate>Plot_Structure</PlotTemplate>
+
+				<Attributes>
+
+					<Attribute>
+							<ColumnLabel>Structure</ColumnLabel>
+							<FieldName>Struc_type</FieldName>
+							<EntryProperties>
+								<Type>LOOKUP</Type>
+								<LookupValue>S_type</LookupValue>
+								<Nullable>TRUE</Nullable>
+								<Default>_NONE</Default>
+							</EntryProperties>
+					</Attribute>
+
+					<Attribute>
+						<ColumnLabel>STRIKE</ColumnLabel>
+						<FieldName>_AZIMUTH</FieldName>
+						<EntryProperties>
+							<Type>NUMERIC</Type>
+							<Minimum inclusive="TRUE">0</Minimum>
+							<Maximum inclusive="TRUE">360</Maximum>
+						</EntryProperties>
+					</Attribute>
+
+					<Attribute>
+						<ColumnLabel>DIP_DIRECTION</ColumnLabel>
+						<FieldName>_AZIPL90</FieldName>
+						<EntryProperties>
+							<Type>NUMERIC</Type>
+							<Minimum inclusive="TRUE">0</Minimum>
+							<Maximum inclusive="TRUE">360</Maximum>
+						</EntryProperties>
+					</Attribute>
+			</Attributes>
+		</ObjectType>
+
+		<ObjectType>
+				<Name>Structure Plan</Name>
+				<Template>Demo_Structures_Plan</Template>
+				<PlotTemplate>Plot_Structures_Plan</PlotTemplate>
+				<Attributes>
+				<Attribute>
+					<ColumnLabel>STRUCTURE</ColumnLabel>
+					<FieldName>STRCTURE</FieldName>
+					<EntryProperties>
+					<Type>LOOKUP</Type>
+					<LookupValue>Structure</LookupValue>
+					<Nullable>TRUE</Nullable>
+					<Default>_NONE</Default>
+					</EntryProperties>
+				</Attribute>
+				<Attribute>
+					<ColumnLabel>FTYPE</ColumnLabel>
+					<FieldName>FTYPE</FieldName>
+					<EntryProperties>
+					<Type>LOOKUP</Type>
+					<LookupValue>FTYPE</LookupValue>
+					<Nullable>TRUE</Nullable>
+					<Default>_NONE</Default>
+					</EntryProperties>
+				</Attribute>
+				<Attribute>
+						<ColumnLabel>DIP</ColumnLabel>
+						<FieldName>DIP</FieldName>
+						<EntryProperties>
+						<Type>NUMERIC</Type>
+						<Minimum inclusive="TRUE">0</Minimum>
+						<Maximum inclusive="TRUE">90</Maximum>
+						</EntryProperties>
+				</Attribute>
+				<Attribute>
+					<ColumnLabel>DISPLACEMENT</ColumnLabel>
+					<FieldName>THROW</FieldName>
+					<EntryProperties>
+					<Type>NUMERIC</Type>
+					<Default>0</Default>
+					<Minimum inclusive="TRUE">0</Minimum>
+					<Maximum inclusive="TRUE">50</Maximum>
+					</EntryProperties>
+				</Attribute>
+				<Attribute>
+					<ColumnLabel>STRIKE</ColumnLabel>
+					<FieldName>_AZIMUTH</FieldName>
+					<EntryProperties>
+					<Type>NUMERIC</Type>
+					<Minimum inclusive="TRUE">0</Minimum>
+					<Maximum inclusive="TRUE">360</Maximum>
+					</EntryProperties>
+				</Attribute>
+				<Attribute>
+					<ColumnLabel>DIP_DIRECTION</ColumnLabel>
+					<FieldName>_AZIPL90</FieldName>
+					<EntryProperties>
+					<Type>NUMERIC</Type>
+					<Minimum inclusive="TRUE">0</Minimum>
+					<Maximum inclusive="TRUE">360</Maximum>
+					</EntryProperties>
+				</Attribute>
+				<Attribute>
+					<ColumnLabel>Length</ColumnLabel>
+					<FieldName>_LENGTH</FieldName>
+					<EntryProperties>
+					<Type>NUMERIC</Type>
+					</EntryProperties>
+				</Attribute>
+				<Attribute>
+					<ColumnLabel>AREA</ColumnLabel>
+					<FieldName>_AREA</FieldName>
+					<EntryProperties>
+					<Type>NUMERIC</Type>
+					</EntryProperties>
+				</Attribute>
+				<Attribute>
+					<ColumnLabel>Comment</ColumnLabel>
+					<FieldName>TEXT</FieldName>
+					<EntryProperties>
+					<Type>TEXT</Type>
+					</EntryProperties>
+				</Attribute>
+			</Attributes>
+      </ObjectType>
+
+		<ObjectType>
+
+			<Name>Structural Observations</Name>
+			<Template>Demo_Obs</Template>
+			<!-- <PlotTemplate>Plot_StrucObs</PlotTemplate> -->
+
+				<Attributes>
+
+					<Attribute>
+						<ColumnLabel>Structure</ColumnLabel>
+						<FieldName>Struc_type</FieldName>
+						<EntryProperties>
+							<Type>LOOKUP</Type>
+							<LookupValue>S_type</LookupValue>
+							<Nullable>TRUE</Nullable>
+						</EntryProperties>
+					</Attribute>
+
+					<Attribute>
+						<ColumnLabel>Dip</ColumnLabel>
+						<FieldName>SDIP</FieldName>
+						<EntryProperties>
+							<Type>NUMERIC</Type>
+							<Minimum inclusive="TRUE">-90</Minimum>
+							<Maximum inclusive="TRUE">90</Maximum>
+						</EntryProperties>
+					</Attribute>
+
+					<Attribute>
+						<ColumnLabel>Dip_Direction</ColumnLabel>
+						<FieldName>TRDIPDIRN</FieldName>
+						<EntryProperties>
+							<Type>NUMERIC</Type>
+							<Minimum inclusive="TRUE">0</Minimum>
+							<Maximum inclusive="TRUE">360</Maximum>
+						</EntryProperties>
+					</Attribute>
+
+					<Attribute>
+						<ColumnLabel>Comment</ColumnLabel>
+						<FieldName>TEXT</FieldName>
+						<EntryProperties>
+							<Type>TEXT</Type>
+						</EntryProperties>
+					</Attribute>
+
+				</Attributes>
+
+		</ObjectType>
+
+		<ObjectType>
+			
+			<Name>Tape</Name>
+			<Template>DemoTape</Template>
+			<!-- <PlotTemplate>Plot_Auto_Hatch</PlotTemplate> -->
+				
+				<Attributes>	
+
+					<!-- <Attribute> -->
+							<!-- <ColumnLabel>Auto-Hatch</ColumnLabel>
+							<FieldName>Stratigraphy</FieldName>
+							<EntryProperties>
+								<Type>LOOKUP</Type>
+								<LookupValue>Stratigraphy</LookupValue>
+								<Nullable>TRUE</Nullable>
+								<Default>_NONE</Default>
+							</EntryProperties>
+					</Attribute> -->
+							
+				</Attributes>
+
+		</ObjectType>	
+
+		<ObjectType>
+			
+			<Name>Auto_Hatch</Name>
+			<Template>Demo_AutoHatch</Template>
+			<PlotTemplate>Plot_Auto_Hatch</PlotTemplate>
+				
+				<Attributes>	
+
+					<Attribute>
+							<ColumnLabel>Auto-Hatch</ColumnLabel>
+							<FieldName>Stratigraphy</FieldName>
+							<EntryProperties>
+								<Type>LOOKUP</Type>
+								<LookupValue>Stratigraphy</LookupValue>
+								<Nullable>TRUE</Nullable>
+								<Default>_NONE</Default>
+							</EntryProperties>
+					</Attribute>
+							
+				</Attributes>
+
+			</ObjectType>	
+
+	</Features>
+
+        <ChannelSamples>
+
+			<Name>Name</Name>
+			<Template>Demo_Channel</Template>
+			<PlotTemplate>Plot_Hamlet_Channel</PlotTemplate>
+
+			<Attributes>
+
+				<Attribute>
+					<Assay>FALSE</Assay>
+					<ColumnLabel>Rock Type</ColumnLabel>
+					<FieldName>RTYPE</FieldName>
+					<EntryProperties>
+						<Type>LOOKUP</Type>
+						<LookupValue>Lithology</LookupValue>
+						<Nullable>FALSE</Nullable>
+					</EntryProperties>
+				</Attribute>
+
+				<Attribute>
+					<Assay>FALSE</Assay>
+					<ColumnLabel>Qualifier</ColumnLabel>
+					<FieldName>Qualifier</FieldName>
+					<EntryProperties>
+						<Type>LOOKUP</Type>
+						<LookupValue>Qualifier1</LookupValue>
+						<Nullable>FALSE</Nullable>
+					</EntryProperties>
+				</Attribute>			
+
+				<Attribute>
+					<Assay>FALSE</Assay>
+					<ColumnLabel>Comment</ColumnLabel>
+					<FieldName>COMMENT</FieldName>
+					<EntryProperties>
+						<Type>TEXT</Type>
+						<Length>255</Length>
+						<Nullable>TRUE</Nullable>
+					</EntryProperties>
+				</Attribute>
+				<Attribute>
+					<Assay>TRUE</Assay>
+					<ColumnLabel>Au</ColumnLabel>
+					<FieldName>AU</FieldName>
+					<EntryProperties>
+						<Type>NUMERIC</Type>
+						<Minimum inclusive="TRUE">0</Minimum>
+						<Maximum inclusive="TRUE">1</Maximum>
+						<Nullable>FALSE</Nullable>
+					</EntryProperties>
+				</Attribute>
+				<Attribute>
+					<Assay>TRUE</Assay>
+					<ColumnLabel>Cu</ColumnLabel>
+					<FieldName>CU</FieldName>
+					<EntryProperties>
+						<Type>NUMERIC</Type>
+						<Minimum inclusive="TRUE">0</Minimum>
+						<Maximum inclusive="TRUE">1</Maximum>
+						<Nullable>FALSE</Nullable>
+					</EntryProperties>
+				</Attribute>
+				<Attribute>
+					<Assay>TRUE</Assay>
+					<ColumnLabel>Ag</ColumnLabel>
+					<FieldName>AG</FieldName>
+					<EntryProperties>
+						<Type>NUMERIC</Type>
+						<Minimum inclusive="TRUE">0</Minimum>
+						<Maximum inclusive="TRUE">1</Maximum>
+						<Nullable>FALSE</Nullable>
+					</EntryProperties>
+				</Attribute>
+
+			</Attributes>
+
+		</ChannelSamples>
+
+	<Areas>
+			<Template>AreasTemplate</Template>
+			<PlotTemplate>AreasPlotTemplate</PlotTemplate>
+			<ErrorThreshold>0.005</ErrorThreshold>
+			<OverlapThreshold>0.001</OverlapThreshold>
+	</Areas>
+								
+	<StratSections>
+
+		<SegmentColumn default="TRUE">
+			<ColumnLabel>FROM</ColumnLabel>
+			<FieldName>FROM</FieldName>
+		</SegmentColumn>
+
+		<SegmentColumn default="TRUE">
+			<ColumnLabel>TO</ColumnLabel>
+			<FieldName>TO</FieldName>
+		</SegmentColumn>
+
+		<SegmentColumn default="TRUE">
+			<ColumnLabel>LENGTH</ColumnLabel>
+			<FieldName>LENGTH</FieldName>
+		</SegmentColumn>	   
+
+		<ObjectType>
+			
+			<Name>Strat1</Name>				
+			
+				<VisualisationFeature>Auto_Hatch</VisualisationFeature>
+				<VisualisationSourceField>Stratigraphy</VisualisationSourceField>
+			 	<VisualisationDestinationField>Stratigraphy</VisualisationDestinationField>
+	
+			<Template>Demo_Sections</Template>
+			<!-- <PlotTemplate>Plot_Sections</PlotTemplate> -->
+			<UseOffset>TRUE</UseOffset>
+				
+			<Attributes>
+				
+				<Attribute>
+						<ColumnLabel>Profile_ID</ColumnLabel>
+						<FieldName>PROF_ID</FieldName>
+						<TargetItem>SECTION</TargetItem>
+						<EntryProperties>
+							<Type>TEXT</Type>
+						</EntryProperties>
+				</Attribute>
+					
+				<Attribute>
+					  <ColumnLabel>Stratigraphy</ColumnLabel>
+					  <FieldName>Stratigraphy</FieldName>
+					  <TargetItem>SEGMENT</TargetItem>
+						  <EntryProperties>
+							<Type>LOOKUP</Type>
+							<LookupValue>Stratigraphy</LookupValue>
+							<Nullable>TRUE</Nullable>
+							<Default>_NONE</Default>
+						  </EntryProperties>
+				</Attribute>
+					
+				<Attribute>
+						<ColumnLabel>Colour</ColumnLabel>
+						<FieldName>Colour</FieldName>
+						  <TargetItem>SEGMENT</TargetItem>
+							<EntryProperties>
+								<Type>LOOKUP</Type>
+								<LookupValue>Colour</LookupValue>
+								<Nullable>TRUE</Nullable>
+								<Default>_NONE</Default>
+							</EntryProperties>
+				</Attribute>
+							
+				<Attribute>
+						<ColumnLabel>Lithology</ColumnLabel>
+						<FieldName>Lithology</FieldName>
+						 <TargetItem>SEGMENT</TargetItem>
+							<EntryProperties>
+								<Type>LOOKUP</Type>
+								<LookupValue>Lith</LookupValue>
+								<Nullable>TRUE</Nullable>
+								<Default>_NONE</Default>
+							</EntryProperties>
+				</Attribute>
+				
+				<Attribute>
+						<ColumnLabel>Weath</ColumnLabel>
+						<FieldName>Geol_Weath</FieldName>
+						 <TargetItem>SEGMENT</TargetItem>
+							<EntryProperties>
+								<Type>LOOKUP</Type>
+								<LookupValue>Weathering</LookupValue>
+								<Nullable>TRUE</Nullable>
+								<Default>_NONE</Default>
+							</EntryProperties>
+				</Attribute>
+								
+				<Attribute>
+						<ColumnLabel>Dip</ColumnLabel>
+						<FieldName>Dip</FieldName>
+						 <TargetItem>SEGMENT</TargetItem>
+							<EntryProperties>
+									<Type>NUMERIC</Type>
+									<Default>_NONE</Default>
+									<Nullable>TRUE</Nullable>
+									<Minimum inclusive="TRUE">-90</Minimum>
+									<Maximum inclusive="TRUE">90</Maximum>
+							</EntryProperties>
+				</Attribute>
+				
+				<Attribute>
+						<ColumnLabel>Dip_Dir</ColumnLabel>
+						<FieldName>DipDir</FieldName>
+						 <TargetItem>SEGMENT</TargetItem>
+							<EntryProperties>
+								<Type>NUMERIC</Type>
+								<Default>_NONE</Default>
+								<Nullable>TRUE</Nullable>
+								<Minimum inclusive="TRUE">-360</Minimum>
+								<Maximum inclusive="TRUE">360</Maximum>
+							</EntryProperties>
+				</Attribute>			
+				
+			</Attributes>
+
+		</ObjectType>
+
+		<ObjectType>
+			
+			<Name>Strat2</Name>				
+			
+				<VisualisationFeature>Auto_Hatch</VisualisationFeature>
+				<VisualisationSourceField>Strat_Minor</VisualisationSourceField>
+			 	<VisualisationDestinationField>Strat_Minor</VisualisationDestinationField>
+	
+			<Template>Kamoa_Profiles</Template>
+			<!-- <PlotTemplate>Plot_Kamoa_Profiles</PlotTemplate> -->
+			<UseOffset>TRUE</UseOffset>
+				
+			<Attributes>
+				
+				<Attribute>
+						<ColumnLabel>Profile_ID</ColumnLabel>
+						<FieldName>PROF_ID</FieldName>
+						<TargetItem>SECTION</TargetItem>
+						<EntryProperties>
+							<Type>TEXT</Type>
+						</EntryProperties>
+				</Attribute>
+					
+				<Attribute>
+					  <ColumnLabel>Stratigraphy</ColumnLabel>
+					  <FieldName>Stratigraphy</FieldName>
+					  <TargetItem>SEGMENT</TargetItem>
+						  <EntryProperties>
+							<Type>LOOKUP</Type>
+							<LookupValue>Stratigraphy</LookupValue>
+							<Nullable>TRUE</Nullable>
+							<Default>_NONE</Default>
+						  </EntryProperties>
+				</Attribute>
+					
+				<Attribute>
+						<ColumnLabel>Colour</ColumnLabel>
+						<FieldName>Colour</FieldName>
+						  <TargetItem>SEGMENT</TargetItem>
+							<EntryProperties>
+								<Type>LOOKUP</Type>
+								<LookupValue>Colour</LookupValue>
+								<Nullable>TRUE</Nullable>
+								<Default>_NONE</Default>
+							</EntryProperties>
+				</Attribute>
+							
+				<Attribute>
+						<ColumnLabel>Lithology</ColumnLabel>
+						<FieldName>Lithology</FieldName>
+						 <TargetItem>SEGMENT</TargetItem>
+							<EntryProperties>
+								<Type>LOOKUP</Type>
+								<LookupValue>Lith</LookupValue>
+								<Nullable>TRUE</Nullable>
+								<Default>_NONE</Default>
+							</EntryProperties>
+				</Attribute>
+				
+				<Attribute>
+						<ColumnLabel>Weath</ColumnLabel>
+						<FieldName>Geol_Weath</FieldName>
+						 <TargetItem>SEGMENT</TargetItem>
+							<EntryProperties>
+								<Type>LOOKUP</Type>
+								<LookupValue>Weathering</LookupValue>
+								<Nullable>TRUE</Nullable>
+								<Default>_NONE</Default>
+							</EntryProperties>
+				</Attribute>
+								
+				<Attribute>
+						<ColumnLabel>Dip</ColumnLabel>
+						<FieldName>Dip</FieldName>
+						 <TargetItem>SEGMENT</TargetItem>
+							<EntryProperties>
+									<Type>NUMERIC</Type>
+									<Default>_NONE</Default>
+									<Nullable>TRUE</Nullable>
+									<Minimum inclusive="TRUE">-90</Minimum>
+									<Maximum inclusive="TRUE">90</Maximum>
+							</EntryProperties>
+				</Attribute>
+				
+				<Attribute>
+						<ColumnLabel>Dip_Dir</ColumnLabel>
+						<FieldName>DipDir</FieldName>
+						 <TargetItem>SEGMENT</TargetItem>
+							<EntryProperties>
+								<Type>NUMERIC</Type>
+								<Default>_NONE</Default>
+								<Nullable>TRUE</Nullable>
+								<Minimum inclusive="TRUE">-360</Minimum>
+								<Maximum inclusive="TRUE">360</Maximum>
+							</EntryProperties>
+				</Attribute>			
+				
+			</Attributes>
+		</ObjectType>
+			
+	</StratSections>
+	
+		
+		<Profiles>
+			<Template>Demo_Profile</Template>
+			<PlotTemplate>Plot_Profiles</PlotTemplate>	
+		</Profiles>
+
+		<Georeference>
+			<Template>GeoreferenceTemplate</Template>
+			<!-- <PlotTemplate>GeoreferencePlotTemplate</PlotTemplate> -->
+		</Georeference>
+
+		<SurveyStrings>
+            <Template>Demo_LevelStrings</Template>
+            <PlotTemplate>Plot_LvlStrings</PlotTemplate>
+        </SurveyStrings>
+
+        <SurveyPoints>
+            <Template>LvlPoints</Template>
+            <PlotTemplate>Plot_LvlPoints</PlotTemplate>
+        </SurveyPoints>
+
+	</MappingObjects>
+
+	<LookupTables>
+	
+		<LookupTable name="Author" type="text">
+			<Item>
+				<Name>Lawrence Lecron</Name>
+				<Value>Lawrence Lecron</Value>
+			</Item>
+			<Item>
+				<Name>Jimmy Oldsea</Name>
+				<Value>Jimmy Oldsea</Value>
+			</Item>	
+			<Item>
+				<Name>Catherine Huntsman</Name>
+				<Value>Catherine Huntsman</Value>
+			</Item>		
+
+		</LookupTable>
+
+		<LookupTable name="Lithology" type="text">
+			<Item>
+				<Name>Vein</Name>
+				<Value>VN</Value>
+			</Item>
+			<Item>
+				<Name>Sandstone</Name>
+				<Value>SST</Value>
+			</Item>
+			<Item>
+				<Name>Siltstone</Name>
+				<Value>SLT</Value>
+			</Item>
+			<Item>
+				<Name>Basalt</Name>
+				<Value>BST</Value>
+			</Item>			
+			<Item>
+				<Name>Andesite</Name>
+				<Value>AND</Value>
+			</Item>
+		</LookupTable>
+
+		<LookupTable name="Stratigraphy" type="text">
+			<Item><Name>Hanging_Wall1</Name><Value>HW1</Value></Item>
+			<Item><Name>Hanging_Wall2</Name><Value>HW2</Value></Item>
+			<Item><Name>Seam1</Name><Value>Seam1</Value></Item>
+			<Item><Name>Seam2</Name><Value>Seam2</Value></Item>
+			<Item><Name>Seam3</Name><Value>Seam3</Value></Item>	
+			<Item><Name>Foot_Wall1</Name><Value>Foot_Wall1</Value></Item>
+			<Item><Name>Foot_Wall2</Name><Value>Foot_Wall2</Value></Item>		
+			<Item><Name>Foot_Wall3</Name><Value>Foot_Wall3</Value></Item>		
+		</LookupTable>
+
+		<LookupTable name="Lith" type="text">
+			<Item><Name>Siltstone</Name><Value>SSL</Value></Item>
+			<Item><Name>Sandstone</Name><Value>SST</Value></Item>
+			<Item><Name>Diamictite</Name><Value>SDT</Value></Item>
+			<Item><Name>Conglomerate</Name><Value>SCG</Value></Item>
+			<Item><Name>Monolithic Breccia</Name><Value>BXM</Value></Item>
+			<Item><Name>Polylithic Breccia</Name><Value>BXP</Value></Item>			
+			<Item><Name>Vein</Name><Value>VN</Value></Item>
+			<Item><Name>Quartzite</Name><Value>QZT</Value></Item>
+		</LookupTable>
+
+		<LookupTable name="ContactType" type="text">
+			<Item><Name>HW</Name><Value>HW</Value></Item>
+			<Item><Name>FW</Name><Value>FW</Value></Item>
+		</LookupTable>
+		
+		<LookupTable name="Colour" type="text">
+			<Item><Name>Black</Name><Value>BL</Value></Item>
+			<Item><Name>Dark Brown</Name><Value>DB</Value></Item>
+			<Item><Name>Greenish Black</Name><Value>GB</Value></Item>
+			<Item><Name>Greenish Gray</Name><Value>GG</Value></Item>
+			<Item><Name>Light Gray</Name><Value>LG</Value></Item>
+			<Item><Name>Medium Brown</Name><Value>MB</Value></Item>
+			<Item><Name>Medium Gray</Name><Value>MG</Value></Item>
+			<Item><Name>Maroon</Name><Value>MR</Value></Item>
+			<Item><Name>Dark Olive Green</Name><Value>OG</Value></Item>
+			<Item><Name>Orange</Name><Value>OR</Value></Item>
+			<Item><Name>Pale Green</Name><Value>PG</Value></Item>
+			<Item><Name>Pink</Name><Value>PK</Value></Item>
+			<Item><Name>Reddish Brown</Name><Value>RB</Value></Item>
+			<Item><Name>Tan to Yellow</Name><Value>TY</Value></Item>
+			<Item><Name>White</Name><Value>WH</Value></Item>			
+		</LookupTable>
+				
+		<LookupTable name="Weathering" type="text">
+			<Item><Name>Extremely (completely) weathered</Name><Value>EW</Value></Item>
+			<Item><Name>Fresh rock</Name><Value>FR</Value></Item>
+			<Item><Name>Highly Weathered</Name><Value>HW</Value></Item>
+			<Item><Name>Moderately weathered</Name><Value>MW</Value></Item>
+			<Item><Name>Residual Soil</Name><Value>RS</Value></Item>
+			<Item><Name>Strongly weathered</Name><Value>SW</Value></Item>
+			<Item><Name>Unweathered</Name><Value>UN</Value></Item>
+			<Item><Name>Weakly weathered</Name><Value>WW</Value></Item>	
+		</LookupTable>
+
+		<LookupTable name="Qualifier1" type="text">
+			
+			<Item>
+
+				<Name>d</Name>
+				<Value>d</Value>
+			
+					<LookupRefs>
+						<LookupRef>
+							<TableName>Lithology</TableName>
+							<ItemValue>VN</ItemValue>
+						</LookupRef>
+					</LookupRefs>
+
+			</Item>	
+
+			<Item>
+				<Name>e</Name>
+				<Value>e</Value>
+					<LookupRefs>
+						<LookupRef>
+							<TableName>Lithology</TableName>
+							<ItemValue>VN</ItemValue>
+						</LookupRef>
+					</LookupRefs>
+			</Item>
+			
+			<Item>
+				<Name>f</Name>
+				<Value>f</Value>
+					<LookupRefs>
+						<LookupRef>
+							<TableName>Lithology</TableName>
+							<ItemValue>VN</ItemValue>
+						</LookupRef>
+					</LookupRefs>
+			</Item>
+			
+			<Item>
+				<Name>n</Name>
+				<Value>n</Value>
+					<LookupRefs>
+						<LookupRef>
+							<TableName>Lithology</TableName>
+							<ItemValue>SST</ItemValue>
+						</LookupRef>
+					</LookupRefs>
+			</Item>
+
+			<Item>
+				<Name>p</Name>
+				<Value>p</Value>
+					<LookupRefs>
+						<LookupRef>
+							<TableName>Lithology</TableName>
+							<ItemValue>SST</ItemValue>
+						</LookupRef>
+					</LookupRefs>
+			</Item>	
+
+			<Item>
+				<Name>q</Name>
+				<Value>q</Value>
+					<LookupRefs>
+						<LookupRef>
+							<TableName>Lithology</TableName>
+							<ItemValue>SST</ItemValue>
+						</LookupRef>
+					</LookupRefs>
+			</Item>	
+			<Item>
+				<Name>w</Name>
+				<Value>w</Value>
+					<LookupRefs>
+						<LookupRef>
+							<TableName>Lithology</TableName>
+							<ItemValue>SLT</ItemValue>
+						</LookupRef>
+					</LookupRefs>
+			</Item>	
+			<Item>
+				<Name>z</Name>
+				<Value>z</Value>
+					<LookupRefs>
+						<LookupRef>
+							<TableName>Lithology</TableName>
+							<ItemValue>SLT</ItemValue>
+						</LookupRef>
+					</LookupRefs>
+			</Item>	
+			
+			<Item>
+				<Name>pm</Name>
+				<Value>pm</Value>
+					<LookupRefs>
+						<LookupRef>
+							<TableName>Lithology</TableName>
+							<ItemValue>SLT</ItemValue>
+						</LookupRef>
+					</LookupRefs>
+			</Item>
+			<Item>
+				<Name>b</Name>
+				<Value>b</Value>
+					<LookupRefs>
+						<LookupRef>
+							<TableName>Lithology</TableName>
+							<ItemValue>SLT</ItemValue>
+						</LookupRef>
+					</LookupRefs>
+			</Item>
+			
+			<Item>
+				<Name>cc</Name>
+				<Value>cc</Value>
+					<LookupRefs>
+						<LookupRef>
+							<TableName>Lithology</TableName>
+							<ItemValue>SLT</ItemValue>
+						</LookupRef>
+					</LookupRefs>
+			</Item>		
+
+
+		</LookupTable>
+
+		<LookupTable name="Vein1Type" type="text">
+			<Item>
+				<Name>Breccia</Name>
+				<Value>VB</Value>
+			</Item>
+			<Item>
+				<Name>Extensional</Name>
+				<Value>VE</Value>
+			</Item>		
+			<Item>
+				<Name>Massive</Name>
+				<Value>VM</Value>
+			</Item>		
+			<Item>
+				<Name>Shear</Name>
+				<Value>VS</Value>
+			</Item>			
+			<Item>
+				<Name>Foliation Parallel</Name>
+				<Value>VF</Value>
+			</Item>
+			<Item>
+				<Name>Irregular</Name>
+				<Value>VI</Value>
+			</Item>				
+		</LookupTable>
+
+		<LookupTable name="Structure" type="text">
+			<Item>
+				<Name>Fault</Name>
+				<Value>FLT</Value>
+			</Item>
+			<Item>
+				<Name>Joints</Name>
+				<Value>JOINT</Value>
+			</Item>
+			<Item>
+				<Name>Dolerite</Name>
+				<Value>DOL</Value>
+			</Item>
+			<Item>
+				<Name>Lamprophyre</Name>
+				<Value>LAMP</Value>
+			</Item>
+			<Item>
+				<Name>Syenite</Name>
+				<Value>SYENITE</Value>
+			</Item>
+			<Item>
+				<Name>Pegmatite_Veins</Name>
+				<Value>PEGM</Value>
+			</Item>
+			<Item>
+				<Name>Shears</Name>
+				<Value>SHEAR</Value>
+			</Item>
+			<Item>
+				<Name>Replacement_Pegmatoid</Name>
+				<Value>REP_PEG</Value>
+			</Item>
+			<Item>
+				<Name>BSN</Name>
+				<Value>BSN</Value>
+			</Item>
+			<Item>
+				<Name>DUNITE</Name>
+				<Value>DUN</Value>
+			</Item>
+   		</LookupTable>
+
+		<LookupTable name="FTYPE" type="text">
+			<Item>
+				<Name>No_Throw</Name>
+				<Value>No_Throw</Value>
+			</Item>
+			<Item>
+				<Name>Normal Fault</Name>
+				<Value>Normal</Value>
+			</Item>
+			<Item>
+				<Name>Reverse Fault</Name>
+				<Value>Reverse</Value>
+			</Item>
+			<Item>
+				<Name>Vertical Fault</Name>
+				<Value>Vertical</Value>
+			</Item>
+			<Item>
+				<Name>Strike_Slip</Name>
+				<Value>Strike</Value>
+			</Item>
+   		</LookupTable>
+
+		<LookupTable name="Vein_Int" type="text">
+			<Item>
+				<Name>Trace</Name>
+				<Value>Tr</Value>
+			</Item>
+			
+			<Item>
+				<Name>Weak</Name>
+				<Value>Wk</Value>
+			</Item>
+			<Item>
+				<Name>Moderate</Name>
+				<Value>Mo</Value>
+			</Item>
+			<Item>
+				<Name>Strong</Name>
+				<Value>St</Value>
+			</Item>
+			<Item>
+				<Name>Intense</Name>
+				<Value>In</Value>
+			</Item>
+			<Item>
+				<Name>Massive</Name>
+				<Value>Ms</Value>
+			</Item>
+		</LookupTable>
+
+		<LookupTable name="S_type" type="text">
+			<Item>
+				<Name>Fault</Name>
+				<Value>FLT</Value>
+			</Item>
+			<Item>
+				<Name>Shear Zone</Name>
+				<Value>SHZ</Value>
+			</Item>	
+			<Item>
+				<Name>Foliation</Name>
+				<Value>FOL</Value>
+			</Item>			
+		</LookupTable>
+
+		<LookupTable name="GSIZE" type="numeric">
+
+			<Item>
+				<Name>VeryFine</Name>
+				<Value>1</Value>
+			</Item>
+
+			<Item>
+				<Name>Fine</Name>
+				<Value>2</Value>
+			</Item>
+
+			<Item>
+				<Name>Medium</Name>
+				<Value>3</Value>
+			</Item>	
+
+			<Item>
+				<Name>Coarse</Name>
+				<Value>4</Value>
+			</Item>
+
+		</LookupTable>		
+
+		<LookupTable name="Sample" type="numeric">
+
+			<Item>
+				<Name>First</Name>
+				<Value>1</Value>
+			</Item>
+
+			<Item>
+				<Name>Second</Name>
+				<Value>2</Value>
+			</Item>
+
+			<Item>
+				<Name>Third</Name>
+				<Value>3</Value>
+			</Item>
+
+		</LookupTable>
+
+	</LookupTables>
+
+	<MapTypes>
+
+		<MapType>
+			<Name>Face</Name>
+			<Sides>FRONT</Sides>
+			<ReportTemplate>TemplateFace4.dmtpl</ReportTemplate>			
+		</MapType>
+
+		<MapType>
+			<Name>Heading</Name>
+			<Sides>FRONT,LEFT,RIGHT,TOP</Sides>
+			<ReportTemplate>Template8.dmtpl</ReportTemplate>		
+		</MapType>
+
+		<MapType>
+			<Name>Panel</Name>
+			<Sides>FRONT</Sides>
+			<ReportTemplate>PanelTemplate8.dmtpl</ReportTemplate>	
+			<UseAutomaticOverlayMode>TRUE</UseAutomaticOverlayMode>	
+		</MapType>
+
+		<MapType>
+			<Name>Location</Name>
+			<Sides>TOP</Sides>
+			<ReportTemplate>LocationTemplate.dmtpl</ReportTemplate>		
+		</MapType>
+
+	</MapTypes>
+
+	<LevelMapTypes>
+
+			<LevelMapType>
+				<Name>LEVEL1-500</Name>
+				<ReportTemplate>Level.dmtpl</ReportTemplate>
+				<MapGridFormat>
+					<Origin>centre</Origin>
+					<Template>DemoGrid</Template>
+				</MapGridFormat>
+			</LevelMapType>
+
+			<LevelMapType>
+				<Name>LEVEL1-1000</Name>
+				<ReportTemplate>Level.dmtpl</ReportTemplate>
+				<MapGridFormat>
+					<Origin>centre</Origin>
+					<Template>DemoGrid</Template>
+				</MapGridFormat>
+			</LevelMapType>
+
+	</LevelMapTypes>
+
+	<ChannelSampleStandards>
+		<Standard><Name>QTZ FLUSH</Name></Standard>
+		<Standard><Name>BLANK</Name></Standard>
+		<Standard><Name>LG1</Name></Standard>
+		<Standard><Name>MG2</Name></Standard>
+		<Standard><Name>PLG</Name></Standard>
+		<Standard><Name>PMG</Name></Standard>
+		<Standard><Name>PVH</Name></Standard>
+	</ChannelSampleStandards>
+
+	<NamingConventions>
+	
+		<Map>
+			<BaseString>Map{0}-{1}</BaseString>
+			<Parameter key="0">DATE_YYYYMMDD</Parameter>
+			<Parameter key="1">ID</Parameter>
+		</Map>
+
+		<SampleID>
+			<BaseString>Sample{0}</BaseString>
+			<Parameter key="0">ID</Parameter>
+		</SampleID>
+
+        <ChannelSamples>
+			<MinDigits>4</MinDigits>
+		</ChannelSamples>
+
+	</NamingConventions>
+
+	<MapGridFormat>
+    	<Template>GridTemplate</Template>
+	</MapGridFormat>
+
+<ButterflySettings enabled="true" outlinestolerance='0.5'/> 
+
+</MappingConfiguration>

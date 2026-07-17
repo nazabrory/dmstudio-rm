@@ -1,2 +1,0 @@
-# _Plots_FormatDisplay_HullProperties
-

@@ -1,0 +1,27 @@
+Dimensions:
+----------
+Height:						4.1 metres
+Height - Raised:				8.4 metres
+Loading Height:					3.5 metres
+Width:						4.8 metres
+Length:						8.2 metres
+
+Operating Specifications:
+------------------------
+Maximum Capacity:				45.0 tonnes
+Maximum Capacity:				31.0 cubic metres
+Maximum Loaded Speed:				80.0 km/hr
+
+Machine Weights:
+---------------
+Target Gross Machine Operating Weight:		82.1 tonnes
+Chassis Weight:					25.0 tonnes
+Body Weight:					10.4 tonnes
+
+Transmission and Fuel:
+------
+Forward 1 - 7:					12.0 - 80.0 km/hr
+Reverse:					17.0 km/hr	
+Fuel Tank:					530 litres
+				
+

@@ -1,2 +1,0 @@
-# _DigitizerCoordinates_Dialog
-

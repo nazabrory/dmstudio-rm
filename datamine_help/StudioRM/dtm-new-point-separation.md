@@ -1,2 +1,0 @@
-# dtm-new-point-separation
-

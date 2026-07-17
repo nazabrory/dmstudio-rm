@@ -1,0 +1,5 @@
+Ultimate Pit Statistics Total
+Ore (Tonnes)              9,516,263
+Waste (Tonnes)          107,107,293
+Profit (USD)            104,952,674
+Gold (grams)             17,502,075

@@ -1,2 +1,0 @@
-# fillet-string-points-berm
-

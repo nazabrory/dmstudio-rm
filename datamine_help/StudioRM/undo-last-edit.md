@@ -1,2 +1,0 @@
-# undo-last-string-edit
-

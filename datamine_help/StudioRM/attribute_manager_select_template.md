@@ -1,2 +1,0 @@
-# _AttributeManager_SelectTemplate
-

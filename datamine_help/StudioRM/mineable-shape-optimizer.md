@@ -1,2 +1,0 @@
-# mineable-shape-optimizer
-

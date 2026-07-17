@@ -24,8 +24,6 @@ IMPLICIT_FIELDS = ['XMORIG', 'YMORIG', 'ZMORIG', 'NX', 'NY', 'NZ','X0','Y0','Z0'
 
 #------------------------------------------------------------------------------------#
 
-dmf = dmstudio.dmfiles.init()
-dmc = dmstudio.dmcommands.init()
 
 class dmfile_def(object):
 
@@ -101,6 +99,7 @@ def inpfil(csv=None, out_o=None, definition=None):
     arguments += "'!' 'Y' " + temp_csv
 
     try:
+        dmf = dmstudio.dmfiles.init()
         dmf.inpfil(out_o=out_o, arguments=arguments)
     finally:
         if os.path.exists(temp_csv):

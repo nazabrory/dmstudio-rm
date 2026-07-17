@@ -40,13 +40,17 @@ if errorlevel 1 (
 )
 
 REM Check if virtual environment already exists
+set RECREATE=n
 if exist ".venv" (
     echo Virtual environment '.venv' already exists.
     set /p RECREATE="Recreate it? (y/N): "
-    if /i "!RECREATE!"=="y" (
-        echo Removing existing virtual environment...
-        rmdir /s /q .venv
-    ) else (
+)
+
+if /i "%RECREATE%"=="y" (
+    echo Removing existing virtual environment...
+    rmdir /s /q .venv
+) else (
+    if exist ".venv" (
         echo Using existing virtual environment.
         goto :activate
     )

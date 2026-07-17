@@ -4,9 +4,6 @@ Superprocess module - multi-command Studio RM workflows.
 from dmstudio import initialize
 from dmstudio import dmcommands
 
-oScript = initialize.studio(version=None)
-dmc = dmcommands.init()
-
 def dxf_to_dm(dxf_i, out_o, zone_f=None, zone_p=None):
 
     '''
@@ -19,6 +16,9 @@ def dxf_to_dm(dxf_i, out_o, zone_f=None, zone_p=None):
     '''
 
     assert dxf_i.lower().endswith('.dxf'), "Input file is not a dxf"
+
+    oScript = initialize.studio(version=None)
+    dmc = dmcommands.init()
 
     dmc.oScript.ActiveProject.Data.LoadFile(dxf_i)
     obj3d = oScript.ActiveProject.Data.LastObjectAdded

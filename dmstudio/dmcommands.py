@@ -28,6 +28,17 @@ class init(object):
         self.version = version
         if self.oScript is None:
             self.oScript = dmstudio.initialize.studio(self.version)
+        if self.oScript is not None:
+            try:
+                if self.oScript.ActiveProject is None:
+                    import warnings
+                    warnings.warn(
+                        "Datamine Studio RM is connected, but no active project is loaded. "
+                        "Please open a project (.rmproj) in Studio RM before executing commands.",
+                        UserWarning
+                    )
+            except Exception:
+                pass
 
     def run_command(self, command):
 

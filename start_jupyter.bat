@@ -13,8 +13,19 @@ echo ============================================
 echo.
 
 if not exist ".venv" (
+    if not "%CONDA_DEFAULT_ENV%"=="" (
+        echo Active Conda environment detected: %CONDA_DEFAULT_ENV%
+        echo Starting JupyterLab...
+        jupyter lab
+        exit /b 0
+    )
     echo ERROR: Virtual environment '.venv' not found!
-    echo Please double-click 'setup_env.bat' first to install dmstudio.
+    echo.
+    echo If you set up using Conda, please activate your environment first:
+    echo   conda activate dmstudio
+    echo   jupyter lab
+    echo.
+    echo Otherwise, please run 'setup_env.bat' first to create a local virtual environment.
     echo.
     pause
     exit /b 1

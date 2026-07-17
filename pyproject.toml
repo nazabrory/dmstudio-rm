@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dmstudio"
-version = "2.0.0b1"
+version = "2.0.0b4"
 description = "Python module for Datamine Studio RM scripting with AI agent capabilities"
 readme = "README.md"
 license = {text = "MIT"}
@@ -29,7 +29,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/nazabrory/dmstudio"
+Homepage = "https://github.com/nazabrory/dmstudio-rm"
 
 [tool.setuptools]
 packages = ["dmstudio"]

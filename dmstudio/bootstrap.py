@@ -29,8 +29,8 @@ def download_tutorials(target_dir):
     target_dir = os.path.abspath(target_dir)
     os.makedirs(target_dir, exist_ok=True)
     
-    url = 'https://github.com/nazabrory/dmstudio/archive/refs/heads/master.zip'
-    fallback_url = 'https://github.com/nazabrory/dmstudio/archive/refs/heads/main.zip'
+    url = 'https://github.com/nazabrory/dmstudio-rm/archive/refs/heads/master.zip'
+    fallback_url = 'https://github.com/nazabrory/dmstudio-rm/archive/refs/heads/main.zip'
     
     # 2. Create temporary file
     with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp_file:

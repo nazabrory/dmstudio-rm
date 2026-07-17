@@ -155,3 +155,14 @@ celerybeat-schedule
 # ---------------------------------------------------------------------------
 .agents/
 
+# ---------------------------------------------------------------------------
+# dmstudio - Public Publishing Exceptions
+# ---------------------------------------------------------------------------
+# Exclude core package init from being ignored
+!/dmstudio/__init__.py
+
+# Allow committing tutorial/case-study files
+!/tutorials/**/*.rmproj
+!/tutorials/**/*.dm
+!/tutorials/**/*.dmx
+!/tutorials/**/*.dat

@@ -1,19 +1,49 @@
-# Context: dmstudio Notebook Testing Domain
+# Context: dmstudio
 
-This document defines the ubiquitous language and domain concepts for the `dmstudio` Jupyter notebook verification system.
+Ubiquitous language for the dmstudio package: Studio RM automation, package surface, and notebook verification.
 
-## Glossary
+## Language
 
-### test_sandbox
-A dedicated, isolated workspace directory containing a single Datamine project (`Project.rmproj`). It is used to execute Jupyter notebooks sequentially, avoiding COM automation conflicts arising from having multiple projects open in Datamine Studio RM simultaneously.
+### Product surface
 
-### notebook_runner
-The programmatic execution coordinator that runs notebooks sequentially in the `test_sandbox`. It is responsible for:
-- Verifying the active project matching.
-- Dynamically patching relative database paths.
-- Auto-dismissing blocking Studio RM dialogs in a background thread.
-- Managing execution timeouts.
-- Wiping all sandbox files (excluding the project metadata) after each run.
+**Command wrapper**:
+A Python method on `dmcommands.init` or `dmfiles.init` that builds a Studio CLI string and sends it via COM `Parsecommand`.
+_Avoid_: macro, process method (when you mean the Python API)
 
-### test_results
-The storage location for test execution outputs. Each run generates a timestamped subfolder containing a markdown summary report (`summary.md`) and evaluated `.ipynb` notebook files for any runs that encountered errors or failed.
+**Process command**:
+A Studio process exposed through `dmcommands` (e.g. sort, copy, holes3d) — roughly one sandbox under `tutorials/collections/processes/`.
+_Avoid_: file command (those live under `dmfiles`)
+
+**File command**:
+A Studio file-generation or directory utility exposed through `dmfiles` (e.g. INPFIL, PROTOM) — sandboxes under `tutorials/collections/files/`.
+_Avoid_: process command
+
+**Active project**:
+The Datamine project currently open in the running Studio RM instance; COM automation targets this workspace and its folder.
+_Avoid_: working directory (Python cwd may differ until aligned)
+
+**Scratch file**:
+A Datamine logical name with a leading underscore; kept in memory and not written to disk as a normal project file.
+_Avoid_: temp file (unless you mean an on-disk name without `_`)
+
+**Canonical module**:
+The module that implements a capability today (`command_registry`, `dm_io`, `dialog`, `bootstrap`, `sandbox`). Prefer importing from here in new code and docs.
+_Avoid_: treating `agent` as the implementation home
+
+**Compat re-export**:
+The `agent` module’s public surface that re-exports helpers from canonical modules so older scripts and notebooks keep working.
+_Avoid_: “agent owns I/O / discovery / dialogs” as current architecture
+
+### Notebook testing
+
+**Test sandbox**:
+An isolated workspace directory with a single Datamine project (`Project.rmproj`) used to run notebooks without multi-project COM conflicts.
+_Avoid_: temporary folder (generic OS temp)
+
+**Notebook runner**:
+The coordinator that runs notebooks sequentially in a test sandbox: project checks, path patching, dialog dismissal, timeouts, and post-run cleanup.
+_Avoid_: nbconvert alone (when you mean the full orchestration)
+
+**Test results**:
+Timestamped storage of a run’s summary (`summary.md`) and failing/errored evaluated notebooks.
+_Avoid_: output folder (unspecified)

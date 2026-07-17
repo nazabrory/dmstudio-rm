@@ -1,5 +1,24 @@
 # Changelog
 
+## Documentation & module layout (current as of 2.0.0b4) - 2026-07-17
+
+Docs-only alignment with the split package surface (no behaviour change):
+
+| Capability | Canonical module | Compat re-export |
+|------------|------------------|------------------|
+| `list_commands`, `get_command_schema`, `search_commands` | `command_registry` | `agent` |
+| `read_datamine`, `to_datamine`, `patch_dataframe` | `dm_io` | `agent` |
+| `dialog_dismiss_context` | `dialog` | `agent` |
+| `download_tutorials` | `bootstrap` | `agent`, `dmstudio.download_tutorials` |
+| Sandbox helpers | `sandbox` | `agent` |
+
+- **`README.md`**: Thin dual-audience guide (users first); Conda-first install; compact architecture; canonical imports with one-line `agent` compat note; tutorials table including `custom_notebooks/`.
+- **`AGENTS.md`**: Full module map, MCP tool list (includes `search_commands`), placeholder paths, COM rules cite `dialog` first.
+- **`CONTEXT.md`**: Product surface glossary plus notebook-testing terms.
+- Historical entries below keep original release narrative; annotations note **where code lives now** when names moved.
+
+---
+
 ## 2.0.0b4 (Tutorials Restructuring & Split Collections) - 2026-07-16
 
 ### Structural Changes
@@ -25,31 +44,30 @@
 ## 2.0.0b3 (Process Example Notebook Collection & Introspection Upgrade) - 2026-07-16
 
 ### Features
-- **Unified Introspection for `dmfiles`:** Extended [dmstudio/agent.py](file:///D:/Active/dmstudio/dmstudio/agent.py) to inspect both `dmcommands.init` and `dmfiles.init` classes. This ensures all 300 Datamine commands (including `protom` and `inpfil`) are discoverable, searchable, and their schemas extractable.
-- **Process Example Notebook Collection:** Created [generate_collections.py](file:///D:/Active/dmstudio/tests/generate_collections.py) to programmatically generate 297 process example notebooks and directories under `tutorials/collections/`.
+- **Unified Introspection for `dmfiles`:** Extended command discovery (originally surfaced via `agent`; **now implemented in `command_registry`**, re-exported by `agent`) to inspect both `dmcommands.init` and `dmfiles.init`. All ~300 Datamine commands (including `protom` and `inpfil`) are discoverable, searchable, and schema-extractable.
+- **Process Example Notebook Collection:** Created `generate_collections.py` to programmatically generate process example notebooks and directories under `tutorials/collections/`.
   - **Frictionless Portability:** Uses relative resolution paths to automatically locate the Datamine help database from the collections directory, ensuring zero setup issues when cloned.
   - **Case-Insensitive Windows Pathing:** Normalized ActiveProject folder comparisons using `.lower()` to prevent drive letter case mismatches on Windows.
   - **Docstring-Aware parameter requirement logic:** Evaluates whether a list or scalar input file is marked as compulsory (`Required=Yes`) inside the process's docstring and uncomments it automatically (e.g. `samples_i` in `holes3d` or `inmods_i` in `desurv` are now active).
   - **Thorough Workspace Cleanup:** Upgraded the notebooks' final cell to remove generated `dmdir.py`, `__init__.py`, and `__pycache__` artifacts in addition to `t_` prefix files, restoring directory layouts to "as new" states.
-  - **Interactive HTML Results Verification:** Output cells read and display previews of actual computed output files using `agent.read_datamine`.
+  - **Interactive HTML Results Verification:** Output cells read and display previews of actual computed output files using `agent.read_datamine` (**canonical: `dm_io.read_datamine`**, re-exported by `agent`).
 
 ## 2.0.0b2 (Interactive Visualization & COM Fixes) - 2026-07-16
 
 ### Bug Fixes
-- **`agent.read_datamine`:** Fixed a critical bug in [dmstudio/agent.py](file:///D:/OnGoing%20Project/dmstudio-rm3/dmstudio/agent.py#L241) where it was calling `table.GetValue(i)` instead of the correct ADO COM method `table.GetColumn(i)`, returning `None` for all values.
-- **`dm.compdh` wrapper:** Corrected input file syntax prefix from `&**in**=` to `&in=` in [dmstudio/dmcommands.py](file:///D:/OnGoing%20Project/dmstudio-rm3/dmstudio/dmcommands.py#L6806).
-- **`dm.join` wrapper:** Exposed `keys_f` field parameter mapping inside the `join` method signature in [dmstudio/dmcommands.py](file:///D:/OnGoing%20Project/dmstudio-rm3/dmstudio/dmcommands.py).
+- **`agent.read_datamine` / table read path:** Fixed a critical bug in the Datamine table reader (shipped under `agent`; **now lives in `dm_io`**) where it called `table.GetValue(i)` instead of the correct ADO COM method `table.GetColumn(i)`, returning `None` for all values.
+- **`dm.compdh` wrapper:** Corrected input file syntax prefix from `&**in**=` to `&in=` in `dmcommands.py`.
+- **`dm.join` wrapper:** Exposed `keys_f` field parameter mapping inside the `join` method signature in `dmcommands.py`.
 
 ### Workflow & Visualization Enhancements
 - **Interactive 3D WebGL (Plotly):** Bypassed experimental Python 3.14 + Conda on Windows fatal crashes (`0xc06d007f` in `numpy.linalg.inv`) during 3D plotting by introducing a standalone, interactive 3D WebGL HTML plot using **Plotly.js (via CDN)**. The plot is embedded inline inside JupyterLab using `IPython.display.IFrame`, avoiding C++ extension segmentation faults entirely.
 - **File Locking Workaround:** Avoided Datamine write locks by copying `comp_holes.dmx` to a temporary copy dynamically located using `oScript.ActiveProject.Folder`, reading it with pandas, cleaning up the copy, and then loading it into the active Datamine 3D view window.
 
 ### Testing & Diagnostics
-- **Integration Tests:** Patched [tests/integration_test.py](file:///D:/OnGoing%20Project/dmstudio-rm3/tests/integration_test.py) and [tests/diagnose_project.py](file:///D:/OnGoing%20Project/dmstudio-rm3/tests/diagnose_project.py) to support newer Studio RM COM project properties (`.Title` and `.Folder`) while retaining safe fallbacks to legacy `.Name` and `.Directory`.
-- **Package Dependencies:** Added `matplotlib` to [environment.yml](file:///D:/OnGoing%20Project/dmstudio-rm3/environment.yml) and [requirements.txt](file:///D:/OnGoing%20Project/dmstudio-rm3/requirements.txt).
+- **Integration Tests:** Patched `tests/integration_test.py` and `tests/diagnose_project.py` to support newer Studio RM COM project properties (`.Title` and `.Folder`) while retaining safe fallbacks to legacy `.Name` and `.Directory`.
+- **Package Dependencies:** Added `matplotlib` to `environment.yml` and `requirements.txt`.
 
 ## 2.0.0b1 (Conda Support, VS Code Agents & Root Cleanup) - 2026-07-15
-
 
 ### Clean Workspace
 - Centralized all project files (`Project.rmproj`), tutorial databases (`Database/`), tutorial notebooks (`Holes3D_Tutorial.ipynb`, `Studio_RM_3.1_Examples.ipynb`), and scratch `.dmx` tables into a clean `tutorials/` subdirectory.
@@ -60,7 +78,7 @@
 - Configured Conda environment setup details in both `README.md` and `AGENTS.md`.
 
 ### VS Code & Direct AI Agent Guidelines
-- Documented how VS Code coding agents (like Cursor, Github Copilot, Roo Code, Claude Code) can natively interact with the repository without the need for an MCP server, utilizing direct workspace access and reading `.dm` data files via `agent.read_datamine`.
+- Documented how VS Code coding agents (like Cursor, Github Copilot, Roo Code, Claude Code) can natively interact with the repository without the need for an MCP server, utilizing direct workspace access and reading `.dm` data files via `agent.read_datamine` (**canonical: `dm_io.read_datamine`**).
 - Added detailed steps on configuring Jupyter Notebook kernels inside VS Code to directly edit and execute the generated notebooks.
 
 ### Disclaimer & License Terms
@@ -73,11 +91,13 @@
 - Replaced bare `except:` blocks in `initialize.py` with `except Exception:` (PEP-8 best practice).
 
 ### AI Agent Module (`dmstudio/agent.py`) — new file
-- `list_commands()` — Returns all dmcommands wrappers as a JSON-serialisable list.
-- `get_command_schema(cmd_name)` — Returns full parameter schema for a command.
-- `search_commands(query)` — Fuzzy keyword search over command names and docstrings.
-- `read_datamine(filepath)` — Reads `.dm`/`.dmx` binary files into pandas DataFrames using `DmFile.DmTableADO` COM object — no proprietary dependencies.
-- `dialog_dismiss_context()` — Opt-in context manager that auto-dismisses blocking `#32770` Studio RM modal dialogs in a background thread.
+Originally introduced as the home of AI helpers. **Later split into canonical modules**; `agent` remains a **compat re-export** layer:
+
+- `list_commands()` — **now `command_registry`**
+- `get_command_schema(cmd_name)` — **now `command_registry`**
+- `search_commands(query)` — **now `command_registry`**
+- `read_datamine(filepath)` — **now `dm_io`**
+- `dialog_dismiss_context()` — **now `dialog`**
 
 ### Jupyter Notebook Builder (`dmstudio/notebook_builder.py`) — new file
 - `NotebookBuilder(filename, title)` — Programmatically builds auditable Jupyter Notebooks.
@@ -85,22 +105,20 @@
 - AI agents should write all workflows to notebooks (via `NotebookBuilder`) for full auditability, then execute with `jupyter nbconvert --to notebook --execute --inplace`.
 
 ### MCP Server (`mcp_server.py`) — new file
-- FastMCP stdio server exposing 4 tools: `list_commands`, `get_command_schema`, `read_datamine_file`, `create_jupyter_workflow`.
+- FastMCP stdio server; originally four tools, **now five**: `list_commands`, `get_command_schema`, `search_commands`, `read_datamine_file`, `create_jupyter_workflow`.
 - Compatible with Claude Desktop, Google Antigravity, and any MCP-capable client.
 
 ### Cleanup: Removed SLR / Sean Horan References
 - `README.md` — Removed author attribution, updated copyright to generic, added AI/MCP documentation.
 - `pyproject.toml` — Removed `authors` entry (Sean Horan / rpacan.com).
 - `setup.py` — Removed `author` / `author_email` fields.
-- `dmstudio/superprocess.py` — Removed `pyrpa` import and "only available to SLR employees" messages. Rewrote `display_ellipsoids` to use `agent.read_datamine()`.
+- `dmstudio/superprocess.py` — Removed `pyrpa` import and "only available to SLR employees" messages. Rewrote `display_ellipsoids` to use `agent.read_datamine()` (**canonical: `dm_io.read_datamine`**).
 - `Holes3D_Tutorial.ipynb` — Stripped SLR employee stdout from output cells.
 
 ### Package Updates
-- `dmstudio/__init__.py` — Exports new `agent` and `notebook_builder` submodules.
+- `dmstudio/__init__.py` — Exports new `agent` and `notebook_builder` submodules (later also canonical modules and `download_tutorials`).
 - `requirements.txt` — Added `nbformat>=5.0.0`, updated `mcp>=1.0.0`.
 - `pyproject.toml` — Added `nbformat` and `mcp` to package dependencies.
-
-
 
 ### Studio RM 3.2 Support
 - Added explicit support for Datamine Studio RM 3.2 via the `'StudioRM3.2'` version string in `initialize.py`.

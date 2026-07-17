@@ -2,124 +2,131 @@
 
 ## Project Overview
 
-Python package for Datamine Studio RM scripting via Windows COM automation. 
-The package source lives in `dmstudio/` (a subfolder of the project root `dmstudio/`). The project root contains packaging config, examples, tests, and setup scripts.
+Python package for Datamine Studio RM scripting via Windows COM automation.
+The package source lives in `dmstudio/`. The project root holds packaging config, tutorials, tests, MCP server, and setup scripts.
+
+User-facing install and quick start: **[README.md](README.md)**. Domain vocabulary: **[CONTEXT.md](CONTEXT.md)**.
 
 ---
 
-## 🛠️ Project Preparation & Setup (For Developers & Agents)
+## Project Preparation & Setup
 
-To run tests or examples, the environment must be configured as follows:
-1. **Windows & Datamine Studio RM**: Must be running on a Windows system with Datamine Studio RM installed and licensed.
-2. **Open Project**: Open **`Project.rmproj`** in Datamine Studio RM before executing any script that interacts with COM.
-3. **Environment Setup**:
+1. **Windows & Datamine Studio RM**: Windows with Studio RM installed and licensed.
+2. **Open Project**: Open a `.rmproj` (e.g. `tutorials/Project.rmproj`) in Studio RM before any COM script.
+3. **Environment Setup** (Conda recommended):
    ```bash
-   # Option A: Conda environment setup (Recommended)
-   # Assumes conda is installed. Uses the environment.yml file.
+   # Option A: Conda (recommended)
    conda env create -f environment.yml
    conda activate dmstudio
    pip install -e .
 
-   # Option B: Standard venv setup via uv (Fast alternative)
-   # Assumes uv is installed.
+   # Option B: uv
    uv venv
    .venv\Scripts\activate
    uv pip install -r requirements.txt
    uv pip install -e .
    uv pip install jupyterlab
 
-   # Option C: Legacy PowerShell/CMD setup scripts
-   setup_env.bat        # CMD (one-click setup)
-   .\setup_env.ps1      # PowerShell (one-click setup)
+   # Option C: One-click Windows helpers
+   setup_env.bat        # CMD
+   .\setup_env.ps1      # PowerShell
    ```
-4. **Active COM Session**: The COM library connects to the running instance of Studio RM. Keep the application open with `Project.rmproj` active.
+4. **Active COM Session**: The library attaches to the running Studio RM instance. Keep Studio open with the intended project active.
 
 ---
 
-## 🏗️ File Structure
+## File Structure
 
 ```
-dmstudio-rm3/                     ← Project root (working directory for scripts)
+dmstudio-rm/                      ← Project root
 ├── dmstudio/                     ← Python package source
-│   ├── __init__.py               ← Package entrypoint exporting all submodules
-│   ├── version.py                ← Version string ('2.0.0b3')
-│   ├── initialize.py             ← COM initialization; supports StudioRM3.x dynamically
-│   ├── dmcommands.py             ← ~270 auto-generated command wrappers
-│   ├── dmfiles.py                ← ~30 file-generation command wrappers (INPFIL etc.)
-│   ├── special.py                ← COM automation helpers
-│   ├── superprocess.py           ← Multi-command workflows (dxf_to_dm, display_ellipsoids)
-│   ├── agent.py                  ← AI agent helpers (schema, file reader, dialog dismissal)
+│   ├── __init__.py               ← Exports submodules; download_tutorials shortcut
+│   ├── version.py                ← Version string ('2.0.0b4')
+│   ├── initialize.py             ← COM init; StudioRM3.x dynamic resolution
+│   ├── dmcommands.py             ← ~268 process command wrappers
+│   ├── dmfiles.py                ← ~32 file-command wrappers (INPFIL, PROTOM, …)
+│   ├── command_registry.py       ← list_commands / get_command_schema / search_commands
+│   ├── dm_io.py                  ← read_datamine / to_datamine (DataFrame ↔ .dm/.dmx)
+│   ├── dialog.py                 ← dialog_dismiss_context (Win32 modal dismisser)
+│   ├── bootstrap.py              ← download_tutorials
+│   ├── sandbox.py                ← Sandbox / dataset copy helpers
+│   ├── agent.py                  ← Compat re-export layer (see below)
+│   ├── special.py                ← Adapted COM helpers
+│   ├── superprocess.py           ← Multi-command workflows
 │   └── notebook_builder.py       ← Jupyter Notebook builder
 ├── mcp_server.py                 ← FastMCP stdio server
-├── tutorials/                    ← Tutorials and Datamine project files
-│   ├── Project.rmproj            ← Shared tutorial project file
-│   ├── collections/              ← Process & file-command workspace collection
-│   │   ├── processes/            ← One sandbox per dmcommands wrapper (~268 folders)
-│   │   │   ├── copy/
-│   │   │   │   ├── Project.rmproj
-│   │   │   │   └── copy_example.ipynb
-│   │   │   ├── holes3d/
-│   │   │   │   ├── Project.rmproj
-│   │   │   │   └── holes3d_example.ipynb
-│   │   │   └── ... (all other process folders)
-│   │   └── files/                ← One sandbox per dmfiles wrapper (~32 folders)
-│   │       ├── protom/
-│   │       │   ├── Project.rmproj
-│   │       │   └── protom_example.ipynb
-│   │       ├── inpfil/
-│   │       │   ├── Project.rmproj
-│   │       │   └── inpfil_example.ipynb
-│   │       └── ... (all other file-command folders)
-│   └── case_studies/             ← End-to-end tutorial workflows
-│       ├── holes3d_desurvey/
-│       │   ├── Project.rmproj
-│       │   └── Holes3D_Tutorial.ipynb
-│       ├── grade_estimation/
-│       │   ├── Project.rmproj
-│       │   └── Grade_Estimation_Examples.ipynb
-│       └── studio_rm_examples/
-│           ├── Project.rmproj
-│           └── Studio_RM_3.1_Examples.ipynb
-├── tests/                        ← Centralized developer test and helper scripts
-│   ├── quick_test.py             ← Smoke test (no Studio license needed)
-│   ├── test_workflow.py          ← Verification script (Notebook, Command schema, search tests)
-│   ├── integration_test.py       ← Integration test suite
-│   ├── stress_test.py            ← End-to-end COM test (requires active Studio + project)
-│   ├── diagnose_project.py       ← Studio connection diagnostic utility
-│   ├── run_sandbox_tests.py      ← Automated sequential validation runner for notebooks
-│   ├── generate_wrappers.py      ← Regenerates dmcommands.py from StudioRM.chm XML
-│   ├── generate_collections.py   ← Regenerates all 300 process/file sandbox notebooks
-│   └── restructure_case_studies.py ← Migrates case study notebooks to case_studies/
-├── requirements.txt              ← Pinned dependencies
-├── pyproject.toml                ← Modern packaging config
-└── setup.py                      ← Legacy setup (kept for compatibility)
+├── tutorials/
+│   ├── Project.rmproj
+│   ├── Database/                 ← Tutorial source data
+│   ├── collections/
+│   │   ├── processes/            ← ~268 process sandboxes
+│   │   └── files/                ← ~32 file-command sandboxes
+│   ├── case_studies/
+│   │   ├── holes3d_desurvey/
+│   │   ├── grade_estimation/
+│   │   └── studio_rm_examples/
+│   └── custom_notebooks/         ← Hand-tuned examples
+├── tests/
+│   ├── quick_test.py
+│   ├── test_workflow.py
+│   ├── integration_test.py
+│   ├── stress_test.py
+│   ├── diagnose_project.py
+│   ├── run_sandbox_tests.py
+│   ├── generate_wrappers.py
+│   ├── generate_collections.py
+│   └── restructure_case_studies.py
+├── requirements.txt
+├── environment.yml
+├── pyproject.toml
+├── setup.py
+├── setup_env.bat / setup_env.ps1
+├── start_jupyter.bat
+├── README.md
+├── AGENTS.md
+├── CONTEXT.md
+└── CHANGELOG.md
 ```
 
 ---
 
-## 🤖 AI Agent & MCP Specifications
+## Package surface (canonical vs compat)
 
-### Local Handoffs & Workspace Context
-To support persistent context and session handovers across different AI coding tools (such as Google Antigravity, Cursor, Roo Code, Claude Code, GitHub Copilot):
-- **Local Handover Directory:** Always write session-specific handoff reports, planning notes, or temporary scratchpad scripts to the `.agents/` directory in the repository root.
-- **Gitignored:** The `.agents/` folder is explicitly gitignored in `.gitignore`, keeping the main codebase repository history clean.
-- **Accessing History:** Future AI agents should scan this directory for recent `.md` reports (e.g. `handoff_report.md`) to read previous session outcomes and continue workflows seamlessly.
+### Canonical modules
 
-### `dmstudio/agent.py`
-AI agent helper module. Import: `from dmstudio import agent`
+| Module | Role | Key API |
+|--------|------|---------|
+| `dmcommands` | Process command wrappers | `dmcommands.init()` |
+| `dmfiles` | File-generation wrappers | `dmfiles.init()` |
+| `initialize` | COM / Studio / DmFile bootstrap | `studio()`, `dmFile()` |
+| `command_registry` | Discovery without side effects of full agent import | `list_commands()`, `get_command_schema()`, `search_commands()` |
+| `dm_io` | Binary table I/O via `DmFile.DmTableADO` | `read_datamine()`, `to_datamine()`, `patch_dataframe()` |
+| `dialog` | Opt-in modal dismissal | `dialog_dismiss_context()` |
+| `bootstrap` | Tutorial download | `download_tutorials(target_dir)` (also `dmstudio.download_tutorials`) |
+| `sandbox` | Sandbox dataset helpers | `copy_database_files()`, `initialize_sandbox()` |
+| `notebook_builder` | Programmatic `.ipynb` | `NotebookBuilder` |
+| `special` / `superprocess` | Extra COM workflows | e.g. `dxf_to_dm`, plot/PDF helpers |
 
-| Function | Description |
-|----------|-------------|
-| `agent.list_commands()` | Returns all 300 Datamine commands as `[{name, doc}]` |
-| `agent.get_command_schema(cmd)` | Returns full parameter schema for a command |
-| `agent.search_commands(query)` | Fuzzy keyword search across command names/docs |
-| `agent.read_datamine(filepath)` | Reads `.dm`/`.dmx` binary into pandas DataFrame via `DmFile.DmTableADO` COM |
-| `agent.dialog_dismiss_context()` | Context manager: background thread dismisses blocking `#32770` Studio dialogs |
+### `dmstudio/agent.py` (compat re-export)
+
+Import: `from dmstudio import agent`.
+
+**Does not own implementations.** Re-exports for backward compatibility:
+
+| Symbol | Canonical home |
+|--------|----------------|
+| `list_commands`, `get_command_schema`, `search_commands` | `command_registry` |
+| `read_datamine`, `to_datamine`, `patch_dataframe` | `dm_io` |
+| `dialog_dismiss_context` | `dialog` |
+| `copy_database_files`, `initialize_sandbox` | `sandbox` |
+| `download_tutorials` | `bootstrap` |
+
+Prefer **canonical modules** in new code and docs. Tutorials/tests may still use `agent.*`.
 
 ### `dmstudio/notebook_builder.py`
-Programmatic Jupyter Notebook generator. Import: `from dmstudio.notebook_builder import NotebookBuilder`
 
 ```python
+from dmstudio.notebook_builder import NotebookBuilder
 nb = NotebookBuilder('workflow.ipynb', title='My Workflow')
 nb.add_markdown('## Step 1')
 nb.add_code("cmd.mgsort(in_i='collars', out_o='sorted', keys_f=['BHID'])")
@@ -127,33 +134,38 @@ nb.save()
 ```
 
 ### `mcp_server.py`
-FastMCP stdio server. Run: `.venv\Scripts\python mcp_server.py`
 
-Exposed MCP tools:
-- `list_commands` — returns all Datamine commands
-- `get_command_schema(command_name)` — returns parameter signature
-- `read_datamine_file(filepath, max_rows)` — returns file preview as JSON
-- `create_jupyter_workflow(notebook_name, steps)` — builds `.ipynb` from a step list
+Run: `.venv\Scripts\python mcp_server.py` (or Conda env python).
 
-#### Registering MCP with Claude Desktop (`%APPDATA%\Claude\claude_desktop_config.json`):
+MCP tools (via `command_registry`, `dm_io`, `NotebookBuilder`):
+
+- `list_commands`
+- `get_command_schema(command_name)`
+- `search_commands(query)`
+- `read_datamine_file(filepath, max_rows)`
+- `create_jupyter_workflow(notebook_name, steps)`
+
+#### Claude Desktop (`%APPDATA%\Claude\claude_desktop_config.json`)
+
 ```json
 {
   "mcpServers": {
     "dmstudio": {
-      "command": "D:\\OnGoing Project\\dmstudio-rm3\\.venv\\Scripts\\python",
-      "args": ["D:\\OnGoing Project\\dmstudio-rm3\\mcp_server.py"]
+      "command": "C:\\path\\to\\dmstudio-rm\\.venv\\Scripts\\python.exe",
+      "args": ["C:\\path\\to\\dmstudio-rm\\mcp_server.py"]
     }
   }
 }
 ```
 
-#### Registering MCP with Antigravity (`.gemini/config/antigravity.json`):
+#### Antigravity (example)
+
 ```json
 {
   "mcpServers": {
     "dmstudio": {
-      "command": "D:\\OnGoing Project\\dmstudio-rm3\\.venv\\Scripts\\python",
-      "args": ["D:\\OnGoing Project\\dmstudio-rm3\\mcp_server.py"]
+      "command": "C:\\path\\to\\dmstudio-rm\\.venv\\Scripts\\python.exe",
+      "args": ["C:\\path\\to\\dmstudio-rm\\mcp_server.py"]
     }
   }
 }
@@ -161,151 +173,144 @@ Exposed MCP tools:
 
 ---
 
-## Agent skills
+## Local handoffs
 
-### Issue tracker
-
-Issues and PRDs for this repo live as GitHub issues. See [issue-tracker.md](file:///D:/Active/dmstudio/docs/agents/issue-tracker.md).
-
-### Triage labels
-
-Triage labels map directly to canonical roles: needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. See [triage-labels.md](file:///D:/Active/dmstudio/docs/agents/triage-labels.md).
-
-### Domain docs
-
-Single-context repository layout (one CONTEXT.md + docs/adr/ at repo root). See [domain.md](file:///D:/Active/dmstudio/docs/agents/domain.md).
+- Write session handoff notes / scratch plans under **`.agents/`** (gitignored).
+- Scan that folder for recent handoffs when resuming work across tools.
 
 ---
 
-## 🛠️ Verification & Commands
+## Agent skills (repo docs)
 
-### Run Smoke Test (no Studio license required)
+- Issue tracker: [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md)
+- Triage labels: [docs/agents/triage-labels.md](docs/agents/triage-labels.md)
+- Domain docs layout: [docs/agents/domain.md](docs/agents/domain.md)
+
+---
+
+## Verification & commands
+
+### No Studio license required
+
 ```bash
 .venv\Scripts\python tests\quick_test.py
-```
-
-### Run Full Verification (no Studio license required)
-```bash
 .venv\Scripts\python tests\test_workflow.py
 ```
 
-### Run Connection Diagnostic (requires active Studio + loaded project)
+### Active Studio + loaded project
+
 ```bash
 .venv\Scripts\python tests\diagnose_project.py
-```
-
-### Run End-to-End COM Stress Test (requires active Studio + loaded project)
-```bash
 .venv\Scripts\python tests\stress_test.py
+.venv\Scripts\python tests\integration_test.py
+.venv\Scripts\python tests\run_sandbox_tests.py
 ```
 
-### Rebuild / Reinstall (Editable mode)
+### Rebuild editable install
+
 ```bash
 .venv\Scripts\pip install -e .
 ```
 
+### Generators
+
+- **`tests/generate_wrappers.py`** — regenerates `dmcommands.py` from StudioRM help XML.
+- **`tests/generate_collections.py`** — regenerates ~300 sandboxes under `tutorials/collections/processes|files/`.
+- **`tests/restructure_case_studies.py`** — case-study layout helper (migration).
+
 ---
 
-## 📏 Code Style Guide
+## Code style guide
 
 ### Imports
-- Standard library first, then third-party, then local (blank line between groups)
-- Use absolute imports within the package: `from dmstudio import dmcommands`
-- Module-level `OSCRYPTCON = None` pattern for COM connection caching
 
-### Naming Conventions
-- **Parameters follow Datamine CLI semantics:**
-  - `_i` suffix = input file (e.g., `in_i`)
-  - `_o` suffix = output file (e.g., `out_o`)
-  - `_f` suffix = field name (e.g., `zone_f`)
-  - `_p` suffix = parameter value (e.g., `allrecs_p`)
+- Stdlib → third-party → local (blank line between groups)
+- Absolute package imports: `from dmstudio import dmcommands`
+- Prefer canonical modules over `agent` for new code
+
+### Naming
+
+- Parameters follow Datamine CLI semantics:
+  - `_i` = input file (`in_i`)
+  - `_o` = output file (`out_o`)
+  - `_f` = field name (`zone_f`)
+  - `_p` = parameter (`allrecs_p`)
   - `retrieval` = retrieval criteria string
 - Classes: `PascalCase` (`dmfile_def`, `init`)
-- Functions/methods: `snake_case` (`run_command`, `parse_infields_list`)
-- Constants: `UPPER_SNAKE_CASE` (`OSCRYPTCON`, `CHAR8_FIELDS`, `IMPLICIT_FIELDS`)
-- Private/internal: leading underscore (`_scriptinit`, `_make_dmdir`)
+- Functions: `snake_case`
+- Constants: `UPPER_SNAKE_CASE`
+- Private: leading `_`
 
 ### Formatting
-- **No formatter configured** — match existing style
-- Single quotes preferred for strings (`'required'`, `'optional'`)
-- Triple single quotes for docstrings (`'''docstring'''`)
-- 4-space indentation
-- Max line length: ~120 chars (do not reflow existing auto-generated commands)
-- No trailing semicolons
 
-### Type Hints
-- **None currently used** (codebase is untyped).
-- If adding type hints, use them sparingly on new public functions. Do not retrofit existing code.
+- No formatter configured — match existing style
+- Single quotes preferred; triple single quotes for docstrings
+- 4-space indent; ~120 char lines; do not reflow auto-generated `dmcommands.py`
+
+### Type hints
+
+- Codebase largely untyped; add sparingly on new public APIs only
 
 ### Docstrings
-- Use triple-single-quoted block docstrings for classes and methods.
-- Format:
-  ```
-  '''
-  FUNCTION_NAME
-  -------------
-  Description text.
 
-  Parameters:
-  -----------
-  param_name: type
-      Description.
+Triple-single-quoted blocks; auto-generated command style:
 
-  Returns:
-  --------
-  return_type
-      Description.
-  '''
-  ```
-- Auto-generated commands in `dmcommands.py` use this format — preserve it.
+```
+'''
+FUNCTION_NAME
+-------------
+Description.
 
-### Error Handling
-- Use `raise ValueError("message")` for invalid parameters.
-- Use `raise RuntimeError("message")` for initialization failures.
-- Sentinel pattern: default params to `"required"` or `"optional"`, then check:
-  ```python
-  if param == "required":
-      raise ValueError("param is required.")
-  if param != "optional":
-      command += " *param=" + param
-  ```
-- Avoid bare `except:` — use `except Exception as e:`.
-- Use `assert` for preconditions in helper functions (e.g., `assert dxf_i.lower().endswith('.dxf')`).
+Parameters:
+-----------
+param_name: type
+    Description.
 
-### Datamine Command String Syntax
-When building command strings for `oScript.Parsecommand()`:
-- `&` prefix for files: `&infile=filename`
-- `*` prefix for fields: `*field=FIELDNAME`
-- `@` prefix for parameters: `@param=value`
-- `{}` for retrieval criteria: `{RETRIEVAL_STRING}`
+Returns:
+--------
+return_type
+    Description.
+'''
+```
 
-### pandas Compatibility
-- **pandas 3.0+ breaking change:** `pd.DataFrame(scalar_dict)` fails. Always wrap in list: `pd.DataFrame([scalar_dict])`
-- Use `pd.concat()` instead of deprecated `DataFrame.append()`
+### Error handling
+
+- `ValueError` for bad params; `RuntimeError` for init failures
+- Sentinel `"required"` / `"optional"` pattern in wrappers
+- Avoid bare `except:`; use `except Exception as e:`
+- `assert` for helper preconditions where already used
+
+### Datamine command string syntax
+
+- `&` files: `&infile=filename`
+- `*` fields: `*field=FIELDNAME`
+- `@` params: `@param=value`
+- `{}` retrieval: `{RETRIEVAL_STRING}`
+
+### pandas
+
+- pandas 3+: wrap scalar dicts: `pd.DataFrame([scalar_dict])`
+- Prefer `pd.concat` over deprecated `DataFrame.append`
 
 ---
 
-## ⚡ Critical COM Engineering Rules
+## Critical COM engineering rules
 
-Always keep these in mind when extending COM automation:
-
-1. **Backslashes break `Parsecommand()`** — never pass Windows paths directly as command arguments. Register files first via `ActiveProject.AddFile(absolute_path)` and use the logical name.
-2. **Spaces in paths break the parser** — same root cause. The CLI parser splits on spaces. Use `AddFile()` to sidestep this.
-3. **Leading underscore = scratch (in-memory) file** — Datamine does NOT write `_tempfile` to disk. Use `tempfile` (no underscore) to verify on-disk output.
-4. **Blocking modals** — `Parsecommand()` runs on the main thread and will hang if Studio shows a `#32770` dialog. Use `agent.dialog_dismiss_context()` (opt-in) or the `win32gui` pattern in `stress_test.py`.
-5. **COM ProgID is version-agnostic** — all `StudioRM3.x` versions share `Datamine.StudioRM.Application`. The version string in `initialize.studio()` is metadata only.
-6. **`DmFile.DmTableADO` fields are 1-indexed** — `Schema.GetFieldName(1)` is the first field.
-7. **`dmdir.py` and root `__init__.py`** are generated at runtime by `_make_dmdir()`. Do not commit them to Git.
+1. **Backslashes break `Parsecommand()`** — do not pass Windows paths as command args. Use `ActiveProject.AddFile(absolute_path)` then logical names.
+2. **Spaces in paths break the parser** — same fix: `AddFile()`.
+3. **Leading underscore = scratch file** — not written to disk; use non-`_` names for durable outputs.
+4. **Blocking modals** — `Parsecommand()` is main-thread; hang risk. Prefer `dialog.dialog_dismiss_context()` (also available as `agent.dialog_dismiss_context` re-export) or the `win32gui` pattern in `stress_test.py`.
+5. **COM ProgID is version-agnostic** — `Datamine.StudioRM.Application`; version string in `initialize.studio()` is metadata.
+6. **`DmFile.DmTableADO` fields are 1-indexed** — `Schema.GetFieldName(1)` is first field.
+7. **`dmdir.py` and runtime root `__init__.py`** from `_make_dmdir()` — do not commit.
 
 ---
 
-## 🏷️ Versioning Policy (PEP 440 Compliance)
+## Versioning policy (PEP 440)
 
-When modifying or releasing this package, future AI agents and developers must strictly follow standard PEP 440 version rules:
-1. **Pre-release Naming**: Avoid non-standard descriptors like `2.0-beta-patch` or `2.0.0-beta.1` in configuration scripts. Instead, use normalized PEP 440 pre-release notation:
-   - First beta: `2.0.0b0` (or `2.0b0`)
-   - Patch / update on that beta: `2.0.0b1` (or `2.0b1`), `2.0.0b2`, etc.
-2. **Release Naming**: Standard semantic version tags for production releases: `2.0.0`, `2.0.1` (patch), `2.1.0` (minor), etc.
-3. **Locations**: Whenever the package version is updated, update both:
-   - `dmstudio/version.py` (`__version__ = 'X.Y.Z'`)
-   - `CHANGELOG.md` heading (e.g. `## X.Y.Z (Title) - YYYY-MM-DD`)
+1. Pre-releases: `2.0.0b0`, `2.0.0b1`, … (not `2.0-beta-patch`).
+2. Releases: `2.0.0`, `2.0.1`, `2.1.0`, …
+3. On version bump update:
+   - `dmstudio/version.py` (`__version__`)
+   - `pyproject.toml` `[project].version`
+   - `CHANGELOG.md` heading

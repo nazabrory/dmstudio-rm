@@ -1,4 +1,14 @@
+<p align="center">
+  <img src="docs/images/banner.jpg" alt="dmstudio Banner" width="100%">
+</p>
+
 # dmstudio: Datamine Studio RM Python Scripting
+
+<p align="center">
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Version"></a>
+  <a href="LICENSE.txt"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License"></a>
+  <a href="https://www.dataminesoftware.com/"><img src="https://img.shields.io/badge/Datamine-Studio%20RM-orange.svg" alt="Datamine Studio RM"></a>
+</p>
 
 **dmstudio** is a user-friendly Python package designed for geologists and engineers to automate **Datamine Studio RM** workflows. It translates complex Datamine macro syntax into readable, interactive Python commands. The entire workflow is designed to run in interactive **JupyterLab** (or Jupyter Notebooks), where you can run processes and analyze results step-by-step.
 
@@ -6,6 +16,58 @@
 > This is a community-maintained library and is **NOT** an official product of Datamine Software. Datamine Software does not provide support or warranties for this package. 
 > 
 > This library uses official Datamine COM Automation APIs (`Datamine.StudioRM.Application` and `DmFile.DmTableADO`) which are built into Studio RM. To run the automation, you **must already own a valid, licensed instance** of Datamine Studio RM running on your system. This library does not bypass or clone any Datamine proprietary code.
+
+---
+
+## 🏗️ Architecture & How It Works
+
+`dmstudio` acts as a Pythonic bridge to the desktop instance of Datamine Studio RM using Windows COM automation APIs.
+
+```mermaid
+flowchart TD
+    %% Styling and colors
+    classDef user fill:#1a252f,stroke:#2c3e50,stroke-width:2px,color:#ffffff;
+    classDef dm fill:#16a085,stroke:#1abc9c,stroke-width:2px,color:#ffffff;
+    classDef com fill:#2980b9,stroke:#3498db,stroke-width:2px,color:#ffffff;
+    classDef rm fill:#d35400,stroke:#e67e22,stroke-width:2px,color:#ffffff;
+
+    subgraph UserSpace ["User Space (JupyterLab / Python Environment)"]
+        A["Jupyter Notebook (.ipynb) or Script"]:::user
+        B["Import dmstudio & initialize"]:::user
+    end
+
+    subgraph DmStudio ["dmstudio Package (Python Wrapper)"]
+        C["dmcommands.init()"]:::dm
+        D["Command Schema Validation<br/>(Checks fields, params, files)"]:::dm
+        E["agent.dialog_dismiss_context()<br/>(Background Thread)"]:::dm
+    end
+
+    subgraph COMLayer ["Windows COM Automation Layer"]
+        F["Datamine.StudioRM.Application<br/>(COM Object Interface)"]:::com
+        G["DmFile.DmTableADO<br/>(Fast Direct File ADO Reader)"]:::com
+    end
+
+    subgraph StudioRM ["Datamine Studio RM (Desktop App)"]
+        H["Active Project (Project.rmproj)<br/>(Loaded in memory)"]:::rm
+        I["Execute CLI Commands<br/>(Parsecommand / run_command)"]:::rm
+        J["Dismiss Blocking Modal Dialogs<br/>(Win32 GUI Events)"]:::rm
+        K[("Datamine Binary Files<br/>(.dm / .dmx on disk)")]:::rm
+    end
+
+    %% Relationships
+    A -->|1. Imports & Configures| B
+    B -->|2. Calls wrapper function| C
+    C -->|3. Connects to COM interface| F
+    C -->|4. Spawns if requested| E
+    C -->|5. Validates parameters| D
+    D -->|6. Passes sanitized script commands| F
+    F -->|7. Dispatches script parser| I
+    I -->|8. Manipulates active workspace| H
+    E -->|Monitoring thread| J
+    J -->|Closes #32770 popups| I
+    G -->|Direct binary read/write| K
+    I -->|Reads/Writes data| K
+```
 
 ---
 

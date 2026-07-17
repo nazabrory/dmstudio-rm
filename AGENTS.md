@@ -3,7 +3,7 @@
 ## Project Overview
 
 Python package for Datamine Studio RM scripting via Windows COM automation. 
-The package source lives in `dmstudio/` (a subfolder of the project root `dmstudio-rm3/`). The project root contains packaging config, examples, tests, and setup scripts.
+The package source lives in `dmstudio/` (a subfolder of the project root `dmstudio/`). The project root contains packaging config, examples, tests, and setup scripts.
 
 ---
 
@@ -52,25 +52,43 @@ dmstudio-rm3/                     ← Project root (working directory for script
 │   └── notebook_builder.py       ← Jupyter Notebook builder
 ├── mcp_server.py                 ← FastMCP stdio server
 ├── tutorials/                    ← Tutorials and Datamine project files
-│   ├── Project.rmproj            ← Your Datamine project file
-│   ├── Holes3D_Tutorial.ipynb    ← Drillhole de-survey workflow notebook
-│   ├── Studio_RM_3.1_Examples.ipynb ← Jupyter examples notebook
-│   ├── collections/              ← Subdirectories for each of the 300 Datamine processes
-│   │   ├── copy/
-│   │   │   ├── Project.rmproj
-│   │   │   └── copy_example.ipynb
-│   │   ├── holes3d/
-│   │   │   ├── Project.rmproj
-│   │   │   └── holes3d_example.ipynb
-│   │   └── ... (297 other process folders)
-│   └── Database/                 ← Raw tutorial database files
+│   ├── Project.rmproj            ← Shared tutorial project file
+│   ├── collections/              ← Process & file-command workspace collection
+│   │   ├── processes/            ← One sandbox per dmcommands wrapper (~268 folders)
+│   │   │   ├── copy/
+│   │   │   │   ├── Project.rmproj
+│   │   │   │   └── copy_example.ipynb
+│   │   │   ├── holes3d/
+│   │   │   │   ├── Project.rmproj
+│   │   │   │   └── holes3d_example.ipynb
+│   │   │   └── ... (all other process folders)
+│   │   └── files/                ← One sandbox per dmfiles wrapper (~32 folders)
+│   │       ├── protom/
+│   │       │   ├── Project.rmproj
+│   │       │   └── protom_example.ipynb
+│   │       ├── inpfil/
+│   │       │   ├── Project.rmproj
+│   │       │   └── inpfil_example.ipynb
+│   │       └── ... (all other file-command folders)
+│   └── case_studies/             ← End-to-end tutorial workflows
+│       ├── holes3d_desurvey/
+│       │   ├── Project.rmproj
+│       │   └── Holes3D_Tutorial.ipynb
+│       ├── grade_estimation/
+│       │   ├── Project.rmproj
+│       │   └── Grade_Estimation_Examples.ipynb
+│       └── studio_rm_examples/
+│           ├── Project.rmproj
+│           └── Studio_RM_3.1_Examples.ipynb
 ├── tests/                        ← Centralized developer test and helper scripts
 │   ├── quick_test.py             ← Smoke test (no Studio license needed)
 │   ├── test_workflow.py          ← Verification script (Notebook, Command schema, search tests)
 │   ├── integration_test.py       ← Integration test suite
 │   ├── stress_test.py            ← End-to-end COM test (requires active Studio + project)
 │   ├── diagnose_project.py       ← Studio connection diagnostic utility
-│   └── generate_wrappers.py      ← Regenerates dmcommands.py from StudioRM.chm XML
+│   ├── generate_wrappers.py      ← Regenerates dmcommands.py from StudioRM.chm XML
+│   ├── generate_collections.py   ← Regenerates all 300 process/file sandbox notebooks
+│   └── restructure_case_studies.py ← Migrates case study notebooks to case_studies/
 ├── requirements.txt              ← Pinned dependencies
 ├── pyproject.toml                ← Modern packaging config
 └── setup.py                      ← Legacy setup (kept for compatibility)
@@ -139,6 +157,22 @@ Exposed MCP tools:
   }
 }
 ```
+
+---
+
+## Agent skills
+
+### Issue tracker
+
+Issues and PRDs for this repo live as GitHub issues. See [issue-tracker.md](file:///D:/Active/dmstudio/docs/agents/issue-tracker.md).
+
+### Triage labels
+
+Triage labels map directly to canonical roles: needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. See [triage-labels.md](file:///D:/Active/dmstudio/docs/agents/triage-labels.md).
+
+### Domain docs
+
+Single-context repository layout (one CONTEXT.md + docs/adr/ at repo root). See [domain.md](file:///D:/Active/dmstudio/docs/agents/domain.md).
 
 ---
 

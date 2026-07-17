@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.0.0b4 (Tutorials Restructuring & Split Collections) - 2026-07-16
+
+### Structural Changes
+- **Split Process Collections:** Refactored `tutorials/collections/` into two clearly separated subfolders:
+  - **`tutorials/collections/processes/`** — One self-contained sandbox per `dmcommands` wrapper (~268 folders).
+  - **`tutorials/collections/files/`** — One self-contained sandbox per `dmfiles` wrapper (~32 folders).
+- **Case Studies Directory:** Moved all end-to-end tutorial notebooks out of the `tutorials/` root into a new **`tutorials/case_studies/`** directory:
+  - `case_studies/holes3d_desurvey/` — Full Holes3D drillhole de-surveying workflow.
+  - `case_studies/grade_estimation/` — Complete ESTIMA + COKRIG grade estimation workflow.
+  - `case_studies/studio_rm_examples/` — Advanced Studio RM 3.1+ scripting examples.
+- **Portable Relative Paths:** Updated all case study notebooks to replace hardcoded `D:\Active\dmstudio\...` paths with `os.path.abspath(os.path.join(...))` relative path resolution, making them portable across machines and clones.
+- **Case-Insensitive Project Verification:** All case study notebooks now use `.lower()` normalization on `ActiveProject.Folder` and `notebook_folder` to prevent false failures on Windows drive-letter case differences.
+- **Cleaned `tutorials/` Root:** Removed all loose `.dmx` scratch files, temporary outputs, and standalone notebooks from the tutorials root, leaving only `Project.rmproj` and the organized subdirectories.
+
+### Generator Updates
+- **`generate_collections.py`:** Updated to output notebooks to `processes/` or `files/` subdirectories (based on whether the command is in `dmcommands` or `dmfiles`). Also handles copying and updating the three special pre-built custom notebooks (`protom`, `estima`, `cokrig`) with portable paths. Old flat-directory notebooks are cleaned up automatically at the end of a run.
+- **`restructure_case_studies.py`:** New helper script in `tests/` that migrates the three root-level case study notebooks to `tutorials/case_studies/`, normalizes paths, and removes obsolete root-level files.
+
+### Documentation
+- **`AGENTS.md`:** Updated file structure tree to reflect the new `processes/`, `files/`, and `case_studies/` layout.
+- **`README.md`:** Updated tutorial run instructions to point users to `tutorials/case_studies/` first, then the `collections/processes/` and `collections/files/` reference sandboxes.
+
 ## 2.0.0b3 (Process Example Notebook Collection & Introspection Upgrade) - 2026-07-16
 
 ### Features

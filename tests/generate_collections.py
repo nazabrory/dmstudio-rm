@@ -226,6 +226,7 @@ def format_param_val(name, default_str, cmd_name_lower):
 
 def generate_notebooks():
     print("Starting process example collection generation...")
+    import json
     
     # 1. Get all commands
     commands = agent.list_commands()
@@ -255,8 +256,65 @@ def generate_notebooks():
         cmd_name = cmd_info['name']
         cmd_name_lower = cmd_name.lower()
         
+        # Determine module/wrapper prefix
+        is_dmfile = cmd_name_lower in dmfiles_methods
+        wrapper_var = "dm_fil" if is_dmfile else "dm_cmd"
+        
+        # Determine target folder path based on whether it is a process or file command
+        target_subfolder = 'files' if is_dmfile else 'processes'
+        folder_path = os.path.join(collections_dir, target_subfolder, cmd_name_lower)
+        os.makedirs(folder_path, exist_ok=True)
+        
+        # Copy Project.rmproj
+        dest_project = os.path.join(folder_path, 'Project.rmproj')
+        if not os.path.exists(dest_project):
+            shutil.copy(project_template, dest_project)
+            
         if cmd_name_lower in skipped:
-            print(f"Skipping custom-built example: {cmd_name}")
+            print(f"Handling custom-built example: {cmd_name}")
+            dest_notebook = os.path.join(folder_path, f"{cmd_name_lower}_example.ipynb")
+            src_notebook = os.path.join(collections_dir, cmd_name_lower, f"{cmd_name_lower}_example.ipynb")
+            if os.path.exists(src_notebook):
+                with open(src_notebook, 'r', encoding='utf-8') as f_in:
+                    nb_data = json.load(f_in)
+                
+                # Walk through cells and modify source lines to use relative paths & case-insensitive check
+                for cell in nb_data.get('cells', []):
+                    if cell.get('cell_type') == 'code':
+                        new_source = []
+                        for line in cell.get('source', []):
+                            # Replace absolute path of help database with relative repo_root (4 levels up now)
+                            if 'help_db = r"D:\\Active\\dmstudio\\datamine_help\\Database\\DMTutorials\\Data\\VBOP\\Datamine"' in line:
+                                new_source.append("    repo_root = os.path.abspath(os.path.join(notebook_folder, '..', '..', '..', '..'))\n")
+                                new_source.append("    help_db = os.path.join(repo_root, 'datamine_help', 'Database', 'DMTutorials', 'Data', 'VBOP', 'Datamine')\n")
+                            elif 'help_db = r"D:\\\\Active\\\\dmstudio\\\\datamine_help\\\\Database\\\\DMTutorials\\\\Data\\\\VBOP\\\\Datamine"' in line:
+                                new_source.append("    repo_root = os.path.abspath(os.path.join(notebook_folder, '..', '..', '..', '..'))\n")
+                                new_source.append("    help_db = os.path.join(repo_root, 'datamine_help', 'Database', 'DMTutorials', 'Data', 'VBOP', 'Datamine')\n")
+                            elif 'help_db = ' in line and ('D:\\Active\\dmstudio' in line or 'D:\\\\Active\\\\dmstudio' in line or 'r"D:' in line):
+                                new_source.append("    repo_root = os.path.abspath(os.path.join(notebook_folder, '..', '..', '..', '..'))\n")
+                                new_source.append("    help_db = os.path.join(repo_root, 'datamine_help', 'Database', 'DMTutorials', 'Data', 'VBOP', 'Datamine')\n")
+                            # Replace absolute path of comp_holes
+                            elif 'shutil.copy(r"D:\\Active\\dmstudio\\tutorials\\comp_holes.dmx"' in line:
+                                new_source.append("    shutil.copy(os.path.join(repo_root, 'tutorials', 'comp_holes.dmx'), os.path.join(notebook_folder, 't_comp_holes.dmx'))\n")
+                            elif 'shutil.copy(r"D:\\\\Active\\\\dmstudio\\\\tutorials\\\\comp_holes.dmx"' in line:
+                                new_source.append("    shutil.copy(os.path.join(repo_root, 'tutorials', 'comp_holes.dmx'), os.path.join(notebook_folder, 't_comp_holes.dmx'))\n")
+                            elif 'shutil.copy(' in line and ('D:\\Active\\dmstudio' in line or 'D:\\\\Active\\\\dmstudio' in line or 'comp_holes.dmx' in line):
+                                new_source.append("    shutil.copy(os.path.join(repo_root, 'tutorials', 'comp_holes.dmx'), os.path.join(notebook_folder, 't_comp_holes.dmx'))\n")
+                            # Replace case-sensitive active_folder verification
+                            elif 'active_folder = os.path.normpath(oScript.ActiveProject.Folder)' in line:
+                                new_source.append("active_folder = os.path.normpath(oScript.ActiveProject.Folder).lower()\n")
+                            elif 'notebook_folder = os.path.normpath(os.path.dirname(os.path.abspath(\'__file__\')))' in line:
+                                new_source.append("notebook_folder = os.path.normpath(os.path.dirname(os.path.abspath('__file__'))).lower()\n")
+                            else:
+                                new_source.append(line)
+                        cell['source'] = new_source
+                
+                with open(dest_notebook, 'w', encoding='utf-8') as f_out:
+                    json.dump(nb_data, f_out, indent=2)
+                print(f"Copied and updated custom notebook: {dest_notebook}")
+                generated_count += 1
+            else:
+                print(f"Warning: Custom notebook not found at: {src_notebook}")
             continue
             
         # 2. Get command schema
@@ -265,19 +323,6 @@ def generate_notebooks():
         except Exception as e:
             print(f"Error getting schema for {cmd_name}: {e}")
             continue
-            
-        # Determine module/wrapper prefix
-        is_dmfile = cmd_name_lower in dmfiles_methods
-        wrapper_var = "dm_fil" if is_dmfile else "dm_cmd"
-        
-        # 3. Create folder
-        folder_path = os.path.join(collections_dir, cmd_name_lower)
-        os.makedirs(folder_path, exist_ok=True)
-        
-        # 4. Copy Project.rmproj
-        dest_project = os.path.join(folder_path, 'Project.rmproj')
-        if not os.path.exists(dest_project):
-            shutil.copy(project_template, dest_project)
             
         # 5. Generate notebook
         notebook_filename = os.path.join(folder_path, f"{cmd_name_lower}_example.ipynb")
@@ -335,7 +380,7 @@ def generate_notebooks():
         )
         nb.add_code(cell3_code)
         
-        # Cell 4: Prepare Inputs (Relative pointer path!)
+        # Cell 4: Prepare Inputs (Relative pointer path, nested 4 levels now!)
         nb.add_markdown(
             "## Step 3: Prepare Inputs\n"
             "We initialize the example project by copying the relevant standard datasets from the Datamine help database "
@@ -343,8 +388,8 @@ def generate_notebooks():
         )
         cell4_code = (
             "# Step 3: Initialize example project dataset using relative paths\n"
-            "# Resolve relative path to repository's help database dynamically\n"
-            "repo_root = os.path.abspath(os.path.join(notebook_folder, '..', '..', '..'))\n"
+            "# Resolve relative path to repository's help database dynamically (4 levels up from subfolders)\n"
+            "repo_root = os.path.abspath(os.path.join(notebook_folder, '..', '..', '..', '..'))\n"
             "help_db = os.path.join(repo_root, 'datamine_help', 'Database', 'DMTutorials', 'Data', 'VBOP', 'Datamine')\n\n"
             "files_to_copy = [\n"
             "    \"_vb_assays.dmx\",\n"
@@ -466,7 +511,17 @@ def generate_notebooks():
         nb.save()
         generated_count += 1
         
-    print(f"Successfully generated {generated_count} process example folders and notebooks.")
+    # Clean up old collections directories (anything in tutorials/collections/ that is not 'processes' or 'files')
+    for item in os.listdir(collections_dir):
+        item_path = os.path.join(collections_dir, item)
+        if os.path.isdir(item_path) and item not in ('processes', 'files'):
+            print(f"Cleaning up old folder: {item}")
+            try:
+                shutil.rmtree(item_path)
+            except Exception as e:
+                print(f"Error removing old folder {item}: {e}")
+                
+    print(f"Successfully generated/moved {generated_count} process/file example folders and notebooks.")
 
 if __name__ == '__main__':
     generate_notebooks()

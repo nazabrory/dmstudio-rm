@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="docs/images/banner.jpg" alt="dmstudio Banner" width="100%">
-</p>
-
 # dmstudio: Datamine Studio RM Python Scripting
 
 <p align="center">

@@ -353,6 +353,6 @@ python tests/run_sandbox_tests.py
 ## ⚖️ License & Attribution
 
 Original work Copyright (c) 2018 Sean D. Horan — released under [MIT License](LICENSE.txt).  
-Modifications and new contributions Copyright (c) 2025 nazabrory contributors.
+Modifications and new contributions Copyright (c) 2026 Achmad Nazar Abrory.
 
 The MIT license permits modification and redistribution provided the original copyright notice is preserved. See [LICENSE.txt](LICENSE.txt) for full terms.

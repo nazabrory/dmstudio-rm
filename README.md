@@ -1,4 +1,4 @@
-# dmstudio: Datamine Studio RM Python Scripting
+# dmstudio-rm: Python wrappers for Datamine Studio RM with AI capabilities
 
 <p align="center">
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.9+-blue.svg" alt="Python Version"></a>

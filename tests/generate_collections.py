@@ -272,46 +272,14 @@ def generate_notebooks():
             if os.path.exists(src_notebook):
                 with open(src_notebook, 'r', encoding='utf-8') as f_in:
                     nb_data = json.load(f_in)
-                
-                # Walk through cells and modify source lines to use relative paths & case-insensitive check
-                for cell in nb_data.get('cells', []):
-                    if cell.get('cell_type') == 'code':
-                        new_source = []
-                        for line in cell.get('source', []):
-                            # Replace absolute path of help database with relative repo_root (4 levels up now)
-                            if 'help_db = r"D:\\Active\\dmstudio\\datamine_help\\Database\\DMTutorials\\Data\\VBOP\\Datamine"' in line:
-                                new_source.append("    repo_root = os.path.abspath(os.path.join(notebook_folder, '..', '..', '..', '..'))\n")
-                                new_source.append("    help_db = os.path.join(repo_root, 'datamine_help', 'Database', 'DMTutorials', 'Data', 'VBOP', 'Datamine')\n")
-                            elif 'help_db = r"D:\\\\Active\\\\dmstudio\\\\datamine_help\\\\Database\\\\DMTutorials\\\\Data\\\\VBOP\\\\Datamine"' in line:
-                                new_source.append("    repo_root = os.path.abspath(os.path.join(notebook_folder, '..', '..', '..', '..'))\n")
-                                new_source.append("    help_db = os.path.join(repo_root, 'datamine_help', 'Database', 'DMTutorials', 'Data', 'VBOP', 'Datamine')\n")
-                            elif 'help_db = ' in line and ('D:\\Active\\dmstudio' in line or 'D:\\\\Active\\\\dmstudio' in line or 'r"D:' in line):
-                                new_source.append("    repo_root = os.path.abspath(os.path.join(notebook_folder, '..', '..', '..', '..'))\n")
-                                new_source.append("    help_db = os.path.join(repo_root, 'datamine_help', 'Database', 'DMTutorials', 'Data', 'VBOP', 'Datamine')\n")
-                            # Replace absolute path of comp_holes
-                            elif 'shutil.copy(r"D:\\Active\\dmstudio\\tutorials\\comp_holes.dmx"' in line:
-                                new_source.append("    shutil.copy(os.path.join(repo_root, 'tutorials', 'comp_holes.dmx'), os.path.join(notebook_folder, 't_comp_holes.dmx'))\n")
-                            elif 'shutil.copy(r"D:\\\\Active\\\\dmstudio\\\\tutorials\\\\comp_holes.dmx"' in line:
-                                new_source.append("    shutil.copy(os.path.join(repo_root, 'tutorials', 'comp_holes.dmx'), os.path.join(notebook_folder, 't_comp_holes.dmx'))\n")
-                            elif 'shutil.copy(' in line and ('D:\\Active\\dmstudio' in line or 'D:\\\\Active\\\\dmstudio' in line or 'comp_holes.dmx' in line):
-                                new_source.append("    shutil.copy(os.path.join(repo_root, 'tutorials', 'comp_holes.dmx'), os.path.join(notebook_folder, 't_comp_holes.dmx'))\n")
-                            # Replace case-sensitive active_folder verification
-                            elif 'active_folder = os.path.normpath(oScript.ActiveProject.Folder)' in line:
-                                new_source.append("active_folder = os.path.normpath(oScript.ActiveProject.Folder).lower()\n")
-                            elif 'notebook_folder = os.path.normpath(os.path.dirname(os.path.abspath(\'__file__\')))' in line:
-                                new_source.append("notebook_folder = os.path.normpath(os.path.dirname(os.path.abspath('__file__'))).lower()\n")
-                            else:
-                                new_source.append(line)
-                        cell['source'] = new_source
-                
                 with open(dest_notebook, 'w', encoding='utf-8') as f_out:
                     json.dump(nb_data, f_out, indent=2)
-                print(f"Copied and updated custom notebook: {dest_notebook}")
+                print(f"Copied custom notebook: {dest_notebook}")
                 generated_count += 1
             else:
                 print(f"Warning: Custom notebook not found at: {src_notebook}")
             continue
-            
+
         # 2. Get command schema
         try:
             schema = agent.get_command_schema(cmd_name)

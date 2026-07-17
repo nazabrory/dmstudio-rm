@@ -92,8 +92,8 @@ cd path\to\dmstudio-rm
 uv venv
 .venv\Scripts\activate
 uv pip install -r requirements.txt
-uv pip install jupyterlab
 uv pip install -e .
+uv pip install jupyterlab
 ```
 
 ### Option C: One-click Windows helpers
@@ -162,10 +162,11 @@ with dialog.dialog_dismiss_context():
     cmd.copy(in_i='assays', out_o='assays_copy')
 
 # Tutorials zip into a folder (if you installed without a full clone)
+# Canonical: dmstudio.bootstrap.download_tutorials — also exported as dmstudio.download_tutorials
 dmstudio.download_tutorials(r'C:\path\to\workspace')
 ```
 
-Command discovery for agents/scripts lives in `dmstudio.command_registry` (`list_commands`, `get_command_schema`, `search_commands`). Details: [AGENTS.md](AGENTS.md).
+Command discovery lives in `dmstudio.command_registry` (`list_commands`, `get_command_schema`, `search_commands`). Details: [AGENTS.md](AGENTS.md).
 
 ---
 
@@ -231,16 +232,16 @@ Full registration notes: [AGENTS.md](AGENTS.md).
 No Studio license required:
 
 ```cmd
-python tests\quick_test.py
-python tests\test_workflow.py
+.venv\Scripts\python tests\quick_test.py
+.venv\Scripts\python tests\test_workflow.py
 ```
 
 Active Studio + loaded project:
 
 ```cmd
-python tests\diagnose_project.py
-python tests\stress_test.py
-python tests\integration_test.py
+.venv\Scripts\python tests\diagnose_project.py
+.venv\Scripts\python tests\stress_test.py
+.venv\Scripts\python tests\integration_test.py
 ```
 
 Generators, sandbox runners, code style, versioning: **[AGENTS.md](AGENTS.md)**. Changelog: **[CHANGELOG.md](CHANGELOG.md)**. Domain terms: **[CONTEXT.md](CONTEXT.md)**.

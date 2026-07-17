@@ -235,11 +235,7 @@ def generate_notebooks():
     # Define directories
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     collections_dir = os.path.join(base_dir, 'tutorials', 'collections')
-    project_template = os.path.join(base_dir, 'tutorials', 'Project.rmproj')
     
-    if not os.path.exists(project_template):
-        raise FileNotFoundError(f"Project template not found at: {project_template}")
-        
     os.makedirs(collections_dir, exist_ok=True)
     
     # Identify which commands are in dmfiles.init
@@ -310,7 +306,9 @@ def generate_notebooks():
             "import os\n"
             "import shutil\n"
             "import glob\n"
+            "\n"
             "import pandas as pd\n"
+            "\n"
             "from dmstudio import dmcommands, dmfiles, initialize, agent\n\n"
             "# Connect to running Studio RM instance\n"
             "dm_cmd = dmcommands.init(version='StudioRM')\n"
@@ -357,7 +355,7 @@ def generate_notebooks():
             "    \"_vb_SurfacePointsPt.dmx\",\n"
             "    \"_vb_SurfaceTriangles.dmx\"\n"
             "]\n\n"
-            "agent.initialize_sandbox(notebook_folder, files_to_copy=files_to_copy)"
+            "agent.copy_database_files(files_to_copy)"
         )
         nb.add_code(cell4_code)
         

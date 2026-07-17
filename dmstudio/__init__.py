@@ -21,3 +21,6 @@ from dmstudio import special
 from dmstudio import superprocess
 from dmstudio import agent
 from dmstudio import notebook_builder
+
+# Shortcuts
+from dmstudio.agent import download_tutorials

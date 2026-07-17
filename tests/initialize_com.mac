@@ -1,0 +1,11 @@
+initializing
+!ECHO ----------------------------------------------------
+!ECHO initializing COM Project Registration for Antigravity
+!ECHO ----------------------------------------------------
+!ECHO Active project is now being registered in the COM context.
+!END
+!START init    
+# - Use !LOCDBOFF to look for files outside the local folder 
+# - Use local files by deleting the next line or use !LOCDBON
+!LOCDBOFF
+!END

@@ -86,6 +86,7 @@ dmstudio-rm3/                     ← Project root (working directory for script
 │   ├── integration_test.py       ← Integration test suite
 │   ├── stress_test.py            ← End-to-end COM test (requires active Studio + project)
 │   ├── diagnose_project.py       ← Studio connection diagnostic utility
+│   ├── run_sandbox_tests.py      ← Automated sequential validation runner for notebooks
 │   ├── generate_wrappers.py      ← Regenerates dmcommands.py from StudioRM.chm XML
 │   ├── generate_collections.py   ← Regenerates all 300 process/file sandbox notebooks
 │   └── restructure_case_studies.py ← Migrates case study notebooks to case_studies/

@@ -59,7 +59,8 @@ except ImportError:
         'mcp package is required. Install with: pip install "mcp>=1.0.0"'
     )
 
-from dmstudio import agent as dm_agent
+from dmstudio import command_registry
+from dmstudio import dm_io
 from dmstudio.notebook_builder import NotebookBuilder
 
 mcp = FastMCP('dmstudio')
@@ -77,7 +78,7 @@ def list_commands() -> str:
     Returns a JSON array of objects with 'name' and 'doc' (short description)
     for every command exposed by the dmstudio.dmcommands module.
     '''
-    commands = dm_agent.list_commands()
+    commands = command_registry.list_commands()
     return json.dumps(commands, indent=2)
 
 
@@ -97,7 +98,7 @@ def get_command_schema(command_name: str) -> str:
         JSON object with 'name', 'doc', and 'parameters' (list of param dicts).
     '''
     try:
-        schema = dm_agent.get_command_schema(command_name)
+        schema = command_registry.get_command_schema(command_name)
         return json.dumps(schema, indent=2)
     except ValueError as e:
         return json.dumps({'error': str(e)})
@@ -118,7 +119,7 @@ def search_commands(query: str) -> str:
     Returns:
         JSON array of matching commands with 'name' and 'doc'.
     '''
-    results = dm_agent.search_commands(query)
+    results = command_registry.search_commands(query)
     return json.dumps(results, indent=2)
 
 
@@ -143,7 +144,7 @@ def read_datamine_file(filepath: str, max_rows: int = 10) -> str:
         JSON object with 'filepath', 'columns', 'row_count', and 'preview' (list of row dicts).
     '''
     try:
-        df = dm_agent.read_datamine(filepath)
+        df = dm_io.read_datamine(filepath)
         preview = df.head(max_rows).to_dict(orient='records')
         return json.dumps({
             'filepath': os.path.abspath(filepath),

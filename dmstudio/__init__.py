@@ -10,8 +10,12 @@ Submodules:
     initialize      - COM initialization helpers.
     special         - Special/adapted Studio command helpers.
     superprocess    - Multi-command workflow helpers.
-    agent           - AI agent helpers: command discovery, file reading, dialog dismissal.
+    agent           - Backward compatibility re-export layer for legacy AI agent scripts.
     notebook_builder- Jupyter Notebook builder for auditable agent workflows.
+    sandbox         - Sandbox management and dataset copy helpers.
+    dm_io           - High-level DataFrame ↔ Datamine file I/O operations.
+    dialog          - Windows modal dialog auto-dismissal context.
+    bootstrap       - Tutorial bootstrapping and download helpers.
 '''
 
 from dmstudio import dmcommands
@@ -21,6 +25,10 @@ from dmstudio import special
 from dmstudio import superprocess
 from dmstudio import agent
 from dmstudio import notebook_builder
+from dmstudio import sandbox
+from dmstudio import dm_io
+from dmstudio import dialog
+from dmstudio import bootstrap
 
 # Shortcuts
-from dmstudio.agent import download_tutorials
+from dmstudio.bootstrap import download_tutorials

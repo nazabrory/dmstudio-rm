@@ -194,7 +194,7 @@ def get_command_schema(cmd_name):
                     if callable(attr):
                         func = attr
                         break
-                except Exception:
+                except Exception as e:
                     pass
 
     # Fallback 4: search module-level names in dmfiles_generated
@@ -206,7 +206,7 @@ def get_command_schema(cmd_name):
                     if callable(attr):
                         func = attr
                         break
-                except Exception:
+                except Exception as e:
                     pass
 
     if func is None:

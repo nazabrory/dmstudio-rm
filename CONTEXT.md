@@ -10,6 +10,10 @@ Ubiquitous language for the dmstudio package: Studio RM automation, package surf
 A Python method on `dmcommands.init` or `dmfiles.init` that builds a Studio CLI string and sends it via COM `Parsecommand`.
 _Avoid_: macro, process method (when you mean the Python API)
 
+**Approved command wrapper**:
+A command wrapper that has been tested inside the sandbox environment and verified to execute successfully without raising python validation errors, COM errors, or triggering blocking interactive dialog popups.
+
+
 **Process command**:
 A Studio process exposed through `dmcommands` (e.g. sort, copy, holes3d) — roughly one sandbox under `tutorials/collections/processes/`.
 _Avoid_: file command (those live under `dmfiles`)

@@ -90,6 +90,12 @@ dmstudio-rm/                      ← Project root
 └── CHANGELOG.md
 ```
 
+### Repository Layout Decisions
+
+To maintain codebase simplicity and a clean experience for the user:
+- **Root-level setup and launch scripts** (`setup_env.bat`, `setup_env.ps1`, `start_jupyter.bat`) and `mcp_server.py` are explicitly placed in the root directory. This makes the package highly accessible to Windows automation users by offering immediate "first-click" environment setup and starting Jupyter Lab directly at the workspace root.
+- **Excluded Runtime Files**: Local files `dmdir.py` and the root `__init__.py` are created dynamically during execution by `_make_dmdir()` and are git-ignored. Developers should keep the root clean by deleting these files when not running scripts.
+
 ---
 
 ## Package surface (canonical vs compat)

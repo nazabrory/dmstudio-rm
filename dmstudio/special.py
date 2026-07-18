@@ -93,10 +93,10 @@ def inpfil(csv=None, out_o=None, definition=None):
 
     # Create a temporary CSV file without headers to prevent Datamine from trying to parse the headers as data
     import os
-    temp_csv = csv + ".temp_no_header"
+    temp_csv = os.path.abspath(csv + ".temp_no_header").replace('\\', '/')
     df.to_csv(temp_csv, header=False, index=False)
 
-    arguments += "'!' 'Y' " + temp_csv
+    arguments += " '!' 'Y' '" + temp_csv + "' "
 
     try:
         dmf = dmstudio.dmfiles.init()

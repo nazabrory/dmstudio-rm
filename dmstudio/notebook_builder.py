@@ -141,9 +141,9 @@ class NotebookBuilder:
             'nbformat_minor': self._NBFORMAT_MINOR,
             'metadata': {
                 'kernelspec': {
-                    'display_name': 'Python 3',
+                    'display_name': 'dmstudio',
                     'language': 'python',
-                    'name': 'python3',
+                    'name': 'dmstudio',
                 },
                 'language_info': {
                     'name': 'python',

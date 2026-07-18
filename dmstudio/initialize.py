@@ -79,7 +79,23 @@ def studio(version):
                 except Exception:
                     raise RuntimeError("No valid Studio version is active")
 
-    return oScript
+    return StudioCOMWrapper(oScript) if oScript is not None else None
+
+class StudioCOMWrapper(object):
+    """
+    Transparent wrapper for Studio RM COM object to map Parsecommand (lowercase)
+    to ParseCommand (uppercase) depending on OLE dispatch availability.
+    """
+    def __init__(self, obj):
+        super().__setattr__('_obj', obj)
+
+    def __getattr__(self, name):
+        if name == 'Parsecommand':
+            return getattr(self._obj, 'ParseCommand', None) or getattr(self._obj, 'Parsecommand')
+        return getattr(self._obj, name)
+
+    def __setattr__(self, name, value):
+        setattr(self._obj, name, value)
 
 def dmFile():
 

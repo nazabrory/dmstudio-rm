@@ -109,16 +109,59 @@ def to_datamine(df, filepath):
     filepath: str
         Target file path.
     '''
-    if not filepath.lower().endswith(('.dm', '.dmx')):
-        filepath += '.dmx'
+    import shutil
+    import uuid
+
+    # Generate a safe, simple alphanumeric temporary name for Datamine
+    temp_name = 'df_out_' + uuid.uuid4().hex[:8]
 
     fd, temp_csv = tempfile.mkstemp(suffix='.csv')
     os.close(fd)
     try:
         df.to_csv(temp_csv, index=False)
         defn = special.pd_to_definition(df)
-        special.inpfil(csv=temp_csv, out_o=filepath, definition=defn)
-        print('Saved DataFrame to Datamine file: {}'.format(filepath))
+        
+        # Use the simple temp name for the Datamine command to avoid path / backslash issues
+        special.inpfil(csv=temp_csv, out_o=temp_name, definition=defn)
+
+        # Locate the created file in either the active project folder or current working directory
+        project_folder = None
+        try:
+            from dmstudio import dmfiles
+            dmf = dmfiles.init()
+            if dmf.oScript and dmf.oScript.ActiveProject:
+                project_folder = getattr(dmf.oScript.ActiveProject, 'Folder', None) or getattr(dmf.oScript.ActiveProject, 'Directory', None)
+        except Exception:
+            pass
+
+        if not project_folder:
+            project_folder = os.getcwd()
+
+        created_file = None
+        for ext in ('.dm', '.dmx'):
+            p = os.path.join(project_folder, temp_name + ext)
+            if os.path.exists(p):
+                created_file = p
+                break
+
+        if not created_file:
+            # Fallback to current working directory if project folder search did not find it
+            for ext in ('.dm', '.dmx'):
+                p = os.path.join(os.getcwd(), temp_name + ext)
+                if os.path.exists(p):
+                    created_file = p
+                    break
+
+        if created_file:
+            # Ensure target directory exists
+            target_dir = os.path.dirname(os.path.abspath(filepath))
+            if target_dir and not os.path.exists(target_dir):
+                os.makedirs(target_dir, exist_ok=True)
+            # Move and rename to the final requested path
+            shutil.move(created_file, filepath)
+            print('Saved DataFrame to Datamine file: {}'.format(filepath))
+        else:
+            raise RuntimeError('Datamine failed to generate output file.')
     finally:
         if os.path.exists(temp_csv):
             os.remove(temp_csv)

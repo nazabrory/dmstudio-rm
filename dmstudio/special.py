@@ -91,19 +91,57 @@ def inpfil(csv=None, out_o=None, definition=None):
                 continue
             arguments += " '" + (str(definition[column].iloc[i])).strip()[:8] + "' "
 
-    # Create a temporary CSV file without headers to prevent Datamine from trying to parse the headers as data
-    import os
-    temp_csv = os.path.abspath(csv + ".temp_no_header").replace('\\', '/')
-    df.to_csv(temp_csv, header=False, index=False)
+    dmf = dmstudio.dmfiles.init()
 
-    arguments += " '!' 'Y' '" + temp_csv + "' "
+    # To avoid command length limits with large datasets in Parsecommand(),
+    # write the data rows to a temporary CSV file in the active project folder
+    # and instruct INPFIL to load it.
+    import os
+    import uuid
+    
+    project_folder = None
+    try:
+        if dmf.oScript and dmf.oScript.ActiveProject:
+            project_folder = getattr(dmf.oScript.ActiveProject, 'Folder', None) or getattr(dmf.oScript.ActiveProject, 'Directory', None)
+    except Exception:
+        pass
+    if not project_folder:
+        project_folder = os.getcwd()
+
+    temp_csv_name = 'in_' + uuid.uuid4().hex[:8] + '.csv'
+    temp_csv_path = os.path.join(project_folder, temp_csv_name)
+    
+    # Save the dataframe without headers/index, formatting floats to avoid trailing .0
+    formatted_rows = []
+    for _, row in df.iterrows():
+        row_vals = []
+        for fname in df.columns:
+            val = row[fname]
+            if isinstance(val, float) and not (val != val) and val == int(val):
+                row_vals.append(str(int(val)))
+            else:
+                row_vals.append(str(val))
+        formatted_rows.append(','.join(row_vals))
+        
+    with open(temp_csv_path, 'w', encoding='utf-8') as f_out:
+        f_out.write('\n'.join(formatted_rows) + '\n')
+
+    # '!'  = end of DD
+    # 'Y'  = answer to INPFIL's "Use system file? Y/N" prompt
+    # temp_csv_name = local CSV file containing the data rows
+    arguments += " '!' 'Y' '" + temp_csv_name + "' "
+
+    # Strip extension from out_o — Datamine logical names have no extension
+    out_name = os.path.splitext(out_o)[0] if out_o and out_o != 'optional' else out_o
 
     try:
-        dmf = dmstudio.dmfiles.init()
-        dmf.inpfil(out_o=out_o, arguments=arguments)
+        dmf.inpfil(out_o=out_name, arguments=arguments)
     finally:
-        if os.path.exists(temp_csv):
-            os.remove(temp_csv)
+        if os.path.exists(temp_csv_path):
+            try:
+                os.remove(temp_csv_path)
+            except Exception:
+                pass
 
 def csv_to_definition(csv):
 

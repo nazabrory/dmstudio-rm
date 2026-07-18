@@ -39,5 +39,5 @@ packages = ["dmstudio"]
 include-package-data = true
 
 [tool.setuptools.package-data]
-dmstudio = ["LICENSE.txt", "README.md", "skills/**/*.md"]
+dmstudio = ["LICENSE.txt", "README.md"]
 

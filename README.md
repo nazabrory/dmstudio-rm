@@ -301,28 +301,6 @@ Datamine COM scripting has specific rules. Keep these in mind to avoid common er
 
 ### 🤖 AI Integration Capabilities
 
-#### Automated Setup via AI Assistant
-If you are using an AI coding assistant (like **Cursor**, **Windsurf**, **Claude Code**, or **Antigravity**), copy-paste the custom prompt below into your assistant's chat window to set up the package automatically:
-
-```text
-I have installed `dmstudio-rm` in a dedicated python environment for this project.
-
-Please find the correct python interpreter on my machine:
-1. Scan my workspace folder for local virtual environments (like `.venv/`, `venv/`, `.conda/`, or `env/`).
-2. If a local environment is found, run the python command using the path to that specific interpreter (e.g. `.venv\Scripts\python.exe -c "import os, dmstudio; print(os.path.dirname(dmstudio.__file__))"`).
-3. If no local directory is found, try running it via global python or conda.
-
-Once you find the absolute path of the installed `dmstudio` package:
-1. Load and read the agent skill file at `<dmstudio_path>/skills/prepare-env/SKILL.md`.
-2. Follow those instructions to prepare the environment and copy the agent skills locally.
-
-If the package is not installed (e.g., the import command errors out), please inform me that I need to run `pip install dmstudio-rm` first. If you still cannot locate the package or perform the setup, please provide me with instructions on how to manually register the MCP server in my IDE settings.
-```
-
-> [!NOTE]
-> **Setup Frequency**  
-> You only need to run this automated setup prompt **once** per project workspace/environment configuration. Once configured, the settings persist across all subsequent chat sessions.
-
 #### Model Context Protocol (MCP) Server Setup
 To expose Datamine automation tools to your AI agent, configure it as an MCP server:
 

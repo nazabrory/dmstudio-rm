@@ -16,21 +16,6 @@ Submodules:
     dm_io           - High-level DataFrame ↔ Datamine file I/O operations.
     dialog          - Windows modal dialog auto-dismissal context.
     bootstrap       - Tutorial bootstrapping and download helpers.
-
-AI Agent Instructions for Setup & Execution:
---------------------------------------------
-1. Setup Python & MCP:
-   If the user asks you to "prepare dmstudio-rm python" or similar:
-   - Ensure the package dependencies are installed (e.g. `pip install -e .` or `pip install dmstudio-rm`).
-   - Run the automatic installer using the active environment interpreter:
-     `python -m dmstudio.mcp_server --install`
-     This will configure Claude Desktop and output settings for Cursor, Windsurf, Antigravity, etc.
-   - Present the configuration output clearly to the user.
-
-2. COM Isolation & Security Rule:
-   - The AI must NEVER directly run COM automation scripts or instantiate Datamine Studio RM COM processes on the host.
-   - The AI's role is strictly to generate Jupyter Notebook workflows (`.ipynb`) using the NotebookBuilder or `create_jupyter_workflow` MCP tool.
-   - Instruct the user to run the generated notebook themselves inside their active Datamine project session and report back with any feedback/errors.
 '''
 
 # Proactively import pandas at the package root to avoid Python 3.14 / Cython circular import conflicts in debuggers

@@ -302,10 +302,15 @@ Datamine COM scripting has specific rules. Keep these in mind to avoid common er
 ### 🤖 AI Integration Capabilities
 
 #### Automated Setup via AI Assistant
-If you are using an AI coding assistant (like **Cursor**, **Windsurf**, **Claude Code**, or **Antigravity**), you can simply type a request such as:
-> *"prepare dmstudio-rm python"*
+If you are using an AI coding assistant (like **Cursor**, **Windsurf**, **Claude Code**, or **Antigravity**), copy-paste the custom prompt below into your assistant's chat window to set up the package automatically:
 
-The AI agent will read the built-in [prepare-env](file:///D:/Active/dmstudio-rm/.agents/skills/prepare-env/SKILL.md) skill, verify the Python virtual environment, install the package, and automatically register the MCP server for you.
+```text
+I have installed `dmstudio-rm` in my python virtual environment. Please inspect my virtual environment's `site-packages/dmstudio` folder (or run a local search) to find the module's docstring and `skills/prepare-env/SKILL.md`. Then follow those instructions to prepare the dmstudio-rm python environment, install package dependencies, register the MCP server, and copy the agent skills locally.
+```
+
+> [!NOTE]
+> **Setup Frequency**  
+> You only need to run this automated setup prompt **once** per project workspace/environment configuration. Once configured, the settings persist across all subsequent chat sessions.
 
 #### Model Context Protocol (MCP) Server Setup
 To expose Datamine automation tools to your AI agent, configure it as an MCP server:

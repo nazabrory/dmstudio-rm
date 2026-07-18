@@ -325,3 +325,4 @@ return_type
    - `dmstudio/version.py` (`__version__`)
    - `pyproject.toml` `[project].version`
    - `CHANGELOG.md` heading
+4. **NO AUTOMATED PYPI PUBLISHING**: AI agents must never automatically build or upload packages to PyPI (e.g. using `twine`) unless explicitly and specifically directed to run a release/publish by the user. Keep changes local/committed to git by default.

@@ -142,45 +142,44 @@ nb.save()
 
 ### MCP Server (`dmstudio-mcp`)
 
-Run standard command (if installed via pip):
+Run/register standard command:
 ```bash
-dmstudio-mcp
+.venv\Scripts\python -m dmstudio.mcp_server --install
 ```
-Or run directly via python module:
+Or run the server directly (stdio transport):
 ```bash
 .venv\Scripts\python -m dmstudio.mcp_server
 ```
 
-MCP tools (via `command_registry`, `dm_io`, `NotebookBuilder`):
+MCP tools (via `command_registry` and `NotebookBuilder`):
 
 - `list_commands`
 - `get_command_schema(command_name)`
 - `search_commands(query)`
-- `read_datamine_file(filepath, max_rows)`
 - `create_jupyter_workflow(notebook_name, steps)`
 
-#### Claude Desktop (`%APPDATA%\Claude\claude_desktop_config.json`)
+#### COM Isolation Policy (CRITICAL)
+To prevent lock conflicts and application crashes, the MCP server is completely decoupled from active COM sessions.
+- **NO Direct COM Executions**: The server has no COM dependencies.
+- **Workflow-Driven Design**: The AI's job is solely to construct Jupyter Notebook workflows (`.ipynb`) using `create_jupyter_workflow`, which the user will run themselves inside Datamine Studio RM.
 
+#### Claude Desktop (`%APPDATA%\Claude\claude_desktop_config.json`)
+Automatically configured using the `--install` CLI argument. It will register:
 ```json
 {
   "mcpServers": {
     "dmstudio": {
-      "command": "dmstudio-mcp"
+      "command": "C:\\path\\to\\python.exe",
+      "args": ["-m", "dmstudio.mcp_server"]
     }
   }
 }
 ```
 
-#### Antigravity (example)
-
-```json
-{
-  "mcpServers": {
-    "dmstudio": {
-      "command": "dmstudio-mcp"
-    }
-  }
-}
+#### Other AI Harnesses (Cursor, Windsurf, Antigravity, etc.)
+Register as a command-type MCP server pointing to the absolute path of the environment's python executable:
+* **Command**: `<PATH_TO_VENV_PYTHON> -m dmstudio.mcp_server`
+* **Name**: `dmstudio`
 ```
 
 ---

@@ -38,7 +38,6 @@ except ImportError:
     )
 
 from dmstudio import command_registry
-from dmstudio import dm_io
 from dmstudio.notebook_builder import NotebookBuilder
 
 mcp = FastMCP('dmstudio')
@@ -102,39 +101,6 @@ def search_commands(query: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Tool: read_datamine_file
-# ---------------------------------------------------------------------------
-
-@mcp.tool()
-def read_datamine_file(filepath: str, max_rows: int = 10) -> str:
-    '''
-    Read a Datamine binary file (.dm or .dmx) and return a preview.
-
-    Uses DmFile.DmTableADO COM object — requires Datamine Studio RM to be
-    installed on this machine. Reads the file without needing an active
-    Studio project.
-
-    Args:
-        filepath: Full or relative path to the .dm or .dmx file.
-        max_rows: Maximum number of rows to include in the preview (default: 10).
-
-    Returns:
-        JSON object with 'filepath', 'columns', 'row_count', and 'preview' (list of row dicts).
-    '''
-    try:
-        df = dm_io.read_datamine(filepath)
-        preview = df.head(max_rows).to_dict(orient='records')
-        return json.dumps({
-            'filepath': os.path.abspath(filepath),
-            'columns': list(df.columns),
-            'row_count': len(df),
-            'preview': preview,
-        }, indent=2, default=str)
-    except Exception as e:
-        return json.dumps({'error': str(e)})
-
-
-# ---------------------------------------------------------------------------
 # Tool: create_jupyter_workflow
 # ---------------------------------------------------------------------------
 
@@ -192,11 +158,66 @@ def create_jupyter_workflow(notebook_name: str, steps: list) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Entry point
+# Installer & Entry point
 # ---------------------------------------------------------------------------
 
+def install_mcp_config():
+    '''Registers the MCP server in Claude Desktop config and prints setup info.'''
+    appdata = os.environ.get('APPDATA')
+    if not appdata:
+        print("Error: APPDATA environment variable not found. Cannot auto-install Claude Desktop config.")
+        return False
+
+    config_dir = os.path.join(appdata, 'Claude')
+    config_path = os.path.join(config_dir, 'claude_desktop_config.json')
+
+    # Ensure config directory exists
+    os.makedirs(config_dir, exist_ok=True)
+
+    # Load existing or initialize new config
+    config = {}
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+        except Exception as e:
+            print(f"Warning: Failed to parse existing Claude Desktop config: {e}. Starting fresh.")
+
+    if 'mcpServers' not in config:
+        config['mcpServers'] = {}
+
+    # Register the server with the absolute path of the current python interpreter
+    config['mcpServers']['dmstudio'] = {
+        'command': sys.executable,
+        'args': ['-m', 'dmstudio.mcp_server']
+    }
+
+    try:
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=2)
+        print(f"Successfully auto-configured Claude Desktop!")
+        print(f"Config file updated: {config_path}")
+    except Exception as e:
+        print(f"Error writing to Claude Desktop config file: {e}")
+        return False
+    return True
+
+
 def main():
-    mcp.run(transport='stdio')
+    import argparse
+    parser = argparse.ArgumentParser(description="Datamine Studio RM MCP Server")
+    parser.add_argument("--install", action="store_true", help="Install/register this MCP server on the host machine")
+    args = parser.parse_args()
+
+    if args.install:
+        success = install_mcp_config()
+        print("\nConfiguration for other IDEs / AI harnesses (e.g. Cursor, Windsurf, Antigravity, etc.):")
+        print("Add a command-type MCP server with the following settings:")
+        print(f"  Name: dmstudio")
+        print(f"  Command: {sys.executable} -m dmstudio.mcp_server")
+        sys.exit(0 if success else 1)
+    else:
+        mcp.run(transport='stdio')
 
 if __name__ == '__main__':
     main()

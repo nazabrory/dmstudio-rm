@@ -301,44 +301,35 @@ Datamine COM scripting has specific rules. Keep these in mind to avoid common er
 
 ### 🤖 AI Integration Capabilities
 
-#### Using AI Coding Assistants
+#### Automated Setup via AI Assistant
+If you are using an AI coding assistant (like **Cursor**, **Windsurf**, **Claude Code**, or **Antigravity**), you can simply type a request such as:
+> *"prepare dmstudio-rm python"*
 
-Modern workspace AI coding assistants (such as **Cursor**, **VS Code Copilot**, or **Claude Code**) can help you write Python automation scripts. Because `dmstudio` is fully documented and structured, AI agents can read the repository files and auto-generated command wrappers to write valid scripting code for you.
-
-* **Contextual Feeding**: Attach this `README.md` and/or [AGENTS.md](AGENTS.md) to your prompt, or point the assistant at the `dmstudio` package directory.
-* **Canonical helpers**: Prefer `command_registry`, `dm_io`, and `dialog` for new work. The `agent` module remains a compatibility re-export for existing notebooks and examples.
+The AI agent will read the built-in [prepare-env](file:///D:/Active/dmstudio-rm/.agents/skills/prepare-env/SKILL.md) skill, verify the Python virtual environment, install the package, and automatically register the MCP server for you.
 
 #### Model Context Protocol (MCP) Server Setup
-
 To expose Datamine automation tools to external desktop clients (like Claude Desktop or Google Antigravity):
 
-1. **Install the package (if not already installed)**:
-   ```bash
-   pip install dmstudio-rm
+1. **Auto-Install/Register the MCP Server**:
+   Run the following command in your active python environment (with the package installed):
+   ```cmd
+   python -m dmstudio.mcp_server --install
    ```
+   This will automatically detect the python interpreter's path, register the `dmstudio` server to Claude Desktop's `%APPDATA%\Claude\claude_desktop_config.json`, and print copy-pasteable configuration details for other IDEs (like Cursor, Windsurf, or Antigravity).
 
-2. **Register the Server in Claude Desktop**  
-   Open `%APPDATA%\Claude\claude_desktop_config.json` and add `dmstudio`:
+2. **Restart your AI client**. You can now prompt the AI to explore project command schemas, search commands, and build Jupyter notebooks programmatically.
 
-   ```json
-   {
-     "mcpServers": {
-       "dmstudio": {
-         "command": "dmstudio-mcp"
-       }
-     }
-   }
-   ```
-
-3. **Restart Claude Desktop**. You can prompt the desktop AI to explore project files, look up command schemas, search commands, preview Datamine tables, and build Jupyter notebooks programmatically.
+#### COM Isolation & Security
+To prevent project locking and Datamine application crashes, the AI assistant operates under strict **COM Isolation**:
+* **No Direct COM Executions**: The MCP server does not connect directly to active COM sessions or run automation processes.
+* **Workflow-Driven Assistant**: The AI's job is to generate a Jupyter Notebook workflow (`.ipynb`) using the `create_jupyter_workflow` tool.
+* **User Execution**: You open and run the generated notebook cells inside your active JupyterLab environment (which has the safe connection to Datamine Studio RM).
 
 MCP tools exposed:
-
-- `list_commands`
-- `get_command_schema`
-- `search_commands`
-- `read_datamine_file`
-- `create_jupyter_workflow`
+* `list_commands`
+* `get_command_schema`
+* `search_commands`
+* `create_jupyter_workflow`
 
 Full registration notes and module details: [AGENTS.md](AGENTS.md).
 

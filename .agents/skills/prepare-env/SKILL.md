@@ -25,19 +25,28 @@ Run the appropriate setup/install commands to ensure the package and its require
 ## 2. Install/Configure the MCP Server
 
 Once the package is installed in the active environment, register it as an MCP server.
-Run the server's built-in installer:
 
+### For Claude Desktop Users:
+Run the automatic installer command:
 ```powershell
 .venv\Scripts\python -m dmstudio.mcp_server --install
 ```
+This automatically updates Claude's `%APPDATA%\Claude\claude_desktop_config.json`.
 
-This command will:
-1. Locate the absolute path of the python interpreter for the active environment.
-2. Automatically update/configure Claude Desktop's `%APPDATA%\Claude\claude_desktop_config.json` to register the `dmstudio` MCP server.
-3. Automatically copy this and other workspace agent skills into the local `.agents/skills/` directory so they are indexed by your IDE/AI.
-4. Print copy-pasteable configuration details (Name, Command) for other IDEs (e.g., Cursor, Windsurf, Antigravity, etc.).
+### For Cursor, Windsurf, and other IDE Users:
+Since these editors configure MCP servers via their graphical settings UI rather than a shared configuration file, you must guide the user to add it manually:
 
-Present these printed copy-pasteable configuration details clearly to the user in your final response so they can easily register it in their respective AI tool if they aren't using Claude Desktop.
+1. Retrieve the absolute path of the current python interpreter:
+   - Run the command to get the full python executable path.
+2. Instruct the user to open their IDE settings:
+   - **Cursor**: Go to `Settings` -> `Features` -> `MCP` -> Click `+ Add New MCP Server`.
+   - **Windsurf**: Go to `Settings` -> Search for `MCP` -> Click `+ Add New MCP Server`.
+3. Provide the user with the exact values to paste into the settings UI:
+   - **Name**: `dmstudio`
+   - **Type**: `command`
+   - **Command**: `<ABSOLUTE_PATH_TO_PYTHON> -m dmstudio.mcp_server` (e.g., `D:\Active\dmstudio-rm\.venv\Scripts\python.exe -m dmstudio.mcp_server`)
+
+Always print these copy-pasteable settings clearly in your final response to guide the user.
 
 ---
 

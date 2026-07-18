@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.0b9 (IDE Settings Guide & Documentation) - 2026-07-18
+
+- **`README.md` & `SKILL.md`**: Enhanced environment and MCP installation documentation to explicitly guide Cursor, Windsurf, and other IDE users on manual graphical settings setup, since these editors do not utilize Claude Desktop's JSON configuration.
+
 ## 2.0.0b8 (Workspace Skill Copying via CLI) - 2026-07-18
 
 - **`mcp_server.py`**: Added copy logic to `--install` that copies packaged skills (`dmstudio/skills/`) directly to the user's project directory `.agents/skills/` so AI assistants running in custom workspaces automatically discover, index, and follow the instructions.

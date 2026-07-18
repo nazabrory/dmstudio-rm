@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.9+-blue.svg" alt="Python Version"></a>
-  <a href="https://img.shields.io/badge/version-2.0.0b8-purple.svg" alt="Version"></a>
+  <a href="https://img.shields.io/badge/version-2.0.0b9-purple.svg" alt="Version"></a>
   <a href="LICENSE.txt"><img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="License"></a>
   <a href="https://www.dataminesoftware.com/"><img src="https://img.shields.io/badge/Datamine-Studio%20RM-orange.svg" alt="Datamine Studio RM"></a>
 </p>
@@ -308,16 +308,35 @@ If you are using an AI coding assistant (like **Cursor**, **Windsurf**, **Claude
 The AI agent will read the built-in [prepare-env](file:///D:/Active/dmstudio-rm/.agents/skills/prepare-env/SKILL.md) skill, verify the Python virtual environment, install the package, and automatically register the MCP server for you.
 
 #### Model Context Protocol (MCP) Server Setup
-To expose Datamine automation tools to external desktop clients (like Claude Desktop or Google Antigravity):
+To expose Datamine automation tools to your AI agent, configure it as an MCP server:
 
-1. **Auto-Install/Register the MCP Server**:
-   Run the following command in your active python environment (with the package installed):
+##### Option A: Claude Desktop (Automated Setup)
+1. Ensure `dmstudio-rm` is installed in your active Python environment.
+2. Run the automatic installer:
    ```cmd
    python -m dmstudio.mcp_server --install
    ```
-   This will automatically detect the python interpreter's path, register the `dmstudio` server to Claude Desktop's `%APPDATA%\Claude\claude_desktop_config.json`, and print copy-pasteable configuration details for other IDEs (like Cursor, Windsurf, or Antigravity).
+   This automatically detects the environment's python path and writes/merges the settings to Claude's `%APPDATA%\Claude\claude_desktop_config.json`.
+3. Restart Claude Desktop.
 
-2. **Restart your AI client**. You can now prompt the AI to explore project command schemas, search commands, and build Jupyter notebooks programmatically.
+##### Option B: Cursor, Windsurf, and other IDEs (Manual UI Setup)
+Since Cursor and Windsurf manage MCP servers via their graphical user interface rather than a shared configuration file:
+1. Run the installer script to obtain the exact python path command:
+   ```cmd
+   python -m dmstudio.mcp_server --install
+   ```
+   Alternatively, get the command directly:
+   ```cmd
+   .venv\Scripts\python -c "import sys; print(f'{sys.executable} -m dmstudio.mcp_server')"
+   ```
+2. Open your IDE settings:
+   - **Cursor**: Go to `Settings` -> `Features` -> `MCP` -> Click `+ Add New MCP Server`.
+   - **Windsurf**: Go to `Settings` -> Search for `MCP` -> Click `+ Add New MCP Server`.
+3. Fill in the MCP server settings:
+   - **Name**: `dmstudio`
+   - **Type**: `command`
+   - **Command**: Paste the path output from Step 1 (e.g. `C:\path\to\.venv\Scripts\python.exe -m dmstudio.mcp_server`).
+4. Save and restart your chat session.
 
 #### COM Isolation & Security
 To prevent project locking and Datamine application crashes, the AI assistant operates under strict **COM Isolation**:

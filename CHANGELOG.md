@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0b6 (Automated MCP Installer & COM-less Server) - 2026-07-18
+
+- **`mcp_server.py`**: Added `--install` CLI argument to automatically detect environment python path and register with Claude Desktop, plus print other IDE configurations. Removed COM dependencies and the `read_datamine_file` tool to enforce strict COM isolation.
+- **`.agents/skills/prepare-env/SKILL.md`**: Created new agent skill for environment preparation, automated MCP server installation, and outlining COM isolation boundary.
+- **`README.md` & `AGENTS.md`**: Documented automated environment setup capability, the `--install` CLI flag, and the COM isolation rules.
+
 ## Documentation & module layout (current as of 2.0.0b4) - 2026-07-17
 
 Docs-only alignment with the split package surface (no behaviour change):

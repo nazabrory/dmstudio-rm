@@ -381,9 +381,8 @@ def generate_notebooks():
         is_dmfile = cmd_name_lower in dmfiles_methods
         wrapper_var = "dm_fil" if is_dmfile else "dm_cmd"
         
-        # Determine target folder path based on whether it is a process or file command
-        target_subfolder = 'files' if is_dmfile else 'processes'
-        folder_path = os.path.join(collections_dir, target_subfolder, cmd_name_lower)
+        # Determine target folder path directly under collections_dir
+        folder_path = os.path.join(collections_dir, cmd_name_lower)
         os.makedirs(folder_path, exist_ok=True)
         
         if cmd_name_lower in skipped:
@@ -594,28 +593,16 @@ def generate_notebooks():
         nb.save()
         generated_count += 1
         
-    # Clean up old collections directories (anything in tutorials/collections/ that is not 'processes' or 'files')
+    # Clean up old or unverified collection directories under tutorials/collections/
     for item in os.listdir(collections_dir):
         item_path = os.path.join(collections_dir, item)
-        if os.path.isdir(item_path) and item not in ('processes', 'files'):
-            print(f"Cleaning up old folder: {item}")
-            try:
-                shutil.rmtree(item_path)
-            except Exception as e:
-                print(f"Error removing old folder {item}: {e}")
-                
-    # Clean up any unverified command directories under collections/processes/ and collections/files/
-    for sub in ('processes', 'files'):
-        sub_path = os.path.join(collections_dir, sub)
-        if os.path.exists(sub_path):
-            for item in os.listdir(sub_path):
-                item_path = os.path.join(sub_path, item)
-                if os.path.isdir(item_path) and item.lower() not in VERIFIED_COMMANDS:
-                    print(f"Cleaning up unverified collection folder: {item_path}")
-                    try:
-                        shutil.rmtree(item_path)
-                    except Exception as e:
-                        print(f"Error removing unverified collection folder {item}: {e}")
+        if os.path.isdir(item_path):
+            if item.lower() not in VERIFIED_COMMANDS or item.lower() in ('processes', 'files'):
+                print(f"Cleaning up old/unverified folder: {item_path}")
+                try:
+                    shutil.rmtree(item_path)
+                except Exception as e:
+                    print(f"Error removing old/unverified folder {item}: {e}")
                         
     print(f"Successfully generated/moved {generated_count} process/file example folders and notebooks.")
 

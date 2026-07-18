@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.0b8 (Workspace Skill Copying via CLI) - 2026-07-18
+
+- **`mcp_server.py`**: Added copy logic to `--install` that copies packaged skills (`dmstudio/skills/`) directly to the user's project directory `.agents/skills/` so AI assistants running in custom workspaces automatically discover, index, and follow the instructions.
+- **`pyproject.toml`**: Configured `package-data` to include all skills markdown files (`skills/**/*.md`) inside the built wheel.
+
 ## 2.0.0b7 (AI Skill Indexing and Package Integration) - 2026-07-18
 
 - **`.gitignore`**: Unignored `.agents/skills/` directory to allow IDEs and AI tools to index and discover agent skills.

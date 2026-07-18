@@ -203,6 +203,30 @@ def install_mcp_config():
     return True
 
 
+def copy_skills_to_workspace():
+    '''Copies package-level skills to the user's workspace so AI agents can index them.'''
+    import shutil
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+    src_skills_dir = os.path.join(package_dir, 'skills')
+    dest_skills_dir = os.path.join(os.getcwd(), '.agents', 'skills')
+
+    if not os.path.exists(src_skills_dir):
+        return
+
+    try:
+        for root, dirs, files in os.walk(src_skills_dir):
+            rel_path = os.path.relpath(root, src_skills_dir)
+            target_dir = os.path.abspath(os.path.join(dest_skills_dir, rel_path)) if rel_path != '.' else dest_skills_dir
+            os.makedirs(target_dir, exist_ok=True)
+            for file in files:
+                src_file = os.path.join(root, file)
+                dest_file = os.path.join(target_dir, file)
+                shutil.copy2(src_file, dest_file)
+        print(f"Successfully copied agent skills to workspace: {dest_skills_dir}")
+    except Exception as e:
+        print(f"Warning: Failed to copy agent skills to workspace: {e}")
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Datamine Studio RM MCP Server")
@@ -211,6 +235,7 @@ def main():
 
     if args.install:
         success = install_mcp_config()
+        copy_skills_to_workspace()
         print("\nConfiguration for other IDEs / AI harnesses (e.g. Cursor, Windsurf, Antigravity, etc.):")
         print("Add a command-type MCP server with the following settings:")
         print(f"  Name: dmstudio")

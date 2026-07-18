@@ -18,37 +18,15 @@ Tools provided:
 
 Usage (standalone):
 -------------------
-    .venv\\Scripts\\python mcp_server.py
-
-Claude Desktop config (~/AppData/Roaming/Claude/claude_desktop_config.json):
------------------------------------------------------------------------------
-{
-  "mcpServers": {
-    "dmstudio": {
-      "command": "C:\\\\path\\\\to\\\\project\\\\.venv\\\\Scripts\\\\python",
-      "args": ["C:\\\\path\\\\to\\\\project\\\\mcp_server.py"]
-    }
-  }
-}
-
-Antigravity (antigravity.json):
---------------------------------
-{
-  "mcpServers": {
-    "dmstudio": {
-      "command": "C:\\\\path\\\\to\\\\project\\\\.venv\\\\Scripts\\\\python",
-      "args": ["C:\\\\path\\\\to\\\\project\\\\mcp_server.py"]
-    }
-  }
-}
+    python -m dmstudio.mcp_server
 '''
 
 import json
 import sys
 import os
 
-# Add project root to path so dmstudio package is importable
-_PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+# Add project root to path so dmstudio package is importable when run directly
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 
@@ -217,5 +195,8 @@ def create_jupyter_workflow(notebook_name: str, steps: list) -> str:
 # Entry point
 # ---------------------------------------------------------------------------
 
-if __name__ == '__main__':
+def main():
     mcp.run(transport='stdio')
+
+if __name__ == '__main__':
+    main()

@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.9+-blue.svg" alt="Python Version"></a>
-  <a href="https://img.shields.io/badge/version-2.0.0b4-purple.svg" alt="Version"></a>
+  <a href="https://img.shields.io/badge/version-2.0.0b5-purple.svg" alt="Version"></a>
   <a href="LICENSE.txt"><img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="License"></a>
   <a href="https://www.dataminesoftware.com/"><img src="https://img.shields.io/badge/Datamine-Studio%20RM-orange.svg" alt="Datamine Studio RM"></a>
 </p>
@@ -91,12 +91,17 @@ Open your Datamine project (e.g. `MyProject.rmproj`) in Studio RM before running
 
 ### 🛠️ Installation
 
-Clone or download this repository into a dedicated folder (for example `C:\path\to\dmstudio-rm`). Keep your geological project data in its own project folder so library source code does not clutter production workspaces.
+#### 📦 Option A: Install from PyPI (Recommended)
+The easiest way to install `dmstudio-rm` is directly from PyPI. Open your terminal or command prompt and run:
+```bash
+pip install dmstudio-rm
+```
 
-#### Option A: Using Conda (Recommended)
+#### 🔧 Option B: Local Source Installation (For Contributors & Tutorials)
+If you want to customize the wrappers, run the full test suite, or access the built-in Jupyter notebook tutorials locally, clone or download this repository (e.g. into `C:\path\to\dmstudio-rm`) and choose one of the options below:
 
-Use the provided `environment.yml` to create a dedicated conda environment:
-
+##### Conda (Recommended)
+Use the provided `environment.yml` to create a dedicated conda environment and install the cloned source in editable mode:
 ```cmd
 # Open Anaconda Prompt / Terminal and navigate to the repo folder
 cd C:\path\to\dmstudio-rm
@@ -111,10 +116,8 @@ conda activate dmstudio
 pip install -e .
 ```
 
-#### Option B: Using uv
-
+##### Using uv
 Create and install dependencies instantly using [uv](https://github.com/astral-sh/uv):
-
 ```cmd
 cd C:\path\to\dmstudio-rm
 uv venv
@@ -126,7 +129,7 @@ uv pip install -e .
 uv pip install jupyterlab
 ```
 
-#### Option C: One-Click Windows Setup (Vanilla Python)
+##### One-Click Windows Setup (Vanilla Python)
 
 If you are using vanilla Python:
 
@@ -309,23 +312,27 @@ Modern workspace AI coding assistants (such as **Cursor**, **VS Code Copilot**, 
 
 To expose Datamine automation tools to external desktop clients (like Claude Desktop or Google Antigravity):
 
-1. **Register the Server in Claude Desktop**  
-   Open `%APPDATA%\Claude\claude_desktop_config.json` and add `dmstudio` (replace with **your** clone path):
+1. **Install the package (if not already installed)**:
+   ```bash
+   pip install dmstudio-rm
+   ```
+
+2. **Register the Server in Claude Desktop**  
+   Open `%APPDATA%\Claude\claude_desktop_config.json` and add `dmstudio`:
 
    ```json
    {
      "mcpServers": {
        "dmstudio": {
-         "command": "C:\\path\\to\\dmstudio-rm\\.venv\\Scripts\\python.exe",
-         "args": ["C:\\path\\to\\dmstudio-rm\\mcp_server.py"]
+         "command": "dmstudio-mcp"
        }
      }
    }
    ```
 
-2. **Restart Claude Desktop**. You can prompt the desktop AI to explore project files, look up command schemas, search commands, preview Datamine tables, and build Jupyter notebooks programmatically.
+3. **Restart Claude Desktop**. You can prompt the desktop AI to explore project files, look up command schemas, search commands, preview Datamine tables, and build Jupyter notebooks programmatically.
 
-MCP tools exposed by `mcp_server.py`:
+MCP tools exposed:
 
 - `list_commands`
 - `get_command_schema`

@@ -9,7 +9,7 @@ exec(open('dmstudio/version.py').read())
 version = __version__
 
 
-setup(name='dmstudio',
+setup(name='dmstudio-rm',
       version=version,
       description='Python module for Datamine Studio RM scripting with AI agent capabilities',
       url='https://github.com/nazabrory/dmstudio-rm',

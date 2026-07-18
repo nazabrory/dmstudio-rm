@@ -53,8 +53,8 @@ dmstudio-rm/                      ← Project root
 │   ├── agent.py                  ← Compat re-export layer (see below)
 │   ├── special.py                ← Adapted COM helpers
 │   ├── superprocess.py           ← Multi-command workflows
-│   └── notebook_builder.py       ← Jupyter Notebook builder
-├── mcp_server.py                 ← FastMCP stdio server
+│   ├── notebook_builder.py       ← Jupyter Notebook builder
+│   └── mcp_server.py             ← FastMCP stdio server (CLI entry point)
 ├── tutorials/
 │   ├── Project.rmproj            ← Project template (used by restructure_case_studies)
 │   ├── test_sandbox/             ← Isolated runtime sandbox for running notebooks
@@ -91,7 +91,8 @@ dmstudio-rm/                      ← Project root
 ### Repository Layout Decisions
 
 To maintain codebase simplicity and a clean experience for the user:
-- **Root-level setup and launch scripts** (`setup_env.bat`, `setup_env.ps1`, `start_jupyter.bat`) and `mcp_server.py` are explicitly placed in the root directory. This makes the package highly accessible to Windows automation users by offering immediate "first-click" environment setup and starting Jupyter Lab directly at the workspace root.
+- **Root-level setup and launch scripts** (`setup_env.bat`, `setup_env.ps1`, `start_jupyter.bat`) are explicitly placed in the root directory. This makes the package highly accessible to Windows automation users by offering immediate "first-click" environment setup and starting Jupyter Lab directly at the workspace root.
+- **MCP Server Package Location**: The `mcp_server.py` resides inside the `dmstudio/` directory so it is cleanly packaged when publishing to PyPI. It is exposed to the user as a console command `dmstudio-mcp`.
 - **Excluded Runtime Files**: Local files `dmdir.py` and the root `__init__.py` are created dynamically during execution by `_make_dmdir()` and are git-ignored. Developers should keep the root clean by deleting these files when not running scripts.
 
 ---
@@ -139,9 +140,16 @@ nb.add_code("cmd.mgsort(in_i='collars', out_o='sorted', keys_f=['BHID'])")
 nb.save()
 ```
 
-### `mcp_server.py`
+### MCP Server (`dmstudio-mcp`)
 
-Run: `.venv\Scripts\python mcp_server.py` (or Conda env python).
+Run standard command (if installed via pip):
+```bash
+dmstudio-mcp
+```
+Or run directly via python module:
+```bash
+.venv\Scripts\python -m dmstudio.mcp_server
+```
 
 MCP tools (via `command_registry`, `dm_io`, `NotebookBuilder`):
 
@@ -157,8 +165,7 @@ MCP tools (via `command_registry`, `dm_io`, `NotebookBuilder`):
 {
   "mcpServers": {
     "dmstudio": {
-      "command": "C:\\path\\to\\dmstudio-rm\\.venv\\Scripts\\python.exe",
-      "args": ["C:\\path\\to\\dmstudio-rm\\mcp_server.py"]
+      "command": "dmstudio-mcp"
     }
   }
 }
@@ -170,8 +177,7 @@ MCP tools (via `command_registry`, `dm_io`, `NotebookBuilder`):
 {
   "mcpServers": {
     "dmstudio": {
-      "command": "C:\\path\\to\\dmstudio-rm\\.venv\\Scripts\\python.exe",
-      "args": ["C:\\path\\to\\dmstudio-rm\\mcp_server.py"]
+      "command": "dmstudio-mcp"
     }
   }
 }

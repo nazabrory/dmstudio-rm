@@ -3,8 +3,8 @@ requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "dmstudio"
-version = "2.0.0b4"
+name = "dmstudio-rm"
+version = "2.0.0b5"
 description = "Python module for Datamine Studio RM scripting with AI agent capabilities"
 readme = "README.md"
 license = {text = "GPL-3.0"}
@@ -31,9 +31,13 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/nazabrory/dmstudio-rm"
 
+[project.scripts]
+dmstudio-mcp = "dmstudio.mcp_server:main"
+
 [tool.setuptools]
 packages = ["dmstudio"]
 include-package-data = true
 
 [tool.setuptools.package-data]
 dmstudio = ["LICENSE.txt", "README.md"]
+

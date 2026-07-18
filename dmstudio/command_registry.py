@@ -36,7 +36,7 @@ VERIFIED_COMMANDS = {
     'count', 'delete', 'diffrn', 'dmedit', 'extra',
     'holes3d', 'ijkgen', 'join', 'mgsort', 'modtra',
     'output', 'selcop', 'seldel', 'selexy', 'sortx',
-    'stats', 'tongrad', 'inpfil'
+    'stats', 'tongrad', 'inpfil', 'estima', 'protom'
 }
 
 

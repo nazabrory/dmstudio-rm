@@ -176,9 +176,8 @@ The repository comes with pre-packaged tutorial data and workflows.
 1. In Datamine Studio RM, open the tutorial project **`tutorials\test_sandbox\Project.rmproj`** under your clone (e.g. `C:\path\to\dmstudio-rm\tutorials\test_sandbox\Project.rmproj`).
 2. Start JupyterLab from the repository root (`start_jupyter.bat`) or from the folder of the notebook you intend to run.
 3. In the JupyterLab sidebar:
-   * **Case Studies (`tutorials/case_studies/`)**: Start with `holes3d_desurvey/Holes3D_Tutorial.ipynb` for de-surveying, or `grade_estimation/Grade_Estimation_Examples.ipynb` for block modeling. Advanced examples live in `studio_rm_examples/`.
-   * **Process Collections (`tutorials/collections/`)**: Dedicated sandboxes for individual commands under `processes/` (~268 commands) and `files/` (~32 file commands).
-   * **Custom Notebooks (`tutorials/custom_notebooks/`)**: Hand-tuned examples (e.g. protom, estima, cokrig).
+   * **Workflows and Case Studies (`tutorials/workflows/`)**: Multi-command workflow tutorials and end-to-end case studies. Start with `holes3d_desurvey/Holes3D_Tutorial.ipynb` for de-surveying, or `grade_estimation/Grade_Estimation_Examples.ipynb` for block modeling. Advanced examples live in `studio_rm_examples/`, and AI agent workflows live in `ai_agent_workflow_tutorial.ipynb`.
+   * **Process Collections (`tutorials/collections/`)**: Reference notebooks for individual commands, including both auto-generated process/file wrappers and hand-tuned examples (like `cokrig_example.ipynb`, `estima_example.ipynb`, and `protom_example.ipynb`).
 
 #### Option B: Downloading Tutorials Dynamically (For pip/conda Installs)
 
@@ -370,7 +369,7 @@ These tests require Datamine Studio RM to be open with a loaded project:
 
 * **`tests/generate_wrappers.py`**: Regenerates `dmstudio/dmcommands.py` / `dmfiles.py` (core/verified) and `dmcommands_generated.py` / `dmfiles_generated.py` (experimental) wrapper classes from StudioRM help XML.
 * **`tests/generate_collections.py`**: Regenerates individual sandbox notebooks under `tutorials/collections/` for the 23 verified core commands.
-* **`tests/restructure_case_studies.py`**: Case-study layout helper.
+* **`tests/restructure_case_studies.py`**: Workflows/case-studies layout helper.
 * **`dmstudio.notebook_builder.NotebookBuilder`**: Programmatic Jupyter Notebook builder for auditable agent workflows:
 
   ```python

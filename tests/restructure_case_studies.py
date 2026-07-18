@@ -3,12 +3,12 @@ import shutil
 import json
 
 def restructure_case_studies():
-    print("Starting case studies restructuring...")
+    print("Starting workflows restructuring...")
     
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     tutorials_dir = os.path.join(base_dir, 'tutorials')
-    case_studies_dir = os.path.join(tutorials_dir, 'case_studies')
-    os.makedirs(case_studies_dir, exist_ok=True)
+    workflows_dir = os.path.join(tutorials_dir, 'workflows')
+    os.makedirs(workflows_dir, exist_ok=True)
     
     project_template = os.path.join(tutorials_dir, 'Project.rmproj')
     if not os.path.exists(project_template):
@@ -30,7 +30,7 @@ def restructure_case_studies():
     ]
 
     # 1. Holes3D Case Study
-    holes3d_dest_dir = os.path.join(case_studies_dir, 'holes3d_desurvey')
+    holes3d_dest_dir = os.path.join(workflows_dir, 'holes3d_desurvey')
     os.makedirs(holes3d_dest_dir, exist_ok=True)
     
     shutil.copy(project_template, os.path.join(holes3d_dest_dir, 'Project.rmproj'))
@@ -55,7 +55,7 @@ def restructure_case_studies():
         print("Set up holes3d_desurvey case study.")
 
     # 2. Grade Estimation Case Study
-    grade_dest_dir = os.path.join(case_studies_dir, 'grade_estimation')
+    grade_dest_dir = os.path.join(workflows_dir, 'grade_estimation')
     os.makedirs(grade_dest_dir, exist_ok=True)
     
     shutil.copy(project_template, os.path.join(grade_dest_dir, 'Project.rmproj'))
@@ -90,7 +90,7 @@ def restructure_case_studies():
         print("Set up grade_estimation case study.")
 
     # 3. Studio RM Examples
-    examples_dest_dir = os.path.join(case_studies_dir, 'studio_rm_examples')
+    examples_dest_dir = os.path.join(workflows_dir, 'studio_rm_examples')
     os.makedirs(examples_dest_dir, exist_ok=True)
     
     shutil.copy(project_template, os.path.join(examples_dest_dir, 'Project.rmproj'))
@@ -161,7 +161,7 @@ def restructure_case_studies():
             except Exception as e:
                 print(f"Error removing {f_name}: {e}")
                 
-    print("Case studies restructuring complete!")
+    print("Workflows restructuring complete!")
 
 if __name__ == '__main__':
     restructure_case_studies()

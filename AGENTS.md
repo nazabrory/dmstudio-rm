@@ -60,14 +60,12 @@ dmstudio-rm/                      ← Project root
 │   ├── test_sandbox/             ← Isolated runtime sandbox for running notebooks
 │   │   └── Project.rmproj        ← Active project file to open in Studio RM
 │   ├── Database/                 ← Tutorial source data
-│   ├── collections/
-│   │   ├── processes/            ← ~268 process sandboxes
-│   │   └── files/                ← ~32 file-command sandboxes
-│   ├── case_studies/
-│   │   ├── holes3d_desurvey/
-│   │   ├── grade_estimation/
-│   │   └── studio_rm_examples/
-│   └── custom_notebooks/         ← Hand-tuned examples
+│   ├── collections/              # All single-command notebooks (flat list)
+│   └── workflows/                # All multi-command workflows and case studies
+│       ├── holes3d_desurvey/
+│       ├── grade_estimation/
+│       ├── studio_rm_examples/
+│       └── ai_agent_workflow_tutorial.ipynb
 ├── tests/
 │   ├── quick_test.py
 │   ├── test_workflow.py
@@ -223,8 +221,8 @@ MCP tools (via `command_registry`, `dm_io`, `NotebookBuilder`):
 ### Generators
 
 - **`tests/generate_wrappers.py`** — regenerates `dmcommands.py` from StudioRM help XML.
-- **`tests/generate_collections.py`** — regenerates ~300 sandboxes under `tutorials/collections/processes|files/`.
-- **`tests/restructure_case_studies.py`** — case-study layout helper (migration).
+- **`tests/generate_collections.py`** — regenerates sandbox notebooks under `tutorials/collections/`.
+- **`tests/restructure_case_studies.py`** — workflows/case-studies layout helper (migration).
 
 ---
 

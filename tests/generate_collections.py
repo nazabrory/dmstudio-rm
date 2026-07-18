@@ -385,18 +385,8 @@ def generate_notebooks():
         folder_path = collections_dir
         
         if cmd_name_lower in skipped:
-            print(f"Handling custom-built example: {cmd_name}")
-            dest_notebook = os.path.join(folder_path, f"{cmd_name_lower}_example.ipynb")
-            src_notebook = os.path.join(base_dir, 'tutorials', 'custom_notebooks', f"{cmd_name_lower}_example.ipynb")
-            if os.path.exists(src_notebook):
-                with open(src_notebook, 'r', encoding='utf-8') as f_in:
-                    nb_data = json.load(f_in)
-                with open(dest_notebook, 'w', encoding='utf-8') as f_out:
-                    json.dump(nb_data, f_out, indent=2)
-                print(f"Copied custom notebook: {dest_notebook}")
-                generated_count += 1
-            else:
-                print(f"Warning: Custom notebook not found at: {src_notebook}")
+            print(f"Skipping custom-built example (lives permanently in collections): {cmd_name}")
+            generated_count += 1
             continue
 
         # 2. Get command schema

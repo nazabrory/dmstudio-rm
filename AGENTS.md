@@ -12,7 +12,7 @@ User-facing install and quick start: **[README.md](README.md)**. Domain vocabula
 ## Project Preparation & Setup
 
 1. **Windows & Datamine Studio RM**: Windows with Studio RM installed and licensed.
-2. **Open Project**: Open a `.rmproj` (e.g. `tutorials/Project.rmproj`) in Studio RM before any COM script.
+2. **Open Project**: Open a `.rmproj` (e.g. `tutorials/test_sandbox/Project.rmproj`) in Studio RM before any COM script.
 3. **Environment Setup** (Conda recommended):
    ```bash
    # Option A: Conda (recommended)
@@ -56,7 +56,9 @@ dmstudio-rm/                      ← Project root
 │   └── notebook_builder.py       ← Jupyter Notebook builder
 ├── mcp_server.py                 ← FastMCP stdio server
 ├── tutorials/
-│   ├── Project.rmproj
+│   ├── Project.rmproj            ← Project template (used by restructure_case_studies)
+│   ├── test_sandbox/             ← Isolated runtime sandbox for running notebooks
+│   │   └── Project.rmproj        ← Active project file to open in Studio RM
 │   ├── Database/                 ← Tutorial source data
 │   ├── collections/
 │   │   ├── processes/            ← ~268 process sandboxes

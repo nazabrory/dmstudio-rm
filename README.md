@@ -167,9 +167,13 @@ Since `dmstudio` is installed in editable/development mode, it is available in y
 
 The repository comes with pre-packaged tutorial data and workflows.
 
+> [!NOTE]
+> **Automatic Directory Alignment**  
+> Unlike custom user scripts, the included tutorial notebooks automatically align Python's working directory to the active Datamine sandbox folder using `initialize_sandbox()`. You do not need to create or run any manual directory alignment scripts to use them.
+
 #### Option A: Running from a Local Git Repository
 
-1. In Datamine Studio RM, open the tutorial project **`tutorials\Project.rmproj`** under your clone (e.g. `C:\path\to\dmstudio-rm\tutorials\Project.rmproj`).
+1. In Datamine Studio RM, open the tutorial project **`tutorials\test_sandbox\Project.rmproj`** under your clone (e.g. `C:\path\to\dmstudio-rm\tutorials\test_sandbox\Project.rmproj`).
 2. Start JupyterLab from the repository root (`start_jupyter.bat`) or from the folder of the notebook you intend to run.
 3. In the JupyterLab sidebar:
    * **Case Studies (`tutorials/case_studies/`)**: Start with `holes3d_desurvey/Holes3D_Tutorial.ipynb` for de-surveying, or `grade_estimation/Grade_Estimation_Examples.ipynb` for block modeling. Advanced examples live in `studio_rm_examples/`.
@@ -187,7 +191,7 @@ import dmstudio
 dmstudio.download_tutorials(r'C:\path\to\workspace')
 ```
 
-This downloads and extracts the tutorials workspace structure. Open Datamine Studio RM, load the downloaded `tutorials/Project.rmproj`, and start JupyterLab in that directory.
+This downloads and extracts the tutorials workspace structure. Open Datamine Studio RM, load the downloaded `tutorials/test_sandbox/Project.rmproj`, and start JupyterLab in that directory.
 
 ---
 

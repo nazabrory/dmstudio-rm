@@ -108,6 +108,11 @@ __init__.py
 *.dm
 *.key
 
+# Ignore session-specific Datamine project metadata
+*.rmproj.spf
+*.rmproj.cmf
+*.rmproj.sfm
+
 # ---------------------------------------------------------------------------
 # dmstudio — datamine help/ folder
 # This is a local export of the StudioRM.chm help file (hundreds of MB).
@@ -166,3 +171,17 @@ celerybeat-schedule
 !/tutorials/**/*.dm
 !/tutorials/**/*.dmx
 !/tutorials/**/*.dat
+
+# Exclude local developer scratchpads and session files
+promptlist
+**/dmstusub.dat
+
+# ---------------------------------------------------------------------------
+# dmstudio — Test runner sandbox & results
+# ---------------------------------------------------------------------------
+# Ignore all runtime files and metadata generated inside the test sandbox
+/tutorials/test_sandbox/*
+!/tutorials/test_sandbox/Project.rmproj
+
+# Ignore all generated test execution results
+/tutorials/test_results/

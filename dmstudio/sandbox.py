@@ -20,6 +20,27 @@ from dmstudio import initialize
 _initial_cwd = os.getcwd()
 
 
+def _find_tutorials_parent(start_dir):
+    '''
+    Find the parent directory of the 'tutorials' folder by traversing upwards.
+    '''
+    current = os.path.abspath(start_dir)
+    while True:
+        # Check if current directory has a 'tutorials/test_sandbox/Project.rmproj'
+        if os.path.exists(os.path.join(current, 'tutorials', 'test_sandbox', 'Project.rmproj')):
+            return current
+        # Also check if current is the 'tutorials' folder itself
+        if os.path.basename(current).lower() == 'tutorials':
+            parent = os.path.dirname(current)
+            if os.path.exists(os.path.join(current, 'test_sandbox', 'Project.rmproj')):
+                return parent
+        parent = os.path.dirname(current)
+        if parent == current:
+            break
+        current = parent
+    return None
+
+
 def copy_database_files(files_to_copy, target_dir=None):
     '''
     copy_database_files
@@ -37,14 +58,16 @@ def copy_database_files(files_to_copy, target_dir=None):
     if target_dir is None:
         target_dir = os.getcwd()
 
-    repo_root = target_dir
-    while True:
-        if os.path.exists(os.path.join(repo_root, 'pyproject.toml')) or os.path.exists(os.path.join(repo_root, 'AGENTS.md')):
-            break
-        parent = os.path.dirname(repo_root)
-        if parent == repo_root:
-            break
-        repo_root = parent
+    repo_root = _find_tutorials_parent(target_dir)
+    if repo_root is None:
+        repo_root = target_dir
+        while True:
+            if os.path.exists(os.path.join(repo_root, 'pyproject.toml')) or os.path.exists(os.path.join(repo_root, 'AGENTS.md')):
+                break
+            parent = os.path.dirname(repo_root)
+            if parent == repo_root:
+                break
+            repo_root = parent
 
     help_db = os.path.join(repo_root, 'tutorials', 'Database', 'DMTutorials', 'Data', 'VBOP', 'Datamine')
     if not os.path.exists(help_db):
@@ -109,15 +132,17 @@ def initialize_sandbox(notebook_folder=None, files_to_copy=None):
     active_folder = os.path.abspath(project.Folder)
 
     # 3. Find repo root dynamically
-    repo_root = notebook_folder
-    while True:
-        if os.path.exists(os.path.join(repo_root, 'pyproject.toml')) or os.path.exists(os.path.join(repo_root, 'AGENTS.md')):
-            break
-        parent = os.path.dirname(repo_root)
-        if parent == repo_root:
-            repo_root = os.path.abspath(os.path.join(notebook_folder, '..', '..', '..', '..'))
-            break
-        repo_root = parent
+    repo_root = _find_tutorials_parent(notebook_folder)
+    if repo_root is None:
+        repo_root = notebook_folder
+        while True:
+            if os.path.exists(os.path.join(repo_root, 'pyproject.toml')) or os.path.exists(os.path.join(repo_root, 'AGENTS.md')):
+                break
+            parent = os.path.dirname(repo_root)
+            if parent == repo_root:
+                repo_root = os.path.abspath(os.path.join(notebook_folder, '..', '..', '..', '..'))
+                break
+            repo_root = parent
 
     expected_sandbox = os.path.abspath(os.path.join(repo_root, 'tutorials', 'test_sandbox'))
 

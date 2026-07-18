@@ -381,9 +381,8 @@ def generate_notebooks():
         is_dmfile = cmd_name_lower in dmfiles_methods
         wrapper_var = "dm_fil" if is_dmfile else "dm_cmd"
         
-        # Determine target folder path directly under collections_dir
-        folder_path = os.path.join(collections_dir, cmd_name_lower)
-        os.makedirs(folder_path, exist_ok=True)
+        # Determine target folder path directly as collections_dir (flat structure)
+        folder_path = collections_dir
         
         if cmd_name_lower in skipped:
             print(f"Handling custom-built example: {cmd_name}")
@@ -593,16 +592,24 @@ def generate_notebooks():
         nb.save()
         generated_count += 1
         
-    # Clean up old or unverified collection directories under tutorials/collections/
+    # Clean up old or unverified collection directories/files under tutorials/collections/
     for item in os.listdir(collections_dir):
         item_path = os.path.join(collections_dir, item)
         if os.path.isdir(item_path):
-            if item.lower() not in VERIFIED_COMMANDS or item.lower() in ('processes', 'files'):
-                print(f"Cleaning up old/unverified folder: {item_path}")
-                try:
-                    shutil.rmtree(item_path)
-                except Exception as e:
-                    print(f"Error removing old/unverified folder {item}: {e}")
+            print(f"Cleaning up old subfolder: {item_path}")
+            try:
+                shutil.rmtree(item_path, ignore_errors=True)
+            except Exception as e:
+                print(f"Error removing old subfolder {item}: {e}")
+        elif os.path.isfile(item_path):
+            if item.endswith('_example.ipynb'):
+                cmd_part = item.replace('_example.ipynb', '').lower()
+                if cmd_part not in VERIFIED_COMMANDS:
+                    print(f"Cleaning up unverified notebook: {item_path}")
+                    try:
+                        os.remove(item_path)
+                    except Exception as e:
+                        print(f"Error removing unverified notebook {item}: {e}")
                         
     print(f"Successfully generated/moved {generated_count} process/file example folders and notebooks.")
 

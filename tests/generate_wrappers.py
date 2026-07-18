@@ -1,6 +1,11 @@
 import os
 import glob
 import re
+import sys
+
+# Add parent directory to path so we can import VERIFIED_COMMANDS
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from dmstudio.command_registry import VERIFIED_COMMANDS
 
 def is_valid_name(name):
     name = name.strip()
@@ -410,6 +415,21 @@ def wrap_lines(text, indent_level, max_len=100):
 def generate_docstring(info, list_groups):
     doc = []
     doc.append(f'        r"""')
+    
+    # Inject CAUTION warning if applicable
+    caution_cmds = {
+        'COMRES', 'INPFIL', 'INPFML', 'INPUTC', 'INPUTD', 'INPDDF',
+        'FDIN', 'FXIN', 'LINK', 'LISTDR', 'MONACO', 'PICDIR',
+        'PROTOM', 'PROTOP', 'QUIG', 'SCRFMT', 'SECDEF', 'TDIN', 'TDOUT',
+        'SPLIT'
+    }
+    if info["name"].upper() in caution_cmds:
+        doc.append("    .. warning::")
+        doc.append("        **USE WITH CAUTION** – This command has known interactive or console-")
+        doc.append("        prompt behaviour. It *may* work with fully-specified arguments via")
+        doc.append("        ``Parsecommand()``, but unexpected pop-ups or missing parameters will")
+        doc.append("        lock the COM server. Verify manually before using in automation.\n")
+
     doc.append(f'        {info["name"]}')
     doc.append(f'        {"-" * len(info["name"])}')
     if info["overview"]:
@@ -694,8 +714,9 @@ def generate_python_function(info):
             body.append(f'        if {name} == "required":')
             body.append(f'            raise ValueError("{name} is required.")')
             body.append("")
+        clean_f_name = f["name"].replace('*', '').strip().lower()
         body.append(f'        if {name} != "optional":')
-        body.append(f'            command += " &{f["name"].lower()}=" + {name}')
+        body.append(f'            command += " &{clean_f_name}=" + {name}')
         body.append("")
 
     for f in output_files_grouped:
@@ -707,8 +728,9 @@ def generate_python_function(info):
             body.append(f'        if {name} == "required":')
             body.append(f'            raise ValueError("{name} is required.")')
             body.append("")
+        clean_f_name = f["name"].replace('*', '').strip().lower()
         body.append(f'        if {name} != "optional":')
-        body.append(f'            command += " &{f["name"].lower()}=" + {name}')
+        body.append(f'            command += " &{clean_f_name}=" + {name}')
         body.append("")
 
     # Fields
@@ -729,8 +751,9 @@ def generate_python_function(info):
                 body.append(f'            command += " *dom{k}=" + dom{k}_f')
                 body.append("")
         else:
+            clean_f_name = f["name"].replace('*', '').strip().lower()
             body.append(f'        if {name} != "optional":')
-            body.append(f'            command += " *{f["name"].lower()}=" + {name}')
+            body.append(f'            command += " *{clean_f_name}=" + {name}')
             body.append("")
 
     # Lists handling
@@ -750,13 +773,14 @@ def generate_python_function(info):
             body.append(f'            raise ValueError("{name} is required.")')
             body.append("")
             
-        validation_code = generate_validation_code(p['name'], name, p.get('range', 'Undefined'), p.get('values', 'Undefined'), p.get('default', 'optional'))
+        validation_code = generate_validation_code(p['name'].replace('*', ''), name, p.get('range', 'Undefined'), p.get('values', 'Undefined'), p.get('default', 'optional'))
         if validation_code:
             body.append(validation_code)
             body.append("")
 
+        clean_p_name = p["name"].replace('*', '').strip().lower()
         body.append(f'        if {name} != "optional":')
-        body.append(f'            command += " @{p["name"].lower()}=" + str({name})')
+        body.append(f'            command += " @{clean_p_name}=" + str({name})')
         body.append("")
 
     body.append(f'        if arguments != "optional":')
@@ -774,30 +798,75 @@ def generate_python_function(info):
     return sig + docstring + "\n" + full_body
 
 # Setup Directories and glob markdown files
-help_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "datamine help", "StudioRM", "Process_Help_XML")
+help_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "datamine_help", "StudioRM", "Process_Help_XML")
 files = glob.glob(os.path.join(help_dir, "*.md"))
+
+EXCLUDED_COMMANDS = {
+    # GUI / Graphical / Terminal Editors
+    'AED', 'CLUSTR', 'DMEDIT', 'ESTIMATE', 'EXPORT', 'HISFIT', 'LAYOUT',
+    'LOADCF', 'PICTED', 'PLTLAY', 'SETENV', 'SURLOG', 'SURVIG', 'SYSPAR',
+    'VARFIT', 'VER', 'XRUN',
+    
+    # Statistical / Print-only (Done in python pandas/scipy)
+    'ANOVA1', 'MANOVA', 'ASTRAN', 'DISPLA', 'STATNP', 'SUPES2', 'SUPEST', 'SUPOOB', 'TERPLT', 'ST1GX',
+    
+    # Report / Text Print Generators (Done in python)
+    'REPORT', 'REPORK', 'TDOUT', 'TABRES', 'FORMAT', 'PITRES', 'ENGLOG', 'PDRIVE',
+    
+    # Interactive Prompts / Data Entry
+    'EXTNDF'
+}
 
 commands_funcs = []
 files_funcs = []
+commands_generated_funcs = []
+files_generated_funcs = []
 
 for filepath in files:
     info = parse_markdown_file(filepath)
     if not info:
         continue
+        
+    if info['name'].upper() in EXCLUDED_COMMANDS:
+        continue
     
     has_inputs = len(info['input_files']) > 0
     
+    if info['name'].upper() == 'BACKTR':
+        for f in info['input_files']:
+            if f['name'].upper() == 'IN1':
+                f['name'] = 'IN'
+    elif info['name'].upper() == 'CHECKIT':
+        info['output_files'].append({
+            'name': 'OUT',
+            'description': 'Output string file.',
+            'required': 'Yes',
+            'type': 'String File',
+            'default': 'required'
+        })
+        
     func_code = generate_python_function(info)
+    name_lower = info['name'].lower()
+    is_verified = name_lower in VERIFIED_COMMANDS
+    
     if has_inputs:
-        commands_funcs.append((info['name'], func_code))
+        if is_verified:
+            commands_funcs.append((info['name'], func_code))
+        else:
+            commands_generated_funcs.append((info['name'], func_code))
     else:
-        files_funcs.append((info['name'], func_code))
+        if is_verified:
+            files_funcs.append((info['name'], func_code))
+        else:
+            files_generated_funcs.append((info['name'], func_code))
 
 # Sort alphabetically by process name
 commands_funcs.sort(key=lambda x: x[0])
 files_funcs.sort(key=lambda x: x[0])
+commands_generated_funcs.sort(key=lambda x: x[0])
+files_generated_funcs.sort(key=lambda x: x[0])
 
-# Prepare dmcommands.py content
+# Boilerplate templates
 commands_boilerplate = """import dmstudio.initialize
 
 
@@ -813,7 +882,7 @@ class init(object):
         ------------------
 
 
-        Commands initialization. After the commands class is initialized  for the first time the object will
+        Commands initialization. After the commands class is initialized for the first time the object will
          be set to the datamine studio object. This property will avoid redundant initializaiton
 
         Parameters:
@@ -889,15 +958,6 @@ class init(object):
         return field_string;
 """
 
-commands_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dmstudio", "dmcommands.py")
-with open(commands_path, "w", encoding="utf-8") as f:
-    f.write(commands_boilerplate)
-    f.write("\n")
-    for name, code in commands_funcs:
-        f.write(code)
-        f.write("\n")
-
-# Prepare dmfiles.py content
 files_boilerplate = """'''
 dmstudio.dmfiles
 ================
@@ -927,7 +987,7 @@ class init(object):
         ------------------
 
 
-        Commands initialization. After the commands class is initialized  for the first time the object will
+        Commands initialization. After the commands class is initialized for the first time the object will
          be set to the datamine studio object. This property will avoid redundant initializaiton
 
         Parameters:
@@ -1000,6 +1060,15 @@ class init(object):
         return field_string;
 """
 
+# Write verified files
+commands_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dmstudio", "dmcommands.py")
+with open(commands_path, "w", encoding="utf-8") as f:
+    f.write(commands_boilerplate)
+    f.write("\n")
+    for name, code in commands_funcs:
+        f.write(code)
+        f.write("\n")
+
 files_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dmstudio", "dmfiles.py")
 with open(files_path, "w", encoding="utf-8") as f:
     f.write(files_boilerplate)
@@ -1008,4 +1077,25 @@ with open(files_path, "w", encoding="utf-8") as f:
         f.write(code)
         f.write("\n")
 
-print(f"Generated {len(commands_funcs)} commands in dmcommands.py and {len(files_funcs)} files in dmfiles.py.")
+# Write experimental/generated files
+commands_gen_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dmstudio", "dmcommands_generated.py")
+with open(commands_gen_path, "w", encoding="utf-8") as f:
+    f.write(commands_boilerplate)
+    f.write("\n")
+    for name, code in commands_generated_funcs:
+        f.write(code)
+        f.write("\n")
+
+files_gen_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dmstudio", "dmfiles_generated.py")
+with open(files_gen_path, "w", encoding="utf-8") as f:
+    f.write(files_boilerplate)
+    f.write("\n")
+    for name, code in files_generated_funcs:
+        f.write(code)
+        f.write("\n")
+
+print(f"Generated:")
+print(f" - {len(commands_funcs)} verified processes in dmcommands.py")
+print(f" - {len(files_funcs)} verified files in dmfiles.py")
+print(f" - {len(commands_generated_funcs)} experimental processes in dmcommands_generated.py")
+print(f" - {len(files_generated_funcs)} experimental files in dmfiles_generated.py")

@@ -20,6 +20,8 @@ Submodules:
 
 from dmstudio import dmcommands
 from dmstudio import dmfiles
+from dmstudio import dmcommands_generated
+from dmstudio import dmfiles_generated
 from dmstudio import initialize
 from dmstudio import special
 from dmstudio import superprocess

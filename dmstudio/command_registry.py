@@ -5,7 +5,7 @@ dmstudio.command_registry
 Command discovery module for Datamine Studio RM.
 
 Provides a read-only index over all command wrappers exposed by
-dmstudio.dmcommands.init and dmstudio.dmfiles.init.
+dmstudio.dmcommands.init, dmstudio.dmfiles.init, and their generated fallback equivalents.
 
 Interface (seam):
     list_commands()             -> list[dict]
@@ -19,13 +19,33 @@ import inspect
 
 from dmstudio import dmcommands, dmfiles
 
+try:
+    from dmstudio import dmcommands_generated
+except ImportError:
+    dmcommands_generated = None
+
+try:
+    from dmstudio import dmfiles_generated
+except ImportError:
+    dmfiles_generated = None
+
+
+# Canonical list of verified commands
+VERIFIED_COMMANDS = {
+    'accmlt', 'append', 'cokrig', 'compdh', 'copy',
+    'count', 'delete', 'diffrn', 'dmedit', 'extra',
+    'holes3d', 'ijkgen', 'join', 'mgsort', 'modtra',
+    'output', 'selcop', 'seldel', 'selexy', 'sortx',
+    'stats', 'tongrad', 'inpfil'
+}
+
 
 # ---------------------------------------------------------------------------
 # Internal helpers (implementation — not part of the interface)
 # ---------------------------------------------------------------------------
 
 def _get_init_classes():
-    '''Return the list of init classes to inspect (both dmcommands and dmfiles).'''
+    '''Return the list of init classes to inspect (both dmcommands/dmfiles and generated/experimental).'''
     classes = []
     if inspect.isclass(dmcommands.init):
         classes.append(dmcommands.init)
@@ -35,6 +55,19 @@ def _get_init_classes():
         classes.append(dmfiles.init)
     else:
         classes.append(type(dmfiles.init))
+
+    if dmcommands_generated is not None:
+        if inspect.isclass(dmcommands_generated.init):
+            classes.append(dmcommands_generated.init)
+        else:
+            classes.append(type(dmcommands_generated.init))
+
+    if dmfiles_generated is not None:
+        if inspect.isclass(dmfiles_generated.init):
+            classes.append(dmfiles_generated.init)
+        else:
+            classes.append(type(dmfiles_generated.init))
+
     return classes
 
 
@@ -48,13 +81,13 @@ def list_commands():
     -------------
 
     Return a list of all available Datamine command wrapper names exposed
-    by dmstudio.dmcommands.init and dmstudio.dmfiles.init. Each entry is a dict
-    with 'name' and 'doc' keys.
+    by verified and experimental modules. Each entry is a dict
+    with 'name', 'doc', and 'experimental' keys.
 
     Returns:
     --------
     list of dict
-        [{'name': 'copy', 'doc': 'COPY ...'}, ...]
+        [{'name': 'copy', 'doc': 'COPY ...', 'experimental': False}, ...]
     '''
     results = []
     seen = set()
@@ -73,7 +106,12 @@ def list_commands():
             if callable(attr):
                 doc = inspect.getdoc(attr) or ''
                 first_line = doc.split('\n')[0].strip()
-                results.append({'name': name, 'doc': first_line})
+                experimental = name.lower() not in VERIFIED_COMMANDS
+                results.append({
+                    'name': name,
+                    'doc': first_line,
+                    'experimental': experimental
+                })
                 seen.add(name)
 
     return sorted(results, key=lambda x: x['name'])
@@ -97,7 +135,8 @@ def get_command_schema(cmd_name):
         {
           'name': str,
           'doc': str,
-          'parameters': [{'name': str, 'default': any, 'annotation': str}, ...]
+          'parameters': [{'name': str, 'default': any, 'annotation': str}, ...],
+          'experimental': bool
         }
 
     Raises:
@@ -146,6 +185,30 @@ def get_command_schema(cmd_name):
                 except Exception:
                     pass
 
+    # Fallback 3: search module-level names in dmcommands_generated
+    if func is None and dmcommands_generated is not None:
+        for name in dir(dmcommands_generated):
+            if name.lower() == cmd_name_lower:
+                try:
+                    attr = getattr(dmcommands_generated, name)
+                    if callable(attr):
+                        func = attr
+                        break
+                except Exception:
+                    pass
+
+    # Fallback 4: search module-level names in dmfiles_generated
+    if func is None and dmfiles_generated is not None:
+        for name in dir(dmfiles_generated):
+            if name.lower() == cmd_name_lower:
+                try:
+                    attr = getattr(dmfiles_generated, name)
+                    if callable(attr):
+                        func = attr
+                        break
+                except Exception:
+                    pass
+
     if func is None:
         raise ValueError('Command not found: {}'.format(cmd_name))
 
@@ -171,6 +234,7 @@ def get_command_schema(cmd_name):
         'name': cmd_name,
         'doc': doc,
         'parameters': params,
+        'experimental': cmd_name_lower not in VERIFIED_COMMANDS,
     }
 
 
@@ -189,7 +253,7 @@ def search_commands(query):
     Returns:
     --------
     list of dict
-        Matching commands: [{'name': str, 'doc': str}, ...]
+        Matching commands: [{'name': str, 'doc': str, 'experimental': bool}, ...]
     '''
     query_lower = query.lower()
     results = []
@@ -197,3 +261,4 @@ def search_commands(query):
         if query_lower in entry['name'].lower() or query_lower in entry['doc'].lower():
             results.append(entry)
     return results
+

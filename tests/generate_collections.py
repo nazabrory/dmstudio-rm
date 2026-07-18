@@ -8,6 +8,7 @@ import re
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dmstudio import agent, dmcommands, dmfiles
+from dmstudio.command_registry import VERIFIED_COMMANDS
 from dmstudio.notebook_builder import NotebookBuilder
 
 def format_doc_to_markdown(doc_text):
@@ -81,11 +82,71 @@ def is_param_required_in_doc(p_name, docstring):
         pattern = r'\b' + re.escape(name) + r'\s*:'
         for match in re.finditer(pattern, docstring, re.IGNORECASE):
             start_idx = match.start()
-            look_ahead = docstring[start_idx : start_idx + 600]
+            look_ahead = docstring[start_idx : start_idx + 4000]
+            # Settle parameter block end to avoid matching down the docstring
+            next_param_match = re.search(r'\n\s*[a-zA-Z0-9_]+\s*:', look_ahead[1:])
+            if next_param_match:
+                look_ahead = look_ahead[:next_param_match.start() + 1]
             if re.search(r'Required\s*=\s*Yes', look_ahead, re.IGNORECASE):
                 return True
                 
     return False
+
+def parse_valid_value_from_docstring(p_name, docstring):
+    if not docstring:
+        return None
+    # Remove suffixes
+    clean_name = p_name.lower()
+    for suffix in ('_i', '_o', '_f', '_p'):
+        if clean_name.endswith(suffix):
+            clean_name = clean_name[:-2]
+            break
+
+    # Look for clean_name block in docstring
+    # The block starts with clean_name followed by optional spaces and colon
+    pattern = r'\b' + re.escape(clean_name) + r'\s*:\s*\n'
+    match = re.search(pattern, docstring, re.IGNORECASE)
+    if not match:
+        # Try finding clean_name: on a line
+        pattern = r'^\s*' + re.escape(clean_name) + r'\s*:\s*$'
+        match = re.search(pattern, docstring, re.IGNORECASE | re.MULTILINE)
+        
+    if not match:
+        return None
+
+    start_idx = match.start()
+    look_ahead = docstring[start_idx : start_idx + 4000]
+    # Settle block end
+    next_param_match = re.search(r'\n\s*[a-zA-Z0-9_]+\s*:', look_ahead[1:])
+    if next_param_match:
+        look_ahead = look_ahead[:next_param_match.start() + 1]
+
+    # Parse Default
+    default_match = re.search(r'Default\s*=\s*([^\n\r]+)', look_ahead, re.IGNORECASE)
+    if default_match:
+        val = default_match.group(1).strip()
+        if val.lower() != 'undefined':
+            return val
+
+    # Parse Values
+    values_match = re.search(r'Values\s*=\s*([^\n\r]+)', look_ahead, re.IGNORECASE)
+    if values_match:
+        val = values_match.group(1).strip()
+        if val.lower() != 'undefined':
+            parts = [p.strip() for p in val.split(',')]
+            if parts and parts[0]:
+                return parts[0]
+
+    # Parse Range
+    range_match = re.search(r'Range\s*=\s*([^\n\r]+)', look_ahead, re.IGNORECASE)
+    if range_match:
+        val = range_match.group(1).strip()
+        if val.lower() != 'undefined':
+            parts = [p.strip() for p in val.split(',')]
+            if parts and parts[0]:
+                return parts[0]
+
+    return None
 
 def wrap_in_quotes_if_needed(default_str):
     if default_str is None:
@@ -131,14 +192,65 @@ def get_real_field_val(name):
         return "'Y'"
     elif name_lower in ('z_f', 'zcoord_f'):
         return "'Z'"
-    elif name_lower in ('keys_f', 'key_f'):
+    elif name_lower == 'keys_f':
         return "['BHID']"
+    elif name_lower == 'key_f':
+        return "'BHID'"
     elif name_lower == 'fields_f':
         return "['AU']"
+    elif 'nfield' in name_lower:
+        return "'NFIELD'"
+    elif 'field' in name_lower:
+        return "'AU'"
     return None
 
-def get_real_output_val(name, cmd_name_lower):
-    is_list = name.endswith('s_o') or name.endswith('mods_o') or name.endswith('files_o')
+def get_real_param_val(name):
+    name_lower = name.lower()
+    if name_lower == 'inverse_p':
+        return '0'
+    elif name_lower == 'tripts_p':
+        return '1'
+    elif name_lower == 'addsymb_p':
+        return '0'
+    elif name_lower == 'flat_p':
+        return '0'
+    elif name_lower == 'planmode_p':
+        return '1'
+    elif name_lower == 'sectmode_p':
+        return '1'
+    elif 'inverse' in name_lower:
+        return '0'
+    elif 'mode' in name_lower:
+        return '1'
+    elif 'type' in name_lower:
+        return '1'
+    elif 'option' in name_lower:
+        return '1'
+    elif 'flag' in name_lower:
+        return '1'
+    elif 'power' in name_lower:
+        return '2'
+    elif 'radius' in name_lower:
+        return '50'
+    elif 'dist' in name_lower:
+        return '50'
+    elif 'resolution' in name_lower:
+        return '10'
+    elif 'interval' in name_lower:
+        return '10'
+    elif 'cutoff' in name_lower:
+        return '0.5'
+    elif 'num' in name_lower:
+        return '1'
+    elif 'count' in name_lower:
+        return '1'
+    elif 'max' in name_lower:
+        return '100'
+    elif 'min' in name_lower:
+        return '0'
+    return '0'
+
+def get_real_output_val(name, cmd_name_lower, is_list):
     val = f"t_{cmd_name_lower}_out"
     if 'smry' in name.lower() or 'summary' in name.lower():
         val = f"t_{cmd_name_lower}_summary"
@@ -149,17 +261,17 @@ def get_real_output_val(name, cmd_name_lower):
         
     return f"['{val}']" if is_list else f"'{val}'"
 
-def get_real_input_name(name):
+def get_real_input_name(name, is_list):
     name_lower = name.lower()
     
     # Ensure this is actually an input file parameter
     if not (name_lower.endswith('_i') or name_lower.endswith('mods_i') or name_lower.endswith('files_i') or name_lower in ('in1', 'in2')):
         return None
         
-    is_list = name_lower.endswith('s_i') or name_lower.endswith('mods_i') or name_lower.endswith('files_i')
-    
     val = None
-    if 'collar' in name_lower:
+    if 'inmods' in name_lower or 'infiles' in name_lower:
+        val = "'t_assays'"
+    elif 'collar' in name_lower:
         val = "'t_collars'"
     elif 'survey' in name_lower:
         val = "'t_surveys'"
@@ -167,8 +279,12 @@ def get_real_input_name(name):
         val = "'t_assays'"
     elif 'lith' in name_lower or 'lithology' in name_lower:
         val = "'t_lithology'"
-    elif 'model' in name_lower or 'proto' in name_lower:
+    elif 'model' in name_lower or 'proto' in name_lower or 'mod' in name_lower:
         val = "'t_mod1'"
+    elif 'wirept' in name_lower or 'wpt' in name_lower:
+        val = "'t_SurfacePointsPt'"
+    elif 'wiretr' in name_lower or 'wtr' in name_lower:
+        val = "'t_SurfaceTriangles'"
     elif 'point' in name_lower or 'pts' in name_lower:
         val = "'t_SurfacePointsPt'"
     elif 'tri' in name_lower or 'wire' in name_lower:
@@ -188,27 +304,30 @@ def get_real_input_name(name):
         return f"[{val}]" if is_list else val
     return None
 
-def format_param_val(name, default_str, cmd_name_lower):
-    is_list = default_str.startswith('[') or name.endswith('s_i') or name.endswith('s_o') or name.endswith('s_f') or name.endswith('s_p')
+def format_param_val(name, default_str, cmd_name_lower, docstring=""):
+    is_list = default_str.startswith('[')
+    
+    # Check if docstring has a valid default/value
+    parsed_val = parse_valid_value_from_docstring(name, docstring)
     
     if default_str == 'required':
         if name.endswith('_o') or name.endswith('mods_o') or name.endswith('files_o'):
-            val = get_real_output_val(name, cmd_name_lower)
+            val = get_real_output_val(name, cmd_name_lower, is_list)
         else:
-            real_input = get_real_input_name(name)
+            real_input = get_real_input_name(name, is_list)
             if real_input:
                 val = real_input
             else:
                 if name.endswith('_i') or name.endswith('mods_i') or name.endswith('files_i'):
-                    val = "['t_input_file']" if is_list else "'t_input_file'"
+                    val = "['t_assays']" if is_list else "'t_assays'"
                 elif name.endswith('_f'):
                     val = get_real_field_val(name) or ("['FIELD']" if is_list else "'FIELD'")
                 else:
-                    val = "'required_val'"
+                    val = wrap_in_quotes_if_needed(parsed_val) if parsed_val else get_real_param_val(name)
         return val, True
     else:
         # It is optional
-        real_input = get_real_input_name(name)
+        real_input = get_real_input_name(name, is_list)
         if real_input:
             val = real_input
         else:
@@ -216,10 +335,13 @@ def format_param_val(name, default_str, cmd_name_lower):
             if real_field:
                 val = real_field
             elif name.endswith('_o') or name.endswith('mods_o') or name.endswith('files_o'):
-                val = get_real_output_val(name, cmd_name_lower)
+                val = get_real_output_val(name, cmd_name_lower, is_list)
             else:
                 if default_str == 'optional':
-                    val = "['optional_field']" if is_list and name.endswith('_f') else "'optional'"
+                    if is_list and name.endswith('_f'):
+                        val = "['optional_field']"
+                    else:
+                        val = wrap_in_quotes_if_needed(parsed_val) if parsed_val else "'optional'"
                 else:
                     val = wrap_in_quotes_if_needed(default_str)
         return val, False
@@ -252,6 +374,9 @@ def generate_notebooks():
         cmd_name = cmd_info['name']
         cmd_name_lower = cmd_name.lower()
         
+        if cmd_name_lower not in VERIFIED_COMMANDS:
+            continue
+            
         # Determine module/wrapper prefix
         is_dmfile = cmd_name_lower in dmfiles_methods
         wrapper_var = "dm_fil" if is_dmfile else "dm_cmd"
@@ -357,6 +482,15 @@ def generate_notebooks():
             "]\n\n"
             "agent.copy_database_files(files_to_copy)"
         )
+        if cmd_name_lower == 'bhcount':
+            cell4_code += (
+                "\n\n# Patch t_assays with XC, YC, ZC coordinates required by bhcount\n"
+                "df_assays = agent.read_datamine('t_assays.dmx')\n"
+                "df_assays['XC'] = 6000.0\n"
+                "df_assays['YC'] = 5000.0\n"
+                "df_assays['ZC'] = 0.0\n"
+                "agent.to_datamine(df_assays, 't_assays.dmx')"
+            )
         nb.add_code(cell4_code)
         
         # Cell 5: Execute Process
@@ -379,9 +513,16 @@ def generate_notebooks():
         for p in params:
             p_name = p['name']
             p_def = p['default']
-            formatted_val, is_req = format_param_val(p_name, p_def, cmd_name_lower)
+            formatted_val, is_req = format_param_val(p_name, p_def, cmd_name_lower, docstring)
             if not is_req:
                 is_req = is_param_required_in_doc(p_name, docstring)
+            if cmd_name_lower == 'anisoang' and p_name in ('wiretr_i', 'wirept_i'):
+                is_req = True
+            if cmd_name_lower == 'chart' and p_name in ('x_f', 'y_f'):
+                is_req = True
+            # Force primary input parameters to be required
+            if p_name in ('in_i', 'infile_i', 'in1_i', 'table_i', 'inmods_i', 'infiles_i'):
+                is_req = True
             if is_req:
                 required_params.append(f"    {p_name}={formatted_val},  # required")
             else:
@@ -463,6 +604,19 @@ def generate_notebooks():
             except Exception as e:
                 print(f"Error removing old folder {item}: {e}")
                 
+    # Clean up any unverified command directories under collections/processes/ and collections/files/
+    for sub in ('processes', 'files'):
+        sub_path = os.path.join(collections_dir, sub)
+        if os.path.exists(sub_path):
+            for item in os.listdir(sub_path):
+                item_path = os.path.join(sub_path, item)
+                if os.path.isdir(item_path) and item.lower() not in VERIFIED_COMMANDS:
+                    print(f"Cleaning up unverified collection folder: {item_path}")
+                    try:
+                        shutil.rmtree(item_path)
+                    except Exception as e:
+                        print(f"Error removing unverified collection folder {item}: {e}")
+                        
     print(f"Successfully generated/moved {generated_count} process/file example folders and notebooks.")
 
 if __name__ == '__main__':

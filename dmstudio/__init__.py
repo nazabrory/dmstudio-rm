@@ -18,6 +18,12 @@ Submodules:
     bootstrap       - Tutorial bootstrapping and download helpers.
 '''
 
+# Proactively import pandas at the package root to avoid Python 3.14 / Cython circular import conflicts in debuggers
+try:
+    import pandas as _pd
+except ImportError:
+    pass
+
 from dmstudio import dmcommands
 from dmstudio import dmfiles
 from dmstudio import dmcommands_generated

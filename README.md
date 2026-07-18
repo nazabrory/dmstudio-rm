@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.9+-blue.svg" alt="Python Version"></a>
   <a href="https://img.shields.io/badge/version-2.0.0b4-purple.svg" alt="Version"></a>
-  <a href="LICENSE.txt"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License"></a>
+  <a href="LICENSE.txt"><img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="License"></a>
   <a href="https://www.dataminesoftware.com/"><img src="https://img.shields.io/badge/Datamine-Studio%20RM-orange.svg" alt="Datamine Studio RM"></a>
 </p>
 
@@ -381,7 +381,9 @@ Changelog: **[CHANGELOG.md](CHANGELOG.md)**. Domain vocabulary: **[CONTEXT.md](C
 
 ## ⚖️ License & Attribution
 
-Original work Copyright (c) 2018 Sean D. Horan — released under [MIT License](LICENSE.txt).  
-Modifications and new contributions Copyright (c) 2026 Achmad Nazar Abrory.
+This repository is a combined work licensed under the **GNU General Public License v3.0 (GPL-3.0)**. 
 
-The MIT license permits modification and redistribution provided the original copyright notice is preserved. See [LICENSE.txt](LICENSE.txt) for full terms.
+* Original work Copyright (c) 2018 Sean D. Horan — released under [MIT License](LICENSE.txt) (terms preserved at the end of LICENSE.txt).  
+* Modifications and new contributions Copyright (c) 2026 Achmad Nazar Abrory — released under GPL-3.0.
+
+See the [LICENSE.txt](LICENSE.txt) file for the full GPL-3.0 text, original MIT terms, and trademark/affiliation disclaimers.

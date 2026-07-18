@@ -212,6 +212,12 @@ cmd.mgsort(in_i='assays', out_o='sorted_assays', keys_f=['BHID', 'FROM'])
 cmd.copy(in_i='sorted_assays', out_o='high_grade_assays', retrieval='AU > 1.5')
 ```
 
+#### Two-Tier Command Wrapper Architecture
+
+To guarantee script stability and prevent blocking UI modals, `dmstudio` separates command wrappers into two distinct namespaces:
+* **Verified Core (`from dmstudio import dmcommands, dmfiles`)**: Contains the 23 verified core commands (e.g., `mgsort`, `copy`, `inpfil`, `stats`, `join`) tested in sandbox environments to execute reliably without manual UI interactivity.
+* **Experimental/Generated (`from dmstudio import dmcommands_generated, dmfiles_generated`)**: Exposes the remaining 280+ auto-generated wrappers. These are unverified, untested, and may trigger blocking interactive modal dialogs.
+
 #### Suffix Naming Convention Guide
 
 To translate Datamine's command arguments into Python parameters:
@@ -362,8 +368,8 @@ These tests require Datamine Studio RM to be open with a loaded project:
 
 ### ⚙️ Developer Helper Scripts
 
-* **`tests/generate_wrappers.py`**: Regenerates `dmstudio/dmcommands.py` wrapper classes from StudioRM help XML.
-* **`tests/generate_collections.py`**: Regenerates the ~300 individual sandbox notebooks under `tutorials/collections/`.
+* **`tests/generate_wrappers.py`**: Regenerates `dmstudio/dmcommands.py` / `dmfiles.py` (core/verified) and `dmcommands_generated.py` / `dmfiles_generated.py` (experimental) wrapper classes from StudioRM help XML.
+* **`tests/generate_collections.py`**: Regenerates individual sandbox notebooks under `tutorials/collections/` for the 23 verified core commands.
 * **`tests/restructure_case_studies.py`**: Case-study layout helper.
 * **`dmstudio.notebook_builder.NotebookBuilder`**: Programmatic Jupyter Notebook builder for auditable agent workflows:
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.0b7 (AI Skill Indexing and Package Integration) - 2026-07-18
+
+- **`.gitignore`**: Unignored `.agents/skills/` directory to allow IDEs and AI tools to index and discover agent skills.
+- **`dmstudio/__init__.py`**: Embedded the automated environment preparation instructions and COM isolation policy directly into the package's top-level docstring so that they are visible even when installed via PyPI without a repository clone.
+
 ## 2.0.0b6 (Automated MCP Installer & COM-less Server) - 2026-07-18
 
 - **`mcp_server.py`**: Added `--install` CLI argument to automatically detect environment python path and register with Claude Desktop, plus print other IDE configurations. Removed COM dependencies and the `read_datamine_file` tool to enforce strict COM isolation.

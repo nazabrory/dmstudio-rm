@@ -159,6 +159,8 @@ celerybeat-schedule
 # AI Agent Workspaces
 # ---------------------------------------------------------------------------
 .agents/
+!.agents/skills/
+!.agents/skills/**
 
 # ---------------------------------------------------------------------------
 # dmstudio - Public Publishing Exceptions

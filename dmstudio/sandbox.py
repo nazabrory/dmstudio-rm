@@ -89,6 +89,18 @@ def copy_database_files(files_to_copy, target_dir=None):
         else:
             print('Warning: Source {} not found in database at {}.'.format(src_name, help_db))
 
+    # Regenerate local dmdir.py in target directory
+    current_cwd = os.getcwd()
+    if os.path.abspath(target_dir) != os.path.abspath(current_cwd):
+        os.chdir(target_dir)
+        try:
+            initialize._make_dmdir()
+        finally:
+            os.chdir(current_cwd)
+    else:
+        initialize._make_dmdir()
+
+
 
 def initialize_sandbox(notebook_folder=None, files_to_copy=None):
     '''
@@ -180,3 +192,7 @@ def initialize_sandbox(notebook_folder=None, files_to_copy=None):
     # 8. Copy database files if requested
     if files_to_copy:
         copy_database_files(files_to_copy, target_dir=active_folder)
+    else:
+        # Regenerate local dmdir.py in sandbox directory
+        initialize._make_dmdir()
+

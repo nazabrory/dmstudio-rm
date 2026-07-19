@@ -412,9 +412,15 @@ def wrap_lines(text, indent_level, max_len=100):
         lines.append(indent + " ".join(current_line))
     return lines
 
-def generate_docstring(info, list_groups):
+def generate_docstring(info, list_groups, is_verified=True):
     doc = []
     doc.append(f'        r"""')
+    
+    if not is_verified:
+        doc.append("        .. warning::")
+        doc.append("            **EXPERIMENTAL / UNVERIFIED** - This command wrapper is auto-generated")
+        doc.append("            and has not been verified. Use with caution.\n")
+
     
     # Inject CAUTION warning if applicable
     caution_cmds = {
@@ -568,7 +574,8 @@ def generate_validation_code(p_name, arg_name, range_str, values_str, default_st
         
     return "\n".join(validation_lines)
 
-def generate_python_function(info):
+def generate_python_function(info, is_verified=True):
+
     # Determine lists
     input_files_grouped, in_list_groups = group_sequential_items(info['input_files'], 'file')
     output_files_grouped, out_list_groups = group_sequential_items(info['output_files'], 'output')
@@ -697,11 +704,17 @@ def generate_python_function(info):
     sig = sig[:-2] + "):\n\n"
 
     # Docstring
-    docstring = generate_docstring(info, all_list_groups)
+    docstring = generate_docstring(info, all_list_groups, is_verified=is_verified)
 
     # Function body
     body = []
+    if not is_verified:
+        body.append("        import warnings")
+        fn_name = sanitize_python_name(info['name']).lower()
+        body.append(f'        warnings.warn("`{fn_name}` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)')
+        body.append("")
     body.append(f'        command = "{info["name"].lower()} "')
+
     body.append("")
 
     # Required check for inputs
@@ -819,8 +832,6 @@ EXCLUDED_COMMANDS = {
 
 commands_funcs = []
 files_funcs = []
-commands_generated_funcs = []
-files_generated_funcs = []
 
 for filepath in files:
     info = parse_markdown_file(filepath)
@@ -845,26 +856,19 @@ for filepath in files:
             'default': 'required'
         })
         
-    func_code = generate_python_function(info)
     name_lower = info['name'].lower()
     is_verified = name_lower in VERIFIED_COMMANDS
+    func_code = generate_python_function(info, is_verified=is_verified)
     
     if has_inputs:
-        if is_verified:
-            commands_funcs.append((info['name'], func_code))
-        else:
-            commands_generated_funcs.append((info['name'], func_code))
+        commands_funcs.append((info['name'], func_code))
     else:
-        if is_verified:
-            files_funcs.append((info['name'], func_code))
-        else:
-            files_generated_funcs.append((info['name'], func_code))
+        files_funcs.append((info['name'], func_code))
 
 # Sort alphabetically by process name
 commands_funcs.sort(key=lambda x: x[0])
 files_funcs.sort(key=lambda x: x[0])
-commands_generated_funcs.sort(key=lambda x: x[0])
-files_generated_funcs.sort(key=lambda x: x[0])
+
 
 # Boilerplate templates
 commands_boilerplate = """import dmstudio.initialize
@@ -1077,25 +1081,7 @@ with open(files_path, "w", encoding="utf-8") as f:
         f.write(code)
         f.write("\n")
 
-# Write experimental/generated files
-commands_gen_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dmstudio", "dmcommands_generated.py")
-with open(commands_gen_path, "w", encoding="utf-8") as f:
-    f.write(commands_boilerplate)
-    f.write("\n")
-    for name, code in commands_generated_funcs:
-        f.write(code)
-        f.write("\n")
-
-files_gen_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dmstudio", "dmfiles_generated.py")
-with open(files_gen_path, "w", encoding="utf-8") as f:
-    f.write(files_boilerplate)
-    f.write("\n")
-    for name, code in files_generated_funcs:
-        f.write(code)
-        f.write("\n")
-
 print(f"Generated:")
-print(f" - {len(commands_funcs)} verified processes in dmcommands.py")
-print(f" - {len(files_funcs)} verified files in dmfiles.py")
-print(f" - {len(commands_generated_funcs)} experimental processes in dmcommands_generated.py")
-print(f" - {len(files_generated_funcs)} experimental files in dmfiles_generated.py")
+print(f" - {len(commands_funcs)} processes in dmcommands.py")
+print(f" - {len(files_funcs)} files in dmfiles.py")
+

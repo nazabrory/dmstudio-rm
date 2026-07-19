@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0b12 - 2026-07-19
+
+- **Wrapper Consolidation**: Consolidated unverified command wrappers from `dmcommands_generated.py` and `dmfiles_generated.py` directly into `dmcommands.py` and `dmfiles.py`. Added user warnings when unverified wrappers are called.
+- **Simplified Command Discovery**: Removed fallback imports from `command_registry.py` for generated modules.
+- **Sandbox Improvements**: Updated `sandbox.py` to automatically regenerate local `dmdir.py` files in sandbox folders.
+
 ## 2.0.0b11 - 2026-07-19
 
 - **AI Setup Integration**: Embedded the unified `dmstudio` Agent rules (`agent_rules.md`) directly in the package data.

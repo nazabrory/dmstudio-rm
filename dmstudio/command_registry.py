@@ -19,15 +19,6 @@ import inspect
 
 from dmstudio import dmcommands, dmfiles
 
-try:
-    from dmstudio import dmcommands_generated
-except ImportError:
-    dmcommands_generated = None
-
-try:
-    from dmstudio import dmfiles_generated
-except ImportError:
-    dmfiles_generated = None
 
 
 # Canonical list of verified commands
@@ -36,7 +27,7 @@ VERIFIED_COMMANDS = {
     'count', 'delete', 'diffrn', 'dmedit', 'extra',
     'holes3d', 'ijkgen', 'join', 'mgsort', 'modtra',
     'output', 'selcop', 'seldel', 'selexy', 'sortx',
-    'stats', 'tongrad', 'inpfil', 'estima', 'protom'
+    'stats', 'tongrad', 'inpfil', 'estima', 'protom', 'copymod'
 }
 
 
@@ -45,7 +36,7 @@ VERIFIED_COMMANDS = {
 # ---------------------------------------------------------------------------
 
 def _get_init_classes():
-    '''Return the list of init classes to inspect (both dmcommands/dmfiles and generated/experimental).'''
+    '''Return the list of init classes to inspect (both dmcommands/dmfiles).'''
     classes = []
     if inspect.isclass(dmcommands.init):
         classes.append(dmcommands.init)
@@ -55,19 +46,6 @@ def _get_init_classes():
         classes.append(dmfiles.init)
     else:
         classes.append(type(dmfiles.init))
-
-    if dmcommands_generated is not None:
-        if inspect.isclass(dmcommands_generated.init):
-            classes.append(dmcommands_generated.init)
-        else:
-            classes.append(type(dmcommands_generated.init))
-
-    if dmfiles_generated is not None:
-        if inspect.isclass(dmfiles_generated.init):
-            classes.append(dmfiles_generated.init)
-        else:
-            classes.append(type(dmfiles_generated.init))
-
     return classes
 
 
@@ -185,29 +163,7 @@ def get_command_schema(cmd_name):
                 except Exception:
                     pass
 
-    # Fallback 3: search module-level names in dmcommands_generated
-    if func is None and dmcommands_generated is not None:
-        for name in dir(dmcommands_generated):
-            if name.lower() == cmd_name_lower:
-                try:
-                    attr = getattr(dmcommands_generated, name)
-                    if callable(attr):
-                        func = attr
-                        break
-                except Exception as e:
-                    pass
 
-    # Fallback 4: search module-level names in dmfiles_generated
-    if func is None and dmfiles_generated is not None:
-        for name in dir(dmfiles_generated):
-            if name.lower() == cmd_name_lower:
-                try:
-                    attr = getattr(dmfiles_generated, name)
-                    if callable(attr):
-                        func = attr
-                        break
-                except Exception as e:
-                    pass
 
     if func is None:
         raise ValueError('Command not found: {}'.format(cmd_name))

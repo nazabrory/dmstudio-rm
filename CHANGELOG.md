@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.0b10 - 2026-07-19
+
+- **Version Bump**: Bumped pre-release version to 2.0.0b10.
+
 ## 2.0.0b9 (IDE Settings Guide & Documentation) - 2026-07-18
 
 - **`README.md` & `SKILL.md`**: Enhanced environment and MCP installation documentation to explicitly guide Cursor, Windsurf, and other IDE users on manual graphical settings setup, since these editors do not utilize Claude Desktop's JSON configuration.

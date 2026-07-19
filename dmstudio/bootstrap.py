@@ -90,3 +90,51 @@ def download_tutorials(target_dir):
         # Clean up temporary file
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
+
+
+def install_agent_skills(target_dir=None):
+    '''
+    install_agent_skills
+    --------------------
+
+    Install the AI agent skills and guidelines into the specified project
+    directory (specifically under `.agents/skills/dmstudio-rules/SKILL.md`).
+    This allows local agent harnesses (like Antigravity) to automatically
+    discover and adhere to Datamine Studio RM rules.
+
+    Parameters:
+    -----------
+    target_dir: str, optional
+        Absolute or relative path to the project directory. If omitted,
+        the current working directory is used.
+    '''
+    if target_dir is None:
+        target_dir = os.getcwd()
+    
+    target_dir = os.path.abspath(target_dir)
+    
+    # 1. Locate source rules file
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+    rules_src = os.path.join(package_dir, 'agent_rules.md')
+    
+    if not os.path.exists(rules_src):
+        # Try fallback if not packaged properly
+        raise FileNotFoundError(
+            'Agent rules source file not found at: {}. Please make sure the package was installed correctly.'.format(rules_src)
+        )
+        
+    # 2. Determine target path
+    # Target directory structure: .agents/skills/dmstudio-rules/SKILL.md
+    skills_dir = os.path.join(target_dir, '.agents', 'skills', 'dmstudio-rules')
+    target_path = os.path.join(skills_dir, 'SKILL.md')
+    
+    # 3. Create target directory and copy
+    os.makedirs(skills_dir, exist_ok=True)
+    
+    try:
+        shutil.copy2(rules_src, target_path)
+        print('Successfully installed AI agent skill to: {}'.format(target_path))
+        return target_path
+    except Exception as e:
+        raise RuntimeError('Failed to install AI agent skill: {}'.format(e))
+

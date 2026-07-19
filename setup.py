@@ -17,5 +17,5 @@ setup(name='dmstudio-rm',
       license='GPL-3.0',
       packages=['dmstudio'],
       include_package_data=True,
-      package_data={'': ['LICENSE.txt', 'README.md']},
+      package_data={'': ['LICENSE.txt', 'README.md'], 'dmstudio': ['agent_rules.md']},
       zip_safe=False)

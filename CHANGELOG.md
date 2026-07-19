@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.0b11 - 2026-07-19
+
+- **AI Setup Integration**: Embedded the unified `dmstudio` Agent rules (`agent_rules.md`) directly in the package data.
+- **MCP Rules & Prompts**: Added a dedicated MCP Resource (`resource://dmstudio/agent-rules`) and Prompt (`dmstudio-rules`) to allow automatic context injection into AI clients.
+- **Workspace Skills Installer**: Introduced `--install-skills` CLI option and `dmstudio.install_agent_skills()` helper to install coding skills to local `.agents/skills/` workspaces.
+- **Interactive Setup Prompt**: Tailored the README setup guide around a single copy-paste prompt instructing AI assistants to automatically build local JSON MCP configurations and workspace skills.
+
 ## 2.0.0b10 - 2026-07-19
 
 - **Version Bump**: Bumped pre-release version to 2.0.0b10.

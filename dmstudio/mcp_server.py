@@ -158,8 +158,53 @@ def create_jupyter_workflow(notebook_name: str, steps: list) -> str:
 
 
 # ---------------------------------------------------------------------------
+# MCP Resource: agent-rules
+# ---------------------------------------------------------------------------
+
+@mcp.resource(
+    uri="resource://dmstudio/agent-rules",
+    name="Datamine Studio RM AI Agent Rules",
+    description="Guidelines, constraints, and standard workflows for AI agents scripting Datamine Studio RM via dmstudio."
+)
+def get_agent_rules() -> str:
+    '''
+    Retrieve the Datamine Studio RM AI Agent Rules markdown document.
+    '''
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+    rules_path = os.path.join(package_dir, 'agent_rules.md')
+    if not os.path.exists(rules_path):
+        return "# Error\nAgent rules file not found inside the package distribution."
+    
+    with open(rules_path, 'r', encoding='utf-8') as f:
+        return f.read()
+
+
+# ---------------------------------------------------------------------------
+# MCP Prompt: dmstudio-rules
+# ---------------------------------------------------------------------------
+
+@mcp.prompt(
+    name="dmstudio-rules",
+    title="Datamine Studio RM AI Rules",
+    description="Inject the critical guidelines and constraints for writing Datamine Studio RM COM scripts into the agent's context."
+)
+def dmstudio_rules() -> list:
+    '''
+    Provide the agent rules and constraints as a developer message.
+    '''
+    content = get_agent_rules()
+    return [
+        {
+            "role": "user",
+            "content": "Please review and adhere to the following rules when working with the dmstudio library:\n\n{}".format(content)
+        }
+    ]
+
+
+# ---------------------------------------------------------------------------
 # Installer & Entry point
 # ---------------------------------------------------------------------------
+
 
 def install_mcp_config():
     '''Registers the MCP server in Claude Desktop config and prints setup info.'''
@@ -207,14 +252,23 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description="Datamine Studio RM MCP Server")
     parser.add_argument("--install", action="store_true", help="Install/register this MCP server on the host machine")
+    parser.add_argument("--install-skills", action="store_true", help="Install AI agent skill markdown files into the current workspace (.agents/skills/)")
     args = parser.parse_args()
 
-    if args.install:
+    if args.install_skills:
+        from dmstudio.bootstrap import install_agent_skills
+        try:
+            install_agent_skills()
+            sys.exit(0)
+        except Exception as e:
+            print("Error: {}".format(e))
+            sys.exit(1)
+    elif args.install:
         success = install_mcp_config()
         print("\nConfiguration for other IDEs / AI harnesses (e.g. Cursor, Windsurf, Antigravity, etc.):")
         print("Add a command-type MCP server with the following settings:")
-        print(f"  Name: dmstudio")
-        print(f"  Command: {sys.executable} -m dmstudio.mcp_server")
+        print("  Name: dmstudio")
+        print("  Command: {} -m dmstudio.mcp_server".format(sys.executable))
         sys.exit(0 if success else 1)
     else:
         mcp.run(transport='stdio')

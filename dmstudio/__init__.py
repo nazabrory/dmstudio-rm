@@ -39,4 +39,4 @@ from dmstudio import dialog
 from dmstudio import bootstrap
 
 # Shortcuts
-from dmstudio.bootstrap import download_tutorials
+from dmstudio.bootstrap import download_tutorials, install_agent_skills

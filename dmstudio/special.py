@@ -77,14 +77,15 @@ def inpfil(csv=None, out_o=None, definition=None):
 
     for i in range(len(definition)):
 
+        idx = definition.index[i]
         if definition['Field Name'].iloc[i] in CHAR8_FIELDS:
-            definition['Field Type'].iloc[i] = 'A'
-            definition['Length'].iloc[i] = 8
+            definition.loc[idx, 'Field Type'] = 'A'
+            definition.loc[idx, 'Length'] = 8
 
         if definition['Field Name'].iloc[i].strip() in IMPLICIT_FIELDS:
-            definition['Field Type'].iloc[i] = 'N'
-            definition['Keep'].iloc[i] = 'N'
-            definition['Default'].iloc[i] = df[definition['Field Name'].iloc[i]].iloc[0]
+            definition.loc[idx, 'Field Type'] = 'N'
+            definition.loc[idx, 'Keep'] = 'N'
+            definition.loc[idx, 'Default'] = df[definition['Field Name'].iloc[i]].iloc[0]
 
         for column in definition.columns:
             if column == 'Length' and definition['Field Type'].iloc[i] == 'N':

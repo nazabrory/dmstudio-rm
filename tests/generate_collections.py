@@ -261,7 +261,7 @@ def get_real_output_val(name, cmd_name_lower, is_list):
         
     return f"['{val}']" if is_list else f"'{val}'"
 
-def get_real_input_name(name, is_list):
+def get_real_input_name(name, is_list, cmd_name_lower=''):
     name_lower = name.lower()
     
     # Ensure this is actually an input file parameter
@@ -269,7 +269,9 @@ def get_real_input_name(name, is_list):
         return None
         
     val = None
-    if 'inmods' in name_lower or 'infiles' in name_lower:
+    if cmd_name_lower == 'compdh' and name_lower in ('in_i', 'infile_i'):
+        val = "'t_dholes'"
+    elif 'inmods' in name_lower or 'infiles' in name_lower:
         val = "'t_assays'"
     elif 'collar' in name_lower:
         val = "'t_collars'"
@@ -314,7 +316,7 @@ def format_param_val(name, default_str, cmd_name_lower, docstring=""):
         if name.endswith('_o') or name.endswith('mods_o') or name.endswith('files_o'):
             val = get_real_output_val(name, cmd_name_lower, is_list)
         else:
-            real_input = get_real_input_name(name, is_list)
+            real_input = get_real_input_name(name, is_list, cmd_name_lower)
             if real_input:
                 val = real_input
             else:
@@ -327,7 +329,7 @@ def format_param_val(name, default_str, cmd_name_lower, docstring=""):
         return val, True
     else:
         # It is optional
-        real_input = get_real_input_name(name, is_list)
+        real_input = get_real_input_name(name, is_list, cmd_name_lower)
         if real_input:
             val = real_input
         else:
@@ -478,6 +480,17 @@ def generate_notebooks():
                 "df_assays['YC'] = 5000.0\n"
                 "df_assays['ZC'] = 0.0\n"
                 "agent.to_datamine(df_assays, 't_assays.dmx')"
+            )
+        elif cmd_name_lower == 'compdh':
+            cell4_code += (
+                "\n\n# Desurvey drillholes using holes3d to create standard sample format required by compdh\n"
+                "print(\"Desurveying drillholes with holes3d...\")\n"
+                "dm_cmd.holes3d(\n"
+                "    collar_i='t_collars',\n"
+                "    survey_i='t_surveys',\n"
+                "    samples_i=['t_assays'],\n"
+                "    out_o='t_dholes'\n"
+                ")"
             )
         nb.add_code(cell4_code)
         

@@ -524,6 +524,8 @@ def generate_notebooks():
             if cmd_name_lower == 'copymod' and p_name == 'modtype_p':
                 is_req = True
                 formatted_val = '1'
+            if cmd_name_lower == 'count' and p_name == 'keys_f':
+                is_req = True
             # Force primary input parameters to be required
             if p_name in ('in_i', 'infile_i', 'in1_i', 'table_i', 'inmods_i', 'infiles_i'):
                 is_req = True

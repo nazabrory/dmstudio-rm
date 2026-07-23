@@ -8231,10 +8231,6 @@ If retrieval criteria are in force, the output file only contains those records 
                 retrieval="optional"):
 
         r"""
-        .. warning::
-            **EXPERIMENTAL / UNVERIFIED** - This command wrapper is auto-generated
-            and has not been verified. Use with caution.
-
         COPYMOD
         -------
         **Note** : This is a _superprocess_ and running it may have an effect on other Datamine files in the project.
@@ -8304,9 +8300,6 @@ In order to add world coordinates to an existing model use **MODTYPE** 4 but do 
             Required=No
 
         """
-        import warnings
-        warnings.warn("`copymod` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
-
         command = "copymod "
 
         if modelin_i == "required":

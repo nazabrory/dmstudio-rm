@@ -122,26 +122,26 @@ def parse_valid_value_from_docstring(p_name, docstring):
         look_ahead = look_ahead[:next_param_match.start() + 1]
 
     # Parse Default
-    default_match = re.search(r'Default\s*=\s*([^\n\r]+)', look_ahead, re.IGNORECASE)
+    default_match = re.search(r'Default\s*=[ \t]*([^\n\r]+)', look_ahead, re.IGNORECASE)
     if default_match:
         val = default_match.group(1).strip()
-        if val.lower() != 'undefined':
+        if val and val.lower() != 'undefined':
             return val
 
     # Parse Values
-    values_match = re.search(r'Values\s*=\s*([^\n\r]+)', look_ahead, re.IGNORECASE)
+    values_match = re.search(r'Values\s*=[ \t]*([^\n\r]+)', look_ahead, re.IGNORECASE)
     if values_match:
         val = values_match.group(1).strip()
-        if val.lower() != 'undefined':
+        if val and val.lower() != 'undefined':
             parts = [p.strip() for p in val.split(',')]
             if parts and parts[0]:
                 return parts[0]
 
     # Parse Range
-    range_match = re.search(r'Range\s*=\s*([^\n\r]+)', look_ahead, re.IGNORECASE)
+    range_match = re.search(r'Range\s*=[ \t]*([^\n\r]+)', look_ahead, re.IGNORECASE)
     if range_match:
         val = range_match.group(1).strip()
-        if val.lower() != 'undefined':
+        if val and val.lower() != 'undefined':
             parts = [p.strip() for p in val.split(',')]
             if parts and parts[0]:
                 return parts[0]
@@ -521,6 +521,9 @@ def generate_notebooks():
                 is_req = True
             if cmd_name_lower == 'chart' and p_name in ('x_f', 'y_f'):
                 is_req = True
+            if cmd_name_lower == 'copymod' and p_name == 'modtype_p':
+                is_req = True
+                formatted_val = '1'
             # Force primary input parameters to be required
             if p_name in ('in_i', 'infile_i', 'in1_i', 'table_i', 'inmods_i', 'infiles_i'):
                 is_req = True

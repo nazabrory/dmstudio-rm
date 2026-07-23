@@ -15103,6 +15103,7 @@ If no SYSFILE exists, data lines are entered in free format. ! terminates. The r
                 seed_p="optional",
                 fldfail_p=1,
                 print_p=0,
+                expression="optional",
                 arguments="optional",
                 retrieval="optional"):
 
@@ -15111,17 +15112,21 @@ If no SYSFILE exists, data lines are entered in free format. ! terminates. The r
         -----
         **EXTRA** is a general purpose EXpression TRAnslator that allows you to _transform_ the contents of files by modifying fields and creating new ones based on the values of existing fields. **EXTRA** also makes it easy to calculate new fields in any file, based on existing fields and values. 
 
-**Tip** : If you're looking for examples of **EXTRA** usage, see [EXTRA examples](<../COMMON/Expression%20Translator%20Examples.md>).
-
-Before **EXTRA** starts to process records from the input file, it must define which fields will appear in the output file. It is important to understand that _all_ decisions about fields in the output file are made _before_ any records are processed.
-
-Normally, the fields that appear in the output are:
-
-  * All fields that are in the input file
-
-  * Fields created in the transforms you specify.
-
-See [EXTRA examples](<../COMMON/Expression%20Translator%20Examples.md>).
+        CRITICAL EXTRA SYNTAX RULES FOR PYTHON / AI SCRIPTING:
+        1. Expression Argument: Pass expression as a Python list of string statements:
+           expression=['FIELD;N = 1.0', 'NAME;A16 = "DEFAULT"', 'IF (VAL == ABSENT()) VAL = 0 END']
+        2. String Constants: String literals MUST be enclosed in DOUBLE QUOTES (e.g. "HIGH_GRADE"). Single quotes are NOT string delimiters in EXTRA.
+        3. Field Type Declarations:
+           - Numeric fields: Append ;N or ;n when creating new fields (e.g. LENGTH;N = TO - FROM).
+           - String fields: Append ;A<len> (max length 256) when creating new string fields (e.g. CODE;A16 = "BLK").
+        4. Reserved Characters & Field Names:
+           - Reserved operators: +, -, *, /, =, <, >, (, ). Field names with reserved characters or matching function names (min, max, type) MUST be enclosed in square brackets: [g/t], [NUM-FLDS], [max].
+        5. Missing Values: Compare numeric missing values using absent() function: IF (AU == ABSENT()) AU = 0.0 END.
+        6. Conditional Statements: Use if (cond) ... elseif (cond) ... else ... end. Note that 'elseif' is ONE WORD. No comments (#) inside IF blocks.
+        7. Record Functions & Dependencies:
+           - first(), last(), prev(FIELD), next(FIELD) operate across adjacent records.
+           - Any field referenced in formulas or prev() MUST exist in the input schema or be calculated in an earlier statement line!
+        8. Scratch Field Cleanup: Use erase(F1, F2) to remove temporary fields before writing output. erase() requires all target fields to exist.
 
         Input Files:
         ------------
@@ -15227,6 +15232,21 @@ See [EXTRA examples](<../COMMON/Expression%20Translator%20Examples.md>).
 
         if print_p != "optional":
             command += " @print=" + str(print_p)
+
+        if expression != "optional":
+            # Accept a list of expression strings or a single string.
+            # Each expression is wrapped in single quotes as required by ParseCommand.
+            # A 'GO' token is appended to trigger EXTRA processing (required in script/macro mode).
+            if isinstance(expression, list):
+                expr_parts = "".join(f"'{e} '" for e in expression) + "'GO'"
+            else:
+                # Single string: treat as one expression, append GO if not already present
+                expr_str = expression.strip()
+                if not expr_str.upper().endswith("GO'") and not expr_str.upper().endswith("GO"):
+                    expr_parts = f"'{expr_str} ''GO'"
+                else:
+                    expr_parts = expression
+            command += " " + expr_parts
 
         if arguments != "optional":
             command += " " + arguments

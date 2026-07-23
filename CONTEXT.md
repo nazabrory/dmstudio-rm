@@ -51,3 +51,16 @@ _Avoid_: nbconvert alone (when you mean the full orchestration)
 **Test results**:
 Timestamped storage of a run’s summary (`summary.md`) and failing/errored evaluated notebooks.
 _Avoid_: output folder (unspecified)
+
+### EXTRA Process Syntax
+
+**EXTRA Expression List**:
+A Python list of string transformation statements passed to `dm_cmd.extra(in_i=..., out_o=..., expression=[...])`.
+- String constants **must use double quotes** (`"VAL"`).
+- New numeric fields require `;N` (`VAL;N = 10.0`). New string fields require `;A<len>` (`CODE;A16 = "STR"`).
+- Reserved characters or functions used as field names must be enclosed in brackets (`[g/t]`, `[max]`).
+- Conditional statements must use `elseif` (one word) and end with `end`.
+- Missing values must be tested using `absent()` function (`IF (AU == ABSENT()) ...`).
+- Fields referenced in `prev()`, `next()`, or arithmetic expressions must exist or be calculated in earlier lines.
+- Temporary scratch fields can be removed before output with `erase(FIELD)`.
+

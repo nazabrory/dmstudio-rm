@@ -369,7 +369,7 @@ def generate_notebooks():
         if not name.startswith('_') and callable(getattr(cls_file, name)):
             dmfiles_methods.add(name.lower())
             
-    skipped = ['protom', 'estima', 'cokrig']
+    skipped = ['protom', 'estima', 'cokrig', 'extra']
     generated_count = 0
     
     for cmd_info in commands:
@@ -546,20 +546,38 @@ def generate_notebooks():
         nb.add_code(cell5_code)
         
         # Cell 6: Verify Results (Functional verification!)
-        nb.add_markdown(
-            "## Step 5: Verify Results\n"
-            "Check that output files exist on disk and read them using pandas to verify the outputs."
-        )
-        cell6_code = (
-            "# Step 5: Verify results\n"
-            f"output_file = 't_{cmd_name_lower}_out.dmx'\n"
-            "if os.path.exists(output_file):\n"
-            "    df = agent.read_datamine(output_file)\n"
-            "    print(f\"Output file loaded successfully. Rows: {len(df)}\")\n"
-            "    print(df.head())\n"
-            "else:\n"
-            "    print(\"Output file not found (run Step 4 first)\")"
-        )
+        if cmd_name_lower == 'delete':
+            nb.add_markdown(
+                "## Step 5: Verify Results\n"
+                "Verify that the input file has been successfully deleted from disk."
+            )
+            cell6_code = (
+                "# Step 5: Verify results\n"
+                "# The delete process should remove the input file from disk.\n"
+                "deleted = True\n"
+                "for ext in ['.dmx', '.dm']:\n"
+                "    target = f't_assays{ext}'\n"
+                "    if os.path.exists(target):\n"
+                "        deleted = False\n"
+                "        print(f\"Verification Failed: '{target}' still exists on disk.\")\n\n"
+                "if deleted:\n"
+                "    print(\"Verification Passed: 't_assays' has been successfully deleted from disk.\")"
+            )
+        else:
+            nb.add_markdown(
+                "## Step 5: Verify Results\n"
+                "Check that output files exist on disk and read them using pandas to verify the outputs."
+            )
+            cell6_code = (
+                "# Step 5: Verify results\n"
+                f"output_file = 't_{cmd_name_lower}_out.dmx'\n"
+                "if os.path.exists(output_file):\n"
+                "    df = agent.read_datamine(output_file)\n"
+                "    print(f\"Output file loaded successfully. Rows: {len(df)}\")\n"
+                "    print(df.head())\n"
+                "else:\n"
+                "    print(\"Output file not found (run Step 4 first)\")"
+            )
         nb.add_code(cell6_code)
         
         # Cell 7: Cleanup

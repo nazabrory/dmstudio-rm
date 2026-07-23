@@ -200,8 +200,8 @@ def get_real_field_val(name):
         return "['AU']"
     elif 'nfield' in name_lower:
         return "'NFIELD'"
-    elif 'field' in name_lower:
-        return "'AU'"
+    elif 'field' in name_lower or name_lower.startswith('f1') or 'f1_' in name_lower:
+        return "'ZONE'" if 'mod' in name_lower or 'f1' in name_lower or 'zone' in name_lower else "'AU'"
     return None
 
 def get_real_param_val(name):
@@ -271,8 +271,10 @@ def get_real_input_name(name, is_list, cmd_name_lower=''):
     val = None
     if cmd_name_lower == 'compdh' and name_lower in ('in_i', 'infile_i'):
         val = "'t_dholes'"
+    elif cmd_name_lower == 'ijkgen' and name_lower in ('in_i', 'infile_i'):
+        val = "'t_holes'"
     elif 'inmods' in name_lower or 'infiles' in name_lower:
-        val = "'t_assays'"
+        val = "'t_assays', 't_lithology'" if is_list else "'t_assays'"
     elif 'collar' in name_lower:
         val = "'t_collars'"
     elif 'survey' in name_lower:
@@ -468,7 +470,8 @@ def generate_notebooks():
             "    \"_vb_vpar.dmx\",\n"
             "    \"_vb_mod1.dmx\",\n"
             "    \"_vb_SurfacePointsPt.dmx\",\n"
-            "    \"_vb_SurfaceTriangles.dmx\"\n"
+            "    \"_vb_SurfaceTriangles.dmx\",\n"
+            "    \"_vb_holes.dmx\"\n"
             "]\n\n"
             "agent.copy_database_files(files_to_copy)"
         )
@@ -501,49 +504,72 @@ def generate_notebooks():
             "Required parameters are active, and optional parameters are commented out."
         )
         
-        # Build command call signature code
-        call_lines = []
-        call_lines.append(f"# Execute {cmd_name_lower}")
-        call_lines.append(f"print(\"Running {cmd_name_lower}...\")")
-        call_lines.append(f"{wrapper_var}.{cmd_name_lower}(")
-        
-        params = schema.get('parameters', [])
-        required_params = []
-        optional_params = []
-        
-        for p in params:
-            p_name = p['name']
-            p_def = p['default']
-            formatted_val, is_req = format_param_val(p_name, p_def, cmd_name_lower, docstring)
-            if not is_req:
-                is_req = is_param_required_in_doc(p_name, docstring)
-            if cmd_name_lower == 'anisoang' and p_name in ('wiretr_i', 'wirept_i'):
-                is_req = True
-            if cmd_name_lower == 'chart' and p_name in ('x_f', 'y_f'):
-                is_req = True
-            if cmd_name_lower == 'copymod' and p_name == 'modtype_p':
-                is_req = True
-                formatted_val = '1'
-            if cmd_name_lower == 'count' and p_name == 'keys_f':
-                is_req = True
-            # Force primary input parameters to be required
-            if p_name in ('in_i', 'infile_i', 'in1_i', 'table_i', 'inmods_i', 'infiles_i'):
-                is_req = True
-            if is_req:
-                required_params.append(f"    {p_name}={formatted_val},  # required")
-            else:
-                optional_params.append(f"    # {p_name}={formatted_val},  # optional")
-                
-        # Combine required and optional
-        all_param_lines = required_params + optional_params
-        for line in all_param_lines:
-            call_lines.append(line)
+        if cmd_name_lower == 'inpfil':
+            cell5_code = (
+                "# Execute inpfil using special.inpfil helper to load data non-interactively via system file\n"
+                "from dmstudio import special\n\n"
+                "print(\"Running inpfil...\")\n\n"
+                "# Create a temporary CSV dataset to supply field definitions and data\n"
+                "sample_data = pd.DataFrame({\n"
+                "    'BHID': ['DH01', 'DH02'],\n"
+                "    'X': [100.0, 105.0],\n"
+                "    'Y': [200.0, 205.0],\n"
+                "    'Z': [50.0, 52.0],\n"
+                "    'AU': [1.5, 2.3]\n"
+                "})\n"
+                "temp_csv = 't_inpfil_input.csv'\n"
+                "sample_data.to_csv(temp_csv, index=False)\n\n"
+                "# Execute INPFIL non-interactively via special helper\n"
+                "special.inpfil(csv=temp_csv, out_o='t_inpfil_out')\n\n"
+                "if os.path.exists(temp_csv):\n"
+                "    os.remove(temp_csv)\n\n"
+                "print(\"inpfil execution completed.\")"
+            )
+            nb.add_code(cell5_code)
+        else:
+            # Build command call signature code
+            call_lines = []
+            call_lines.append(f"# Execute {cmd_name_lower}")
+            call_lines.append(f"print(\"Running {cmd_name_lower}...\")")
+            call_lines.append(f"{wrapper_var}.{cmd_name_lower}(")
             
-        call_lines.append(")")
-        call_lines.append(f"print(\"{cmd_name_lower} execution completed.\")")
-        
-        cell5_code = '\n'.join(call_lines)
-        nb.add_code(cell5_code)
+            params = schema.get('parameters', [])
+            required_params = []
+            optional_params = []
+            
+            for p in params:
+                p_name = p['name']
+                p_def = p['default']
+                formatted_val, is_req = format_param_val(p_name, p_def, cmd_name_lower, docstring)
+                if not is_req:
+                    is_req = is_param_required_in_doc(p_name, docstring)
+                if cmd_name_lower == 'anisoang' and p_name in ('wiretr_i', 'wirept_i'):
+                    is_req = True
+                if cmd_name_lower == 'chart' and p_name in ('x_f', 'y_f'):
+                    is_req = True
+                if cmd_name_lower == 'copymod' and p_name == 'modtype_p':
+                    is_req = True
+                    formatted_val = '1'
+                if cmd_name_lower in ('join', 'subjoi', 'weave', 'subwve', 'count') and p_name == 'keys_f':
+                    is_req = True
+                # Force primary input parameters to be required
+                if p_name in ('in_i', 'infile_i', 'in1_i', 'table_i', 'inmods_i', 'infiles_i'):
+                    is_req = True
+                if is_req:
+                    required_params.append(f"    {p_name}={formatted_val},  # required")
+                else:
+                    optional_params.append(f"    # {p_name}={formatted_val},  # optional")
+                    
+            # Combine required and optional
+            all_param_lines = required_params + optional_params
+            for line in all_param_lines:
+                call_lines.append(line)
+                
+            call_lines.append(")")
+            call_lines.append(f"print(\"{cmd_name_lower} execution completed.\")")
+            
+            cell5_code = '\n'.join(call_lines)
+            nb.add_code(cell5_code)
         
         # Cell 6: Verify Results (Functional verification!)
         if cmd_name_lower == 'delete':

@@ -15103,7 +15103,6 @@ If no SYSFILE exists, data lines are entered in free format. ! terminates. The r
                 seed_p="optional",
                 fldfail_p=1,
                 print_p=0,
-                expression="optional",
                 arguments="optional",
                 retrieval="optional"):
 
@@ -15112,21 +15111,17 @@ If no SYSFILE exists, data lines are entered in free format. ! terminates. The r
         -----
         **EXTRA** is a general purpose EXpression TRAnslator that allows you to _transform_ the contents of files by modifying fields and creating new ones based on the values of existing fields. **EXTRA** also makes it easy to calculate new fields in any file, based on existing fields and values. 
 
-        CRITICAL EXTRA SYNTAX RULES FOR PYTHON / AI SCRIPTING:
-        1. Expression Argument: Pass expression as a Python list of string statements:
-           expression=['FIELD;N = 1.0', 'NAME;A16 = "DEFAULT"', 'IF (VAL == ABSENT()) VAL = 0 END']
-        2. String Constants: String literals MUST be enclosed in DOUBLE QUOTES (e.g. "HIGH_GRADE"). Single quotes are NOT string delimiters in EXTRA.
-        3. Field Type Declarations:
-           - Numeric fields: Append ;N or ;n when creating new fields (e.g. LENGTH;N = TO - FROM).
-           - String fields: Append ;A<len> (max length 256) when creating new string fields (e.g. CODE;A16 = "BLK").
-        4. Reserved Characters & Field Names:
-           - Reserved operators: +, -, *, /, =, <, >, (, ). Field names with reserved characters or matching function names (min, max, type) MUST be enclosed in square brackets: [g/t], [NUM-FLDS], [max].
-        5. Missing Values: Compare numeric missing values using absent() function: IF (AU == ABSENT()) AU = 0.0 END.
-        6. Conditional Statements: Use if (cond) ... elseif (cond) ... else ... end. Note that 'elseif' is ONE WORD. No comments (#) inside IF blocks.
-        7. Record Functions & Dependencies:
-           - first(), last(), prev(FIELD), next(FIELD) operate across adjacent records.
-           - Any field referenced in formulas or prev() MUST exist in the input schema or be calculated in an earlier statement line!
-        8. Scratch Field Cleanup: Use erase(F1, F2) to remove temporary fields before writing output. erase() requires all target fields to exist.
+**Tip** : If you're looking for examples of **EXTRA** usage, see [EXTRA examples](<../COMMON/Expression%20Translator%20Examples.md>).
+
+Before **EXTRA** starts to process records from the input file, it must define which fields will appear in the output file. It is important to understand that _all_ decisions about fields in the output file are made _before_ any records are processed.
+
+Normally, the fields that appear in the output are:
+
+  * All fields that are in the input file
+
+  * Fields created in the transforms you specify.
+
+See [EXTRA examples](<../COMMON/Expression%20Translator%20Examples.md>).
 
         Input Files:
         ------------
@@ -15232,21 +15227,6 @@ If no SYSFILE exists, data lines are entered in free format. ! terminates. The r
 
         if print_p != "optional":
             command += " @print=" + str(print_p)
-
-        if expression != "optional":
-            # Accept a list of expression strings or a single string.
-            # Each expression is wrapped in single quotes as required by ParseCommand.
-            # A 'GO' token is appended to trigger EXTRA processing (required in script/macro mode).
-            if isinstance(expression, list):
-                expr_parts = "".join(f"'{e} '" for e in expression) + "'GO'"
-            else:
-                # Single string: treat as one expression, append GO if not already present
-                expr_str = expression.strip()
-                if not expr_str.upper().endswith("GO'") and not expr_str.upper().endswith("GO"):
-                    expr_parts = f"'{expr_str} ''GO'"
-                else:
-                    expr_parts = expression
-            command += " " + expr_parts
 
         if arguments != "optional":
             command += " " + arguments
@@ -26612,7 +26592,8 @@ The specified fields * **F1** \- * **Fn** should have discrete values rather tha
             command += " &out=" + out_o
 
         if f1_f5_f != "optional":
-            command += " *f1-f5=" + f1_f5_f
+            f_list = [x.strip() for x in f1_f5_f.split(",")] if isinstance(f1_f5_f, str) else list(f1_f5_f)
+            command += self.parse_infields_list("f", f_list, 5, "*")
 
         if xg_f != "optional":
             command += " *xg=" + xg_f
@@ -26961,7 +26942,8 @@ The metal content and mass from the stope wireframe data is the same in the bloc
             command += " *tonnes=" + tonnes_f
 
         if f1_f20_f != "optional":
-            command += " *f1 - f20=" + f1_f20_f
+            f_list = [x.strip() for x in f1_f20_f.split(",")] if isinstance(f1_f20_f, str) else list(f1_f20_f)
+            command += self.parse_infields_list("f", f_list, 20, "*")
 
         if instope_f != "optional":
             command += " *instope=" + instope_f
@@ -27647,10 +27629,10 @@ The optional wireframe file is created around the limits of the prototype model.
                 fieldlst_i="optional",
                 fields_f=['optional'],
                 fieldnam_f="optional",
-                csv_p=0,
-                nodd_p=0,
-                dplace_p=-1,
-                implicit_p=0,
+                csv_p="optional",
+                nodd_p="optional",
+                dplace_p="optional",
+                implicit_p="optional",
                 arguments="optional",
                 retrieval="optional"):
 
@@ -27802,7 +27784,7 @@ The maximum permitted width of 240 characters is not applicable when using this 
                 if isinstance(dplace_p, (int, float)):
                     raise e
 
-        if dplace_p != "optional":
+        if dplace_p != "optional" and dplace_p != -1:
             command += " @dplace=" + str(dplace_p)
 
         if implicit_p != "optional":
@@ -44494,7 +44476,8 @@ If **REGMOD** is used for other purposes then the implication of this treatment 
             command += " &out=" + out_o
 
         if f1_f25_f != "optional":
-            command += " *f1-f25=" + f1_f25_f
+            f_list = [x.strip() for x in f1_f25_f.split(",")] if isinstance(f1_f25_f, str) else list(f1_f25_f)
+            command += self.parse_infields_list("f", f_list, 25, "*")
 
         if fieldnam_f != "optional":
             command += " *fieldnam=" + fieldnam_f
@@ -44639,7 +44622,8 @@ Note: This can be performed on any type of Datamine block model.
             command += " *bltype=" + bltype_f
 
         if f1_f5_f != "optional":
-            command += " *f1-f5=" + f1_f5_f
+            f_list = [x.strip() for x in f1_f5_f.split(",")] if isinstance(f1_f5_f, str) else list(f1_f5_f)
+            command += self.parse_infields_list("f", f_list, 5, "*")
 
         if inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")

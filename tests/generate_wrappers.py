@@ -764,10 +764,18 @@ def generate_python_function(info, is_verified=True):
                 body.append(f'            command += " *dom{k}=" + dom{k}_f')
                 body.append("")
         else:
-            clean_f_name = f["name"].replace('*', '').strip().lower()
-            body.append(f'        if {name} != "optional":')
-            body.append(f'            command += " *{clean_f_name}=" + {name}')
-            body.append("")
+            range_match = re.match(r'f1[_-]?f(\d+)', raw_name)
+            if range_match:
+                max_f = int(range_match.group(1))
+                body.append(f'        if {name} != "optional":')
+                body.append(f'            f_list = [x.strip() for x in {name}.split(",")] if isinstance({name}, str) else list({name})')
+                body.append(f'            command += self.parse_infields_list("f", f_list, {max_f}, "*")')
+                body.append("")
+            else:
+                clean_f_name = f["name"].replace('*', '').strip().lower()
+                body.append(f'        if {name} != "optional":')
+                body.append(f'            command += " *{clean_f_name}=" + {name}')
+                body.append("")
 
     # Lists handling
     for list_name, linfo in all_list_groups.items():

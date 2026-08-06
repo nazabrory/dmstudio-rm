@@ -22,6 +22,14 @@ _Avoid_: file command (those live under `dmfiles`)
 A Studio file-generation or directory utility exposed through `dmfiles` (e.g. INPFIL, PROTOM) — sandboxes under `tutorials/collections/files/`.
 _Avoid_: process command
 
+**File-based process**:
+A Datamine Studio RM command (`process_type == "file_based"`) that runs entirely headless taking input files/parameters and outputting binary Datamine files without requiring GUI viewport interaction.
+_Avoid_: interactive process
+
+**Interactive process**:
+A Datamine Studio RM command (`process_type == "interactive"`) that requires user interaction via the 3D graphics window / viewport picking or interactive screens (e.g., `intext`, `dmedit`, `digitise_doughnut`, `smooth_gradient`, `plot*`).
+_Avoid_: batch process
+
 **Active project**:
 The Datamine project currently open in the running Studio RM instance; COM automation targets this workspace and its folder.
 _Avoid_: working directory (Python cwd may differ until aligned)

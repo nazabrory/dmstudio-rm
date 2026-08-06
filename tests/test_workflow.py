@@ -17,6 +17,7 @@ Run:
 
 import sys
 import os
+import json
 
 # Ensure the project root is importable
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -71,6 +72,37 @@ except Exception as e:
     import traceback; traceback.print_exc()
 
 # ---------------------------------------------------------------------------
+# Test 1B: Hybrid NotebookBuilder & MCP Workflow Generation
+# ---------------------------------------------------------------------------
+print('\n[1B] NotebookBuilder & MCP Server - hybrid workflow generation (batch + interactive)...')
+try:
+    from dmstudio.mcp_server import create_jupyter_workflow
+    
+    hybrid_steps = [
+        {"type": "markdown", "content": "## Step 1: Initialize Connection"},
+        {"type": "code", "content": "from dmstudio import dmcommands\ncmd = dmcommands.init()"},
+        {"type": "command", "command_name": "copy", "args": {"in_i": "_vb_collars", "out_o": "t_collars_copy"}},
+        {"type": "command", "command_name": "intext", "instructions": "Select text file in 3D viewport dialog", "output_verify_file": "t_intext_out"}
+    ]
+    
+    res_str = create_jupyter_workflow("test_hybrid_workflow.ipynb", hybrid_steps)
+    res = json.loads(res_str)
+    assert 'notebook_path' in res, "Failed to create hybrid notebook"
+    
+    # Read generated notebook file and verify cell types and content
+    with open(res['notebook_path'], 'r', encoding='utf-8') as f:
+        nb_data = json.load(f)
+    
+    cell_sources = [ "".join(c['source']) for c in nb_data['cells'] ]
+    assert any("Interactive Step: intext" in src or "Human Checkpoint" in src for src in cell_sources), "Missing interactive markdown instruction cell"
+    assert any("output_verify_file" in src or "t_intext_out" in src for src in cell_sources), "Missing file verification code cell"
+    print('  OK - hybrid workflow generated successfully with batch and interactive checkpoint cells')
+except Exception as e:
+    print('  FAIL:', e)
+    import traceback; traceback.print_exc()
+
+
+# ---------------------------------------------------------------------------
 # Test 2: agent.list_commands()
 # ---------------------------------------------------------------------------
 print('\n[2] agent.list_commands() - introspecting dmcommands...')
@@ -79,6 +111,10 @@ try:
     commands = agent.list_commands()
     print('  OK - found {} commands'.format(len(commands)))
     print('  First 5:', [c['name'] for c in commands[:5]])
+    # Validate process_type key presence
+    assert all('process_type' in c for c in commands), "Missing process_type in list_commands entry"
+    assert all(c['process_type'] in ('file_based', 'interactive') for c in commands), "Invalid process_type value"
+    print('  OK - process_type metadata present in list_commands()')
 except Exception as e:
     print('  FAIL:', e)
     import traceback; traceback.print_exc()
@@ -86,11 +122,16 @@ except Exception as e:
 # ---------------------------------------------------------------------------
 # Test 3: agent.get_command_schema()
 # ---------------------------------------------------------------------------
-print('\n[3] agent.get_command_schema("copy")...')
+print('\n[3] agent.get_command_schema("copy") & ("intext")...')
 try:
     schema = agent.get_command_schema('copy')
     print('  OK - schema keys:', list(schema.keys()))
-    print('  Parameters:', [p['name'] for p in schema.get('parameters', [])][:6])
+    assert 'process_type' in schema, "Missing process_type in get_command_schema"
+    assert schema['process_type'] == 'file_based', "copy should be file_based"
+    
+    schema_int = agent.get_command_schema('intext')
+    assert schema_int['process_type'] == 'interactive', "intext should be interactive"
+    print('  OK - schema process_type resolved correctly (file_based vs interactive)')
 except Exception as e:
     print('  FAIL:', e)
     import traceback; traceback.print_exc()
@@ -103,9 +144,12 @@ try:
     results = agent.search_commands('sort')
     print('  OK - {} matches'.format(len(results)))
     print('  Matches:', [r['name'] for r in results])
+    assert all('process_type' in r for r in results), "Missing process_type in search_commands"
+    print('  OK - process_type metadata present in search_commands()')
 except Exception as e:
     print('  FAIL:', e)
     import traceback; traceback.print_exc()
+
 
 # ---------------------------------------------------------------------------
 # Test 5: Dynamic StudioRM3.x version resolution (no Studio required)

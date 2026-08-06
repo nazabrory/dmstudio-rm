@@ -27,6 +27,8 @@ import json
 import os
 import datetime
 
+from dmstudio import command_registry
+
 
 class NotebookBuilder:
     '''
@@ -122,6 +124,81 @@ class NotebookBuilder:
             'outputs': outputs or [],
             'source': lines,
         })
+        return self
+
+    def add_command_step(self, command_name, args=None, instructions=None, output_verify_file=None, is_interactive=False):
+        '''
+        add_command_step
+        ----------------
+
+        Add a workflow step for a Datamine command. Interactive processes are
+        automatically formatted as Markdown human-instruction checkpoint cells
+        accompanied by dataset verification code cells. File-based processes are
+        formatted as direct Python execution cells.
+
+        Parameters:
+        -----------
+        command_name: str
+            Name of the Datamine command (e.g. 'copy', 'intext').
+        args: dict or None
+            Keyword arguments passed to the command wrapper.
+        instructions: str or None
+            Human guidance instructions for 3D viewport picking/interaction.
+        output_verify_file: str or None
+            Optional filename of output dataset to verify following interaction.
+        is_interactive: bool
+            Force interactive checkpoint handling regardless of registry metadata.
+
+        Returns:
+        --------
+        NotebookBuilder
+            Returns self for method chaining.
+        '''
+        args = args or {}
+        cmd_lower = command_name.lower()
+
+        process_type = 'file_based'
+        if is_interactive or instructions is not None:
+            process_type = 'interactive'
+        else:
+            try:
+                schema = command_registry.get_command_schema(cmd_lower)
+                process_type = schema.get('process_type', 'file_based')
+            except ValueError:
+                process_type = 'file_based'
+
+        if process_type == 'interactive':
+            instr_text = instructions or "Perform interactive picking / operation for '{}' in Datamine Studio RM 3D Viewport.".format(command_name)
+            md_content = (
+                "### Interactive Step: {}\n\n"
+                "> **Human Checkpoint (Studio RM Viewport)**\n"
+                "> {}\n"
+            ).format(command_name, instr_text)
+            if output_verify_file:
+                md_content += "> Expected output dataset: `{}`\n".format(output_verify_file)
+            self.add_markdown(md_content)
+
+            if output_verify_file:
+                code_content = (
+                    "# Output file verification for interactive step {}\n"
+                    "import os\n"
+                    "from dmstudio import dm_io\n\n"
+                    "verify_path = '{}'\n"
+                    "exists = os.path.exists(verify_path) or os.path.exists(verify_path + '.dm') or os.path.exists(verify_path + '.dmx')\n"
+                    "if exists:\n"
+                    "    print('Verified output dataset {} exists.')\n"
+                    "else:\n"
+                    "    print('Waiting for output dataset {} to be generated in Studio RM.')\n"
+                    "    assert exists, 'Output dataset {} not found after interactive step'"
+                ).format(command_name, output_verify_file, output_verify_file, output_verify_file, output_verify_file)
+                self.add_code(code_content)
+        else:
+            args_formatted = ", ".join("{}={!r}".format(k, v) for k, v in args.items())
+            code_content = (
+                "# Execute {}\n"
+                "cmd.{}({})"
+            ).format(command_name, command_name, args_formatted)
+            self.add_code(code_content)
         return self
 
     def save(self):

@@ -110,8 +110,15 @@ def create_jupyter_workflow(notebook_name: str, steps: list) -> str:
     Generate an auditable Jupyter Notebook (.ipynb) from a list of workflow steps.
 
     Each step is a dict with:
-      - "type": "markdown" or "code"
-      - "content": the cell text or code string
+      - "type": "markdown", "code", "command", or "interactive"
+      - "content": cell text or code string (for markdown/code steps)
+      - "command_name": Datamine command name (for command/interactive steps)
+      - "args": dict of keyword parameters (for batch command steps)
+      - "instructions": human guidance instructions (for interactive viewport steps)
+      - "output_verify_file": filename to verify upon completion (for interactive steps)
+
+    Interactive processes are automatically formatted as Markdown instruction cells
+    with 3D viewport guidance accompanied by dataset verification code cells.
 
     The notebook is written to disk and can be executed with:
         jupyter nbconvert --to notebook --execute --inplace <notebook_name>
@@ -123,8 +130,8 @@ def create_jupyter_workflow(notebook_name: str, steps: list) -> str:
                [
                  {"type": "markdown", "content": "## Step 1: Initialize"},
                  {"type": "code",     "content": "from dmstudio import dmcommands\\ncmd = dmcommands.init()"},
-                 {"type": "markdown", "content": "## Step 2: Sort"},
-                 {"type": "code",     "content": "cmd.mgsort(in_i='collars', out_o='sorted', keys_f=['BHID'])"}
+                 {"type": "command",  "command_name": "copy", "args": {"in_i": "collars", "out_o": "sorted"}},
+                 {"type": "command",  "command_name": "intext", "instructions": "Select text file in dialog", "output_verify_file": "imported_pts"}
                ]
 
     Returns:
@@ -140,10 +147,20 @@ def create_jupyter_workflow(notebook_name: str, steps: list) -> str:
         nb = NotebookBuilder(notebook_name, title=title)
 
         for step in steps:
-            step_type = step.get('type', 'code').lower()
+            step_type = step.get('type', '').lower()
+            cmd_name = step.get('command_name') or step.get('command')
             content = step.get('content', '')
+
             if step_type == 'markdown':
                 nb.add_markdown(content)
+            elif cmd_name:
+                nb.add_command_step(
+                    command_name=cmd_name,
+                    args=step.get('args'),
+                    instructions=step.get('instructions'),
+                    output_verify_file=step.get('output_verify_file'),
+                    is_interactive=(step_type == 'interactive')
+                )
             else:
                 nb.add_code(content)
 

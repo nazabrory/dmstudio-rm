@@ -30,6 +30,22 @@ VERIFIED_COMMANDS = {
     'stats', 'tongrad', 'inpfil', 'estima', 'protom', 'copymod'
 }
 
+# Index of interactive commands requiring GUI / viewport picking / manual 3D interaction / visual plotting
+INTERACTIVE_COMMANDS = {
+    'intext', 'inputc', 'inputd', 'inputw', 'scrfmt', 'secdef',
+    'plotan', 'plotar', 'plotcn', 'plotcx', 'plotda', 'plotfr', 'plotft',
+    'plotfx', 'plotgr', 'plothi', 'plotli', 'plotln', 'plotmx', 'plotpa',
+    'plotpe', 'plotpi', 'plotpx', 'plotsi', 'plotsk', 'plotsx', 'plotti',
+    'plottr', 'plottx', 'plotva', 'plotws', 'pltabl', 'swathplt',
+    'dmedit', 'digitise_doughnut', 'smooth_gradient', 'set_view_fov',
+    'switch_drillhole_points_traces'
+}
+
+
+def _get_process_type(cmd_name):
+    '''Return 'interactive' if cmd_name is in INTERACTIVE_COMMANDS, else 'file_based'.'''
+    return 'interactive' if cmd_name.lower() in INTERACTIVE_COMMANDS else 'file_based'
+
 
 # ---------------------------------------------------------------------------
 # Internal helpers (implementation — not part of the interface)
@@ -85,10 +101,12 @@ def list_commands():
                 doc = inspect.getdoc(attr) or ''
                 first_line = doc.split('\n')[0].strip()
                 experimental = name.lower() not in VERIFIED_COMMANDS
+                process_type = _get_process_type(name)
                 results.append({
                     'name': name,
                     'doc': first_line,
-                    'experimental': experimental
+                    'experimental': experimental,
+                    'process_type': process_type
                 })
                 seen.add(name)
 
@@ -191,6 +209,7 @@ def get_command_schema(cmd_name):
         'doc': doc,
         'parameters': params,
         'experimental': cmd_name_lower not in VERIFIED_COMMANDS,
+        'process_type': _get_process_type(cmd_name_lower),
     }
 
 
@@ -209,7 +228,7 @@ def search_commands(query):
     Returns:
     --------
     list of dict
-        Matching commands: [{'name': str, 'doc': str, 'experimental': bool}, ...]
+        Matching commands: [{'name': str, 'doc': str, 'experimental': bool, 'process_type': str}, ...]
     '''
     query_lower = query.lower()
     results = []

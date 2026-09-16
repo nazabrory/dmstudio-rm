@@ -1,6 +1,7 @@
 import re
 
 import dmstudio.initialize
+from dmstudio import validator
 
 
 # constant to avoid redundant COM connections which slows down processing
@@ -8,7 +9,7 @@ OSCRIPTCON = None
 
 class init(object):
 
-    def __init__(self, version=None):
+    def __init__(self, version=None, strict=False):
 
         '''
         commands.__init__
@@ -24,28 +25,38 @@ class init(object):
         version: str
             optional datamine studio versions ('Studio3', 'StudioRM', 'StudioRM3.1', 'StudioRM3.2', 'StudioEM') If no version given, the initializtion
             will try different versions starting with StudioRM then Studio3 and finally StudioEM.
+        strict: bool, optional
+            If True, enables strict command validation raising ValueError on syntax errors or unsafe patterns.
+            Default is False (emits warnings).
 
         '''
         self.oScript = OSCRIPTCON
         self.version = version
+        self.strict = strict
         if self.oScript is None:
             self.oScript = dmstudio.initialize.studio(self.version)
 
-    def run_command(self, command):
+    def run_command(self, command, strict=None):
 
         '''
         run_command
         -----------
 
-        Uses the studio Parsecommand method to execute a datamine script.
+        Uses the studio Parsecommand method to execute a datamine script with
+        pre-flight command validation.
 
         Parameters:
         -----------
 
         command: str
             Datamine command string to be parsed
+        strict: bool, optional
+            If True, raises ValueError on syntax errors or unsafe patterns.
+            If None (default), uses the instance's self.strict setting.
         '''
-
+        if strict is None:
+            strict = getattr(self, 'strict', False)
+        validator.validate_command(command, strict=strict)
         self.oScript.Parsecommand(command)
 
         # update the dmdir.py file containing list of .dm files in current directory

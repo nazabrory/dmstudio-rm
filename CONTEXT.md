@@ -85,3 +85,13 @@ A Python list of string transformation statements passed to `dm_cmd.extra(in_i=.
 - Fields referenced in `prev()`, `next()`, or arithmetic expressions must exist or be calculated in earlier lines.
 - Temporary scratch fields can be removed before output with `erase(FIELD)`.
 
+### Pipeline Integration & Compatibility
+
+**Facade adapter**:
+A domain-specific mediation layer (e.g. `pymri_dm`) that wraps `dmstudio` primitives into workflow-specific routines for notebooks.
+_Avoid_: helper script, COM wrapper
+
+**Binary I/O modernization**:
+The direct ingestion and serialization of Datamine binary tables (`.dm`, `.dmx`) via `dmstudio.dm_io.read_datamine` and `to_datamine`, bypassing intermediate CSV files and Studio COM export processes.
+_Avoid_: CSV export fallback, pandas export
+

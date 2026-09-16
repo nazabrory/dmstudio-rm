@@ -16,6 +16,7 @@ Submodules:
     dm_io           - High-level DataFrame ↔ Datamine file I/O operations.
     dialog          - Windows modal dialog auto-dismissal context.
     bootstrap       - Tutorial bootstrapping and download helpers.
+    validator       - Pre-flight CLI command parser linter and safe validator.
 '''
 
 # Proactively import pandas at the package root to avoid Python 3.14 / Cython circular import conflicts in debuggers
@@ -35,6 +36,8 @@ from dmstudio import sandbox
 from dmstudio import dm_io
 from dmstudio import dialog
 from dmstudio import bootstrap
+from dmstudio import validator
 
 # Shortcuts
 from dmstudio.bootstrap import download_tutorials, install_agent_skills
+from dmstudio.validator import lint_command, validate_command

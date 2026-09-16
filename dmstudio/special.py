@@ -11,6 +11,7 @@ and to facilitate more readable code.
 
 import dmstudio.dmfiles
 import dmstudio.dmcommands
+from dmstudio import validator
 import pandas as pd
 
 # -----------------------------------------------------------------------------------#
@@ -226,7 +227,7 @@ def text_importer(oScript, scenario_file):
     oScript.ActiveProject.RunTextImporter(scenario_file)
 
 
-def create_isoshells(oScript, **kwargs):
+def create_isoshells(oScript, strict=False, **kwargs):
     """
     Create isoshells via ParseCommand with name-value parameter pairs.
     Available for automation in Studio RM 3.1+.
@@ -235,6 +236,8 @@ def create_isoshells(oScript, **kwargs):
     -----------
     oScript: COM object
         Active Studio COM application object.
+    strict: bool, optional
+        If True, raises ValueError on syntax errors or unsafe patterns. Default is False.
     **kwargs: dict
         Name-value parameter pairs for the Create Isoshells command.
         Common parameters include: model, field, value, out, etc.
@@ -248,5 +251,6 @@ def create_isoshells(oScript, **kwargs):
     command = "create-isoshells"
     for key, value in kwargs.items():
         command += " @{}={}".format(key, value)
+    validator.validate_command(command, strict=strict)
     oScript.Parsecommand(command)
 

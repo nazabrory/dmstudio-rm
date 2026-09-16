@@ -53,6 +53,7 @@ dmstudio-rm/                      ← Project root
 │   ├── agent.py                  ← Compat re-export layer (see below)
 │   ├── special.py                ← Adapted COM helpers
 │   ├── superprocess.py           ← Multi-command workflows
+│   ├── validator.py              ← Pre-flight CLI command parser linter and validator
 │   ├── notebook_builder.py       ← Jupyter Notebook builder
 │   └── mcp_server.py             ← FastMCP stdio server (CLI entry point)
 ├── tutorials/
@@ -109,6 +110,7 @@ To maintain codebase simplicity and a clean experience for the user:
 | `command_registry` | Discovery without side effects of full agent import | `list_commands()`, `get_command_schema()`, `search_commands()` |
 | `dm_io` | Binary table I/O via `DmFile.DmTableADO` | `read_datamine()`, `to_datamine()`, `patch_dataframe()` |
 | `dialog` | Opt-in modal dismissal | `dialog_dismiss_context()` |
+| `validator` | Pre-flight CLI command parser linter and validator | `lint_command()`, `validate_command()` |
 | `bootstrap` | Tutorial download | `download_tutorials(target_dir)` (also `dmstudio.download_tutorials`) |
 | `sandbox` | Sandbox dataset helpers | `copy_database_files()`, `initialize_sandbox()` |
 | `notebook_builder` | Programmatic `.ipynb` | `NotebookBuilder` |
@@ -125,6 +127,7 @@ Import: `from dmstudio import agent`.
 | `list_commands`, `get_command_schema`, `search_commands` | `command_registry` |
 | `read_datamine`, `to_datamine`, `patch_dataframe` | `dm_io` |
 | `dialog_dismiss_context` | `dialog` |
+| `lint_command`, `validate_command` | `validator` |
 | `copy_database_files`, `initialize_sandbox` | `sandbox` |
 | `download_tutorials` | `bootstrap` |
 

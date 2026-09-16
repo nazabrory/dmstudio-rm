@@ -17,6 +17,8 @@ Provides:
                             the DmFile.DmTableADO COM object — no proprietary deps required.
 - dialog_dismiss_context(): Context manager that auto-dismisses blocking Studio RM modal
                             dialogs in a background thread (opt-in).
+- lint_command()          : Inspect a command string for syntax errors and unsafe patterns.
+- validate_command()      : Pre-flight validator (warns or raises on malformed command strings).
 '''
 
 
@@ -59,4 +61,14 @@ from dmstudio.sandbox import (  # noqa: F401
 # Tutorial bootstrapping — re-exported from bootstrap for backwards compat
 # ---------------------------------------------------------------------------
 from dmstudio.bootstrap import download_tutorials  # noqa: F401
+
+
+# ---------------------------------------------------------------------------
+# Command validation & linting — re-exported from validator for compat
+# ---------------------------------------------------------------------------
+from dmstudio.validator import (  # noqa: F401
+    lint_command,
+    validate_command,
+)
+
 

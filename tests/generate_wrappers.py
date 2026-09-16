@@ -30,8 +30,8 @@ def expand_wildcard_names(items):
     expanded = []
     for item in items:
         name = item.get('name', '').strip()
-        # Matches e.g. IN3 - 20 or F3 - 10
-        m = re.match(r'^([A-Za-z_]+)(\d+)\s*-\s*(\d+)$', name)
+        # Matches e.g. IN3 - 20, F3 - 10, F2-F25, F1 - F20, F2-F30
+        m = re.match(r'^([A-Za-z_]+)(\d+)\s*-\s*(?:[A-Za-z_]+)?(\d+)$', name)
         if m:
             prefix, start_num, end_num = m.groups()
             start = int(start_num)
@@ -337,6 +337,7 @@ def group_sequential_items(items, item_type):
                 'prefix': prefix.lower(),
                 'max_fields': max(num for num, _, _ in group),
                 'symbol': '&' if item_type == 'file' else ('*' if item_type == 'field' else '@'),
+                'suffix': suffix,
                 'description': group[0][2].get('description', '')
             }
 
@@ -701,7 +702,10 @@ def generate_python_function(info, is_verified=True):
     sig = f"    def {fn_name}(self,\n"
     for arg in args:
         sig += f"                {arg},\n"
-    sig = sig[:-2] + "):\n\n"
+    if all_list_groups:
+        sig += f"                **kwargs):\n\n"
+    else:
+        sig = sig[:-2] + "):\n\n"
 
     # Docstring
     docstring = generate_docstring(info, all_list_groups, is_verified=is_verified)
@@ -713,6 +717,14 @@ def generate_python_function(info, is_verified=True):
         fn_name = sanitize_python_name(info['name']).lower()
         body.append(f'        warnings.warn("`{fn_name}` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)')
         body.append("")
+
+    if all_list_groups:
+        for list_name, linfo in all_list_groups.items():
+            body.append(f'        {list_name} = self._resolve_sequential_param("{list_name}", "{linfo["prefix"]}", {list_name}, {linfo["max_fields"]}, "{linfo["suffix"]}", kwargs)')
+        body.append('        if kwargs:')
+        body.append(f'            raise TypeError(f"{fn_name}() got an unexpected keyword argument \'{{next(iter(kwargs))}}\'")')
+        body.append('')
+
     body.append(f'        command = "{info["name"].lower()} "')
 
     body.append("")
@@ -779,7 +791,7 @@ def generate_python_function(info, is_verified=True):
 
     # Lists handling
     for list_name, linfo in all_list_groups.items():
-        body.append(f'        if {list_name}[0] != "optional":')
+        body.append(f'        if {list_name} and {list_name}[0] != "optional":')
         body.append(f'            command += self.parse_infields_list("{linfo["prefix"]}", {list_name}, {linfo["max_fields"]}, "{linfo["symbol"]}")')
         body.append("")
 
@@ -879,7 +891,9 @@ files_funcs.sort(key=lambda x: x[0])
 
 
 # Boilerplate templates
-commands_boilerplate = """import dmstudio.initialize
+commands_boilerplate = """import re
+
+import dmstudio.initialize
 
 
 # constant to avoid redundant COM connections which slows down processing
@@ -889,7 +903,7 @@ class init(object):
 
     def __init__(self, version=None):
 
-        \"\"\"
+        '''
         commands.__init__
         ------------------
 
@@ -904,7 +918,7 @@ class init(object):
             optional datamine studio versions ('Studio3', 'StudioRM', 'StudioRM3.1', 'StudioRM3.2', 'StudioEM') If no version given, the initializtion
             will try different versions starting with StudioRM then Studio3 and finally StudioEM.
 
-        \"\"\"
+        '''
         self.oScript = OSCRIPTCON
         self.version = version
         if self.oScript is None:
@@ -912,7 +926,7 @@ class init(object):
 
     def run_command(self, command):
 
-        \"\"\"
+        '''
         run_command
         -----------
 
@@ -923,7 +937,7 @@ class init(object):
 
         command: str
             Datamine command string to be parsed
-        \"\"\"
+        '''
 
         self.oScript.Parsecommand(command)
 
@@ -934,7 +948,7 @@ class init(object):
 
     def parse_infields_list(self, prefix, fields, maxfields, vtype='*'):
 
-        \"\"\"
+        '''
         parse_infields_list
         -------------------
 
@@ -958,7 +972,7 @@ class init(object):
         field_string: str
             concatenated string formated for input in datamine commands
 
-        \"\"\"
+        '''
 
         if maxfields < len(fields):
             raise ValueError("More fields have been selected than allowed by Datamine command")
@@ -968,6 +982,41 @@ class init(object):
             field_string += " " + vtype + prefix + str(i + 1) + "=" + field + " "
 
         return field_string;
+
+    def _resolve_sequential_param(self, list_name, prefix, list_val, max_fields, suffix, kwargs):
+        '''
+        Resolves a sequential parameter by checking both the canonical list value
+        and any individual keyword arguments passed in kwargs (e.g. f1_f, f2_f or key1_f, key2_f).
+        Enforces strict contiguous index ordering (no gaps) and prevents passing both.
+        '''
+        pat = re.compile(rf'^{prefix}(\\d+)(?:_{suffix})?$', re.IGNORECASE)
+        numbered = {}
+        keys_to_remove = []
+        for k, v in kwargs.items():
+            m = pat.match(k)
+            if m:
+                idx = int(m.group(1))
+                if idx in numbered:
+                    raise ValueError(f"Duplicate sequential argument provided for '{prefix}{idx}'.")
+                numbered[idx] = v
+                keys_to_remove.append(k)
+
+        for k in keys_to_remove:
+            del kwargs[k]
+
+        if numbered:
+            if list_val != ['optional']:
+                raise ValueError(f"Cannot specify both canonical list '{list_name}' and individual keyword arguments for '{prefix}'.")
+            max_idx = max(numbered.keys())
+            if max_idx > max_fields:
+                raise ValueError(f"Maximum allowed fields for '{prefix}' is {max_fields}, but index {max_idx} was provided.")
+            sorted_indices = sorted(numbered.keys())
+            for expected_idx in range(1, len(sorted_indices) + 1):
+                if expected_idx not in numbered:
+                    raise ValueError(f"Gap detected in sequential arguments for '{list_name}': expected index {expected_idx}, but it was not provided.")
+            return [numbered[i] for i in range(1, len(sorted_indices) + 1)]
+
+        return list_val
 """
 
 files_boilerplate = """'''
@@ -984,6 +1033,8 @@ To do:
 * Use the same field parsing as ``dmcommands``
 
 '''
+import re
+
 import dmstudio.initialize
 
 # constant to avoid redundant COM connections which slows down processing
@@ -1036,7 +1087,7 @@ class init(object):
 
     def parse_infields_list(self, prefix, fields, maxfields=10, vtype='*'):
 
-        \"\"\"
+        '''
         parse_infields_list
         -------------------
 
@@ -1060,7 +1111,7 @@ class init(object):
         field_string: str
             concatenated string formated for input in datamine commands
 
-        \"\"\"
+        '''
 
         if maxfields < len(fields):
             raise ValueError("More fields have been selected than allowed by Datamine command")
@@ -1070,6 +1121,41 @@ class init(object):
             field_string += " " + vtype + prefix + str(i + 1) + "=" + field + " "
 
         return field_string;
+
+    def _resolve_sequential_param(self, list_name, prefix, list_val, max_fields, suffix, kwargs):
+        '''
+        Resolves a sequential parameter by checking both the canonical list value
+        and any individual keyword arguments passed in kwargs (e.g. f1_f, f2_f or key1_f, key2_f).
+        Enforces strict contiguous index ordering (no gaps) and prevents passing both.
+        '''
+        pat = re.compile(rf'^{prefix}(\\d+)(?:_{suffix})?$', re.IGNORECASE)
+        numbered = {}
+        keys_to_remove = []
+        for k, v in kwargs.items():
+            m = pat.match(k)
+            if m:
+                idx = int(m.group(1))
+                if idx in numbered:
+                    raise ValueError(f"Duplicate sequential argument provided for '{prefix}{idx}'.")
+                numbered[idx] = v
+                keys_to_remove.append(k)
+
+        for k in keys_to_remove:
+            del kwargs[k]
+
+        if numbered:
+            if list_val != ['optional']:
+                raise ValueError(f"Cannot specify both canonical list '{list_name}' and individual keyword arguments for '{prefix}'.")
+            max_idx = max(numbered.keys())
+            if max_idx > max_fields:
+                raise ValueError(f"Maximum allowed fields for '{prefix}' is {max_fields}, but index {max_idx} was provided.")
+            sorted_indices = sorted(numbered.keys())
+            for expected_idx in range(1, len(sorted_indices) + 1):
+                if expected_idx not in numbered:
+                    raise ValueError(f"Gap detected in sequential arguments for '{list_name}': expected index {expected_idx}, but it was not provided.")
+            return [numbered[i] for i in range(1, len(sorted_indices) + 1)]
+
+        return list_val
 """
 
 # Write verified files

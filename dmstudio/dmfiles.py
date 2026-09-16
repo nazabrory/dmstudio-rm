@@ -12,6 +12,8 @@ To do:
 * Use the same field parsing as ``dmcommands``
 
 '''
+import re
+
 import dmstudio.initialize
 
 # constant to avoid redundant COM connections which slows down processing
@@ -64,7 +66,7 @@ class init(object):
 
     def parse_infields_list(self, prefix, fields, maxfields=10, vtype='*'):
 
-        """
+        '''
         parse_infields_list
         -------------------
 
@@ -88,7 +90,7 @@ class init(object):
         field_string: str
             concatenated string formated for input in datamine commands
 
-        """
+        '''
 
         if maxfields < len(fields):
             raise ValueError("More fields have been selected than allowed by Datamine command")
@@ -98,6 +100,41 @@ class init(object):
             field_string += " " + vtype + prefix + str(i + 1) + "=" + field + " "
 
         return field_string;
+
+    def _resolve_sequential_param(self, list_name, prefix, list_val, max_fields, suffix, kwargs):
+        '''
+        Resolves a sequential parameter by checking both the canonical list value
+        and any individual keyword arguments passed in kwargs (e.g. f1_f, f2_f or key1_f, key2_f).
+        Enforces strict contiguous index ordering (no gaps) and prevents passing both.
+        '''
+        pat = re.compile(rf'^{prefix}(\d+)(?:_{suffix})?$', re.IGNORECASE)
+        numbered = {}
+        keys_to_remove = []
+        for k, v in kwargs.items():
+            m = pat.match(k)
+            if m:
+                idx = int(m.group(1))
+                if idx in numbered:
+                    raise ValueError(f"Duplicate sequential argument provided for '{prefix}{idx}'.")
+                numbered[idx] = v
+                keys_to_remove.append(k)
+
+        for k in keys_to_remove:
+            del kwargs[k]
+
+        if numbered:
+            if list_val != ['optional']:
+                raise ValueError(f"Cannot specify both canonical list '{list_name}' and individual keyword arguments for '{prefix}'.")
+            max_idx = max(numbered.keys())
+            if max_idx > max_fields:
+                raise ValueError(f"Maximum allowed fields for '{prefix}' is {max_fields}, but index {max_idx} was provided.")
+            sorted_indices = sorted(numbered.keys())
+            for expected_idx in range(1, len(sorted_indices) + 1):
+                if expected_idx not in numbered:
+                    raise ValueError(f"Gap detected in sequential arguments for '{list_name}': expected index {expected_idx}, but it was not provided.")
+            return [numbered[i] for i in range(1, len(sorted_indices) + 1)]
+
+        return list_val
 
     def comres(self,
                 reserve_o="required",
@@ -1623,7 +1660,8 @@ The user may define three values for X and Y defining the scale (X SCALE), and m
                 ps_f=['optional'],
                 seed_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -1715,6 +1753,10 @@ The type of random distribution is primarily dictated by DISTRIB. Each option su
         import warnings
         warnings.warn("`random` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        ps_f = self._resolve_sequential_param("ps_f", "p", ps_f, 2, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"random() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "random "
 
         if out_o == "required":
@@ -1726,7 +1768,7 @@ The type of random distribution is primarily dictated by DISTRIB. Each option su
         if outfield_f != "optional":
             command += " *outfield=" + outfield_f
 
-        if ps_f[0] != "optional":
+        if ps_f and ps_f[0] != "optional":
             command += self.parse_infields_list("p", ps_f, 2, "@")
 
         if nrecs_p == "required":

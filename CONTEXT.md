@@ -46,6 +46,19 @@ _Avoid_: treating `agent` as the implementation home
 The `agent` module’s public surface that re-exports helpers from canonical modules so older scripts and notebooks keep working.
 _Avoid_: “agent owns I/O / discovery / dialogs” as current architecture
 
+**Sequential parameter**:
+A Datamine CLI argument that Studio RM numbers sequentially (e.g. `*F1...*Fn`, `*KEY1...*KEYn`, `&IN1...&INn`).
+_Avoid_: numbered parameter (when referring to Datamine CLI sequences)
+
+**Canonical list parameter**:
+The primary Python parameter representing a sequential CLI sequence as a list of strings (e.g. `fields_f=['...']`, `keys_f=['...']`, `inmods_i=['...']`).
+_Avoid_: multi-field string
+
+**Dual-mode parameter resolution**:
+The adapter layer in command wrappers allowing callers to provide either the canonical list parameter or individual numbered keyword arguments (`f1_f`, `f2_f`, `key1_f`, etc.), automatically packing them into sequential order without gaps.
+_Avoid_: raw kwargs passthrough
+
+
 ### Notebook testing
 
 **Test sandbox**:

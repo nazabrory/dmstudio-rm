@@ -1,3 +1,5 @@
+import re
+
 import dmstudio.initialize
 
 
@@ -8,7 +10,7 @@ class init(object):
 
     def __init__(self, version=None):
 
-        """
+        '''
         commands.__init__
         ------------------
 
@@ -23,7 +25,7 @@ class init(object):
             optional datamine studio versions ('Studio3', 'StudioRM', 'StudioRM3.1', 'StudioRM3.2', 'StudioEM') If no version given, the initializtion
             will try different versions starting with StudioRM then Studio3 and finally StudioEM.
 
-        """
+        '''
         self.oScript = OSCRIPTCON
         self.version = version
         if self.oScript is None:
@@ -31,7 +33,7 @@ class init(object):
 
     def run_command(self, command):
 
-        """
+        '''
         run_command
         -----------
 
@@ -42,7 +44,7 @@ class init(object):
 
         command: str
             Datamine command string to be parsed
-        """
+        '''
 
         self.oScript.Parsecommand(command)
 
@@ -53,7 +55,7 @@ class init(object):
 
     def parse_infields_list(self, prefix, fields, maxfields, vtype='*'):
 
-        """
+        '''
         parse_infields_list
         -------------------
 
@@ -77,7 +79,7 @@ class init(object):
         field_string: str
             concatenated string formated for input in datamine commands
 
-        """
+        '''
 
         if maxfields < len(fields):
             raise ValueError("More fields have been selected than allowed by Datamine command")
@@ -88,6 +90,41 @@ class init(object):
 
         return field_string;
 
+    def _resolve_sequential_param(self, list_name, prefix, list_val, max_fields, suffix, kwargs):
+        '''
+        Resolves a sequential parameter by checking both the canonical list value
+        and any individual keyword arguments passed in kwargs (e.g. f1_f, f2_f or key1_f, key2_f).
+        Enforces strict contiguous index ordering (no gaps) and prevents passing both.
+        '''
+        pat = re.compile(rf'^{prefix}(\d+)(?:_{suffix})?$', re.IGNORECASE)
+        numbered = {}
+        keys_to_remove = []
+        for k, v in kwargs.items():
+            m = pat.match(k)
+            if m:
+                idx = int(m.group(1))
+                if idx in numbered:
+                    raise ValueError(f"Duplicate sequential argument provided for '{prefix}{idx}'.")
+                numbered[idx] = v
+                keys_to_remove.append(k)
+
+        for k in keys_to_remove:
+            del kwargs[k]
+
+        if numbered:
+            if list_val != ['optional']:
+                raise ValueError(f"Cannot specify both canonical list '{list_name}' and individual keyword arguments for '{prefix}'.")
+            max_idx = max(numbered.keys())
+            if max_idx > max_fields:
+                raise ValueError(f"Maximum allowed fields for '{prefix}' is {max_fields}, but index {max_idx} was provided.")
+            sorted_indices = sorted(numbered.keys())
+            for expected_idx in range(1, len(sorted_indices) + 1):
+                if expected_idx not in numbered:
+                    raise ValueError(f"Gap detected in sequential arguments for '{list_name}': expected index {expected_idx}, but it was not provided.")
+            return [numbered[i] for i in range(1, len(sorted_indices) + 1)]
+
+        return list_val
+
     def accmlt(self,
                 in_i="required",
                 out_o="required",
@@ -95,7 +132,8 @@ class init(object):
                 allrecs_p=0,
                 unsorted_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         ACCMLT
@@ -158,6 +196,10 @@ Important: the input file should be sorted on the keyfields beforehand. If it is
             Required=No
 
         """
+        keys_f = self._resolve_sequential_param("keys_f", "key", keys_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"accmlt() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "accmlt "
 
         if in_i == "required":
@@ -172,7 +214,7 @@ Important: the input file should be sorted on the keyfields beforehand. If it is
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if keys_f[0] != "optional":
+        if keys_f and keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 10, "*")
 
         if allrecs_p != "optional":
@@ -280,7 +322,8 @@ A FORTRAN read format can be supplied at the File Description prompt of **ADDDD*
                 out_o="required",
                 tolernce_p=0.001,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -342,6 +385,10 @@ The @**TOLERNCE** parameter is used to define the smallest sub cell that will be
         import warnings
         warnings.warn("`addmod` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        if kwargs:
+            raise TypeError(f"addmod() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "addmod "
 
         if out_o == "required":
@@ -350,7 +397,7 @@ The @**TOLERNCE** parameter is used to define the smallest sub cell that will be
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
         if tolernce_p != "optional":
@@ -379,7 +426,8 @@ The @**TOLERNCE** parameter is used to define the smallest sub cell that will be
                 wiretrou_o="required",
                 wireptou_o="required",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -434,6 +482,11 @@ Normally, a ZONE field in the input triangle files will exist, so that the struc
         import warnings
         warnings.warn("`addtri` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        wiretrs_i = self._resolve_sequential_param("wiretrs_i", "wiretr", wiretrs_i, 2, "i", kwargs)
+        wirepts_i = self._resolve_sequential_param("wirepts_i", "wirept", wirepts_i, 2, "i", kwargs)
+        if kwargs:
+            raise TypeError(f"addtri() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "addtri "
 
         if wiretrou_o == "required":
@@ -448,10 +501,10 @@ Normally, a ZONE field in the input triangle files will exist, so that the struc
         if wireptou_o != "optional":
             command += " &wireptou=" + wireptou_o
 
-        if wiretrs_i[0] != "optional":
+        if wiretrs_i and wiretrs_i[0] != "optional":
             command += self.parse_infields_list("wiretr", wiretrs_i, 2, "&")
 
-        if wirepts_i[0] != "optional":
+        if wirepts_i and wirepts_i[0] != "optional":
             command += self.parse_infields_list("wirept", wirepts_i, 2, "&")
 
         if arguments != "optional":
@@ -469,7 +522,8 @@ Normally, a ZONE field in the input triangle files will exist, so that the struc
                 fields_f=['optional'],
                 fieldnam_f="optional",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -522,6 +576,10 @@ A minimum of one explicit alphanumeric field must be in the input file for conve
         import warnings
         warnings.warn("`alfnum` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 5, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"alfnum() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "alfnum "
 
         if in_i == "required":
@@ -542,7 +600,7 @@ A minimum of one explicit alphanumeric field must be in the input file for conve
         if fieldnam_f != "optional":
             command += " *fieldnam=" + fieldnam_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 5, "*")
 
         if arguments != "optional":
@@ -739,7 +797,8 @@ The output dictionary file is created when generating alpha values from numeric 
                 vrefnum_p=1,
                 flat_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -1114,6 +1173,11 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
         import warnings
         warnings.warn("`anisoang` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        plnflds_f = self._resolve_sequential_param("plnflds_f", "plnfld", plnflds_f, 5, "f", kwargs)
+        sctflds_f = self._resolve_sequential_param("sctflds_f", "sctfld", sctflds_f, 5, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"anisoang() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "anisoang "
 
         if planstr_i != "optional":
@@ -1149,10 +1213,10 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
         if srcparm_f != "optional":
             command += " *srcparm=" + srcparm_f
 
-        if plnflds_f[0] != "optional":
+        if plnflds_f and plnflds_f[0] != "optional":
             command += self.parse_infields_list("plnfld", plnflds_f, 5, "*")
 
-        if sctflds_f[0] != "optional":
+        if sctflds_f and sctflds_f[0] != "optional":
             command += self.parse_infields_list("sctfld", sctflds_f, 5, "*")
 
         if tripts_p != "optional":
@@ -1368,7 +1432,8 @@ If either a search volume parameters (**SRCPARM**) or variogram model (**VMODEL*
                 protodd_p=0,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         APPEND
@@ -1447,6 +1512,10 @@ If the optional parameter @SEQUENCE is set to 1, then a field 'FILENAME' is adde
             Required=No
 
         """
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        if kwargs:
+            raise TypeError(f"append() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "append "
 
         if out_o == "required":
@@ -1455,7 +1524,7 @@ If the optional parameter @SEQUENCE is set to 1, then a field 'FILENAME' is adde
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
         if sequence_p != "optional":
@@ -1716,7 +1785,8 @@ Alphanumeric range fields for which a blank is intentionally to be specified sho
                 mode_p=0,
                 inrange_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -1813,6 +1883,11 @@ During data entry in **[AED](<aed.md>)** or a similar input process, blank (spac
         import warnings
         warnings.warn("`attset` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        datflds_f = self._resolve_sequential_param("datflds_f", "datfld", datflds_f, 5, "f", kwargs)
+        attribs_f = self._resolve_sequential_param("attribs_f", "attrib", attribs_f, 5, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"attset() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "attset "
 
         if in_i != "optional":
@@ -1830,10 +1905,10 @@ During data entry in **[AED](<aed.md>)** or a similar input process, blank (spac
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if datflds_f[0] != "optional":
+        if datflds_f and datflds_f[0] != "optional":
             command += self.parse_infields_list("datfld", datflds_f, 5, "*")
 
-        if attribs_f[0] != "optional":
+        if attribs_f and attribs_f[0] != "optional":
             command += self.parse_infields_list("attrib", attribs_f, 5, "*")
 
         if mode_p != "optional":
@@ -1876,7 +1951,8 @@ During data entry in **[AED](<aed.md>)** or a similar input process, blank (spac
                 sampdist_p=0,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -1943,6 +2019,10 @@ Anomalous samples related to lag or sample distance (**LAG** or **DISTANCE**) ar
         import warnings
         warnings.warn("`autocr` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"autocr() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "autocr "
 
         if in_i == "required":
@@ -1960,7 +2040,7 @@ Anomalous samples related to lag or sample distance (**LAG** or **DISTANCE**) ar
         if sampid_f != "optional":
             command += " *sampid=" + sampid_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 10, "*")
 
         if sampdist_p != "optional":
@@ -3349,7 +3429,8 @@ Determining the 'inside' or 'outside' of input wireframes, in most cases, is sim
                 nleft_p=1,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -3420,6 +3501,10 @@ Canonical scores may be sent to an optional output file (&**SCORES**) which can 
         import warnings
         warnings.warn("`canon` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"canon() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "canon "
 
         if in_i == "required":
@@ -3434,7 +3519,7 @@ Canonical scores may be sent to an optional output file (&**SCORES**) which can 
         if sampid_f != "optional":
             command += " *sampid=" + sampid_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 10, "*")
 
         if nleft_p != "optional":
@@ -3491,7 +3576,8 @@ Canonical scores may be sent to an optional output file (&**SCORES**) which can 
                 inverse_p=0,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -3725,6 +3811,11 @@ If the optional @**FACTOR** parameter is set, then the units of the points in th
         import warnings
         warnings.warn("`cdtran` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        angles_f = self._resolve_sequential_param("angles_f", "angle", angles_f, 3, "f", kwargs)
+        rotaxiss_f = self._resolve_sequential_param("rotaxiss_f", "rotaxis", rotaxiss_f, 3, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"cdtran() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "cdtran "
 
         if in_i == "required":
@@ -3760,10 +3851,10 @@ If the optional @**FACTOR** parameter is set, then the units of the points in th
         if newz_f != "optional":
             command += " *newz=" + newz_f
 
-        if angles_f[0] != "optional":
+        if angles_f and angles_f[0] != "optional":
             command += self.parse_infields_list("angle", angles_f, 3, "@")
 
-        if rotaxiss_f[0] != "optional":
+        if rotaxiss_f and rotaxiss_f[0] != "optional":
             command += self.parse_infields_list("rotaxis", rotaxiss_f, 3, "@")
 
         if x0_p != "optional":
@@ -4042,7 +4133,8 @@ Otherwise:
                 extend_p=1,
                 endpoint_p=1,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -4170,6 +4262,10 @@ The output from the CHANNL3D process is in the standard Drillhole format which i
         import warnings
         warnings.warn("`channl3d` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        samples_i = self._resolve_sequential_param("samples_i", "sample", samples_i, 6, "i", kwargs)
+        if kwargs:
+            raise TypeError(f"channl3d() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "channl3d "
 
         if survpts_i == "required":
@@ -4205,7 +4301,7 @@ The output from the CHANNL3D process is in the standard Drillhole format which i
         if to_f != "optional":
             command += " *to=" + to_f
 
-        if samples_i[0] != "optional":
+        if samples_i and samples_i[0] != "optional":
             command += self.parse_infields_list("sample", samples_i, 6, "&")
 
         if extend_p != "optional":
@@ -4290,7 +4386,8 @@ The output from the CHANNL3D process is in the standard Drillhole format which i
                 progress_p=1,
                 display_p=1,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -4732,6 +4829,14 @@ The output plot file **PLOT** is created using the batch graphics processes and 
         import warnings
         warnings.warn("`chart` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        keys_f = self._resolve_sequential_param("keys_f", "key", keys_f, 3, "f", kwargs)
+        linetyps_f = self._resolve_sequential_param("linetyps_f", "linetyp", linetyps_f, 2, "f", kwargs)
+        symbols_f = self._resolve_sequential_param("symbols_f", "symbol", symbols_f, 2, "f", kwargs)
+        symsizes_f = self._resolve_sequential_param("symsizes_f", "symsize", symsizes_f, 2, "f", kwargs)
+        colours_f = self._resolve_sequential_param("colours_f", "colour", colours_f, 2, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"chart() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "chart "
 
         if in_i == "required":
@@ -4761,19 +4866,19 @@ The output plot file **PLOT** is created using the batch graphics processes and 
         if weight_f != "optional":
             command += " *weight=" + weight_f
 
-        if keys_f[0] != "optional":
+        if keys_f and keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 3, "*")
 
-        if linetyps_f[0] != "optional":
+        if linetyps_f and linetyps_f[0] != "optional":
             command += self.parse_infields_list("linetyp", linetyps_f, 2, "@")
 
-        if symbols_f[0] != "optional":
+        if symbols_f and symbols_f[0] != "optional":
             command += self.parse_infields_list("symbol", symbols_f, 2, "@")
 
-        if symsizes_f[0] != "optional":
+        if symsizes_f and symsizes_f[0] != "optional":
             command += self.parse_infields_list("symsize", symsizes_f, 2, "@")
 
-        if colours_f[0] != "optional":
+        if colours_f and colours_f[0] != "optional":
             command += self.parse_infields_list("colour", colours_f, 2, "@")
 
         if charttyp_p != "optional":
@@ -5716,7 +5821,8 @@ This process is used as part of the [Advanced Estimation](<../STUDIO_RM/Multivar
                 modelout_o="required",
                 tolernce_p=0.001,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -5872,6 +5978,10 @@ The @**TOLERNCE** parameter is used to define the smallest subcell that will be 
         import warnings
         warnings.warn("`combmod` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 20, "i", kwargs)
+        if kwargs:
+            raise TypeError(f"combmod() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "combmod "
 
         if proto_i == "required":
@@ -5886,7 +5996,7 @@ The @**TOLERNCE** parameter is used to define the smallest subcell that will be 
         if modelout_o != "optional":
             command += " &modelout=" + modelout_o
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 20, "&")
 
         if tolernce_p != "optional":
@@ -5906,7 +6016,8 @@ The @**TOLERNCE** parameter is used to define the smallest subcell that will be 
                 outtr_o="required",
                 outpt_o="optional",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -6105,6 +6216,11 @@ Note: **COMBTRI** does not check for interpenetration of the two wireframes, but
         import warnings
         warnings.warn("`combtri` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        wiretrs_i = self._resolve_sequential_param("wiretrs_i", "wiretr", wiretrs_i, 20, "i", kwargs)
+        wirepts_i = self._resolve_sequential_param("wirepts_i", "wirept", wirepts_i, 20, "i", kwargs)
+        if kwargs:
+            raise TypeError(f"combtri() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "combtri "
 
         if outtr_o == "required":
@@ -6116,10 +6232,10 @@ Note: **COMBTRI** does not check for interpenetration of the two wireframes, but
         if outpt_o != "optional":
             command += " &outpt=" + outpt_o
 
-        if wiretrs_i[0] != "optional":
+        if wiretrs_i and wiretrs_i[0] != "optional":
             command += self.parse_infields_list("wiretr", wiretrs_i, 20, "&")
 
-        if wirepts_i[0] != "optional":
+        if wirepts_i and wirepts_i[0] != "optional":
             command += self.parse_infields_list("wirept", wirepts_i, 20, "&")
 
         if arguments != "optional":
@@ -6714,7 +6830,8 @@ If @LOSS>=2 then the lost core will be treated as cavity (zero density and grade
                 reverse_p=0,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         COMPDH
@@ -6965,6 +7082,10 @@ By default, a dominant field value must reach a minimum proportion of the total 
             Required=No
 
         """
+        doms_f = self._resolve_sequential_param("doms_f", "dom", doms_f, 5, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"compdh() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "compdh "
 
         if in_i == "required":
@@ -7015,7 +7136,7 @@ By default, a dominant field value must reach a minimum proportion of the total 
         if zone5_f != "optional":
             command += " *zone5=" + zone5_f
 
-        if doms_f[0] != "optional":
+        if doms_f and doms_f[0] != "optional":
             command += self.parse_infields_list("dom", doms_f, 5, "*")
 
         if interval_p == "required":
@@ -8432,7 +8553,8 @@ No check is made for the existence of the specified output file, which therefore
                 fields_f=['optional'],
                 fieldnam_f="optional",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -8495,6 +8617,10 @@ Also see this online [Knowledge Base article](<https://datamine.freshdesk.com/en
         import warnings
         warnings.warn("`correl` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"correl() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "correl "
 
         if in_i == "required":
@@ -8509,7 +8635,7 @@ Also see this online [Knowledge Base article](<https://datamine.freshdesk.com/en
         if fieldnam_f != "optional":
             command += " *fieldnam=" + fieldnam_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 10, "*")
 
         if arguments != "optional":
@@ -8525,7 +8651,8 @@ Also see this online [Knowledge Base article](<https://datamine.freshdesk.com/en
                 out_o="required",
                 keys_f=['optional'],
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         COUNT
@@ -8565,6 +8692,10 @@ A typical use of COUNT is to find the number of samples in each drillhole (keyed
         -----------
 
         """
+        keys_f = self._resolve_sequential_param("keys_f", "key", keys_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"count() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "count "
 
         if in_i == "required":
@@ -8579,7 +8710,7 @@ A typical use of COUNT is to find the number of samples in each drillhole (keyed
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if keys_f[0] != "optional":
+        if keys_f and keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 10, "*")
 
         if arguments != "optional":
@@ -8817,7 +8948,8 @@ Subcell structures in input and output models
                 sampdist_p=0,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -8889,6 +9021,10 @@ Anomalous samples related to lag or sample distance (**LAG** or **DISTANCE**) ar
         import warnings
         warnings.warn("`crscor` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"crscor() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "crscor "
 
         if in_i == "required":
@@ -8906,7 +9042,7 @@ Anomalous samples related to lag or sample distance (**LAG** or **DISTANCE**) ar
         if sampid_f != "optional":
             command += " *sampid=" + sampid_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 10, "*")
 
         if sampdist_p != "optional":
@@ -9449,7 +9585,8 @@ The **CSOWOPT** process carries out the following functions:
                 axiss_f=['optional'],
                 centre_p=1,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -9564,6 +9701,11 @@ In all cases, output will be a data file of the ellipsoids data type, and can be
         import warnings
         warnings.warn("`daellips` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        angles_f = self._resolve_sequential_param("angles_f", "angle", angles_f, 3, "f", kwargs)
+        axiss_f = self._resolve_sequential_param("axiss_f", "axis", axiss_f, 3, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"daellips() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "daellips "
 
         if points_i != "optional":
@@ -9581,10 +9723,10 @@ In all cases, output will be a data file of the ellipsoids data type, and can be
         if zone_f != "optional":
             command += " *zone=" + zone_f
 
-        if angles_f[0] != "optional":
+        if angles_f and angles_f[0] != "optional":
             command += self.parse_infields_list("angle", angles_f, 3, "*")
 
-        if axiss_f[0] != "optional":
+        if axiss_f and axiss_f[0] != "optional":
             command += self.parse_infields_list("axis", axiss_f, 3, "@")
 
         if declust_p != "optional":
@@ -10391,7 +10533,8 @@ The following **Output** window messages display on successful completion of fil
                 endpts_p=0,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -10583,6 +10726,10 @@ If the **ENDPTS** parameter is set to 1, the sample end points are recorded in t
         import warnings
         warnings.warn("`desurv` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        if kwargs:
+            raise TypeError(f"desurv() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "desurv "
 
         if out_o == "required":
@@ -10618,7 +10765,7 @@ If the **ENDPTS** parameter is set to 1, the sample end points are recorded in t
         if dip_f != "optional":
             command += " *dip=" + dip_f
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
         if survsmth_p != "optional":
@@ -10683,7 +10830,8 @@ If the **ENDPTS** parameter is set to 1, the sample end points are recorded in t
                 keys_f=['optional'],
                 keytol_p=1e-05,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         DIFFRN
@@ -10739,6 +10887,11 @@ A typical use of the **DIFFRN** process is to delete drillholes from a file by s
             Required=No
 
         """
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        keys_f = self._resolve_sequential_param("keys_f", "key", keys_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"diffrn() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "diffrn "
 
         if out_o == "required":
@@ -10747,10 +10900,10 @@ A typical use of the **DIFFRN** process is to delete drillholes from a file by s
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
-        if keys_f[0] != "optional":
+        if keys_f and keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 10, "*")
 
         if keytol_p != "optional":
@@ -10913,7 +11066,8 @@ A typical use of the **DIFFRN** process is to delete drillholes from a file by s
                 zwidth_p=1,
                 density_p=1,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -11080,6 +11234,11 @@ Records 7 and 14 show the tonnes and grades for the total diluted and undiluted 
         import warnings
         warnings.warn("`dilutmod` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        modouts_o = self._resolve_sequential_param("modouts_o", "modout", modouts_o, 2, "o", kwargs)
+        grades_f = self._resolve_sequential_param("grades_f", "grade", grades_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"dilutmod() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "dilutmod "
 
         if modin_i == "required":
@@ -11097,10 +11256,10 @@ Records 7 and 14 show the tonnes and grades for the total diluted and undiluted 
         if density_f != "optional":
             command += " *density=" + density_f
 
-        if modouts_o[0] != "optional":
+        if modouts_o and modouts_o[0] != "optional":
             command += self.parse_infields_list("modout", modouts_o, 2, "@")
 
-        if grades_f[0] != "optional":
+        if grades_f and grades_f[0] != "optional":
             command += self.parse_infields_list("grade", grades_f, 10, "*")
 
         if xwidth_p != "optional":
@@ -11135,7 +11294,8 @@ Records 7 and 14 show the tonnes and grades for the total diluted and undiluted 
                 primat_p=0,
                 prisco_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -11233,6 +11393,10 @@ If the user wishes to plot maps of the output scores then the scores file can be
         import warnings
         warnings.warn("`discan` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"discan() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "discan "
 
         if in_i == "required":
@@ -11256,7 +11420,7 @@ If the user wishes to plot maps of the output scores then the scores file can be
         if sampid_f != "optional":
             command += " *sampid=" + sampid_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 10, "*")
 
         if resum_p != "optional":
@@ -11312,7 +11476,8 @@ If the user wishes to plot maps of the output scores then the scores file can be
                 sampid_f="optional",
                 fields_f=['optional'],
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -11388,6 +11553,10 @@ The output file containing the discriminant scores for each sample can be joined
         import warnings
         warnings.warn("`discla` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"discla() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "discla "
 
         if in_i == "required":
@@ -11420,7 +11589,7 @@ The output file containing the discriminant scores for each sample can be joined
         if sampid_f != "optional":
             command += " *sampid=" + sampid_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 10, "*")
 
         if arguments != "optional":
@@ -12242,7 +12411,8 @@ For 2 and 3 **DRILGRID** averages results over all origins and simulations for e
                 cutval_p="required",
                 fillval_p="required",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -12365,6 +12535,11 @@ The output results file contains all the evaluated tonnages and volumes, split b
         import warnings
         warnings.warn("`dtmcut` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        wiretrs_i = self._resolve_sequential_param("wiretrs_i", "wiretr", wiretrs_i, 2, "i", kwargs)
+        wirepts_i = self._resolve_sequential_param("wirepts_i", "wirept", wirepts_i, 2, "i", kwargs)
+        if kwargs:
+            raise TypeError(f"dtmcut() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "dtmcut "
 
         if proto_i == "required":
@@ -12397,10 +12572,10 @@ The output results file contains all the evaluated tonnages and volumes, split b
         if attrib_f != "optional":
             command += " *attrib=" + attrib_f
 
-        if wiretrs_i[0] != "optional":
+        if wiretrs_i and wiretrs_i[0] != "optional":
             command += self.parse_infields_list("wiretr", wiretrs_i, 2, "&")
 
-        if wirepts_i[0] != "optional":
+        if wirepts_i and wirepts_i[0] != "optional":
             command += self.parse_infields_list("wirept", wirepts_i, 2, "&")
 
         if cutden_p == "required":
@@ -12887,7 +13062,8 @@ The broad line thickness is set to produce a line thickness of 0.7.
                 zcentre_p=0,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -13103,6 +13279,12 @@ The coordinates of the centre of the ellipsoid can be defined using the @**XCENT
         import warnings
         warnings.warn("`ellipse` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        sangles_f = self._resolve_sequential_param("sangles_f", "sangle", sangles_f, 3, "f", kwargs)
+        saxiss_f = self._resolve_sequential_param("saxiss_f", "saxis", saxiss_f, 3, "f", kwargs)
+        sdists_f = self._resolve_sequential_param("sdists_f", "sdist", sdists_f, 3, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"ellipse() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "ellipse "
 
         if srcparm_i != "optional":
@@ -13126,13 +13308,13 @@ The coordinates of the centre of the ellipsoid can be defined using the @**XCENT
         if zone_f != "optional":
             command += " *zone=" + zone_f
 
-        if sangles_f[0] != "optional":
+        if sangles_f and sangles_f[0] != "optional":
             command += self.parse_infields_list("sangle", sangles_f, 3, "@")
 
-        if saxiss_f[0] != "optional":
+        if saxiss_f and saxiss_f[0] != "optional":
             command += self.parse_infields_list("saxis", saxiss_f, 3, "@")
 
-        if sdists_f[0] != "optional":
+        if sdists_f and sdists_f[0] != "optional":
             command += self.parse_infields_list("sdist", sdists_f, 3, "@")
 
         if srefnum_p != "optional":
@@ -15242,15 +15424,15 @@ See [EXTRA examples](<../COMMON/Expression%20Translator%20Examples.md>).
                 rscores_o="optional",
                 oscores_o="optional",
                 sampid_f="optional",
-                f1_f="optional",
-                f2_f10_f="optional",
+                fields_f=['optional'],
                 maxit_p=0,
                 eigenmin_p=1,
                 numeigen_p=0,
                 promaxcf_p=3,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -15311,13 +15493,8 @@ If the user wishes to plot maps of the output scores then the scores files can b
             Default=Undefined
             Required=Yes
 
-        f1: Numeric : IN
+        fields: Undefined : Undefined
             First field to be used. No fields specified means all.
-            Default=Undefined
-            Required=No
-
-        f2_f10: Numeric : IN
-            Second and subsequent fields to be used.
             Default=Undefined
             Required=No
 
@@ -15366,6 +15543,10 @@ If the user wishes to plot maps of the output scores then the scores files can b
         import warnings
         warnings.warn("`factor` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"factor() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "factor "
 
         if in_i == "required":
@@ -15386,11 +15567,8 @@ If the user wishes to plot maps of the output scores then the scores files can b
         if sampid_f != "optional":
             command += " *sampid=" + sampid_f
 
-        if f1_f != "optional":
-            command += " *f1=" + f1_f
-
-        if f2_f10_f != "optional":
-            command += " *f2-f10=" + f2_f10_f
+        if fields_f and fields_f[0] != "optional":
+            command += self.parse_infields_list("f", fields_f, 10, "*")
 
         if maxit_p != "optional":
             try:
@@ -15846,7 +16024,8 @@ This process is used when it is necessary to give different values to a field in
                 z_f="optional",
                 radius_p="optional",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -15915,6 +16094,10 @@ If a filter file is used then points from the &**IN1** file are copied to the &*
         import warnings
         warnings.warn("`filtpo` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        if kwargs:
+            raise TypeError(f"filtpo() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "filtpo "
 
         if out_o == "required":
@@ -15932,7 +16115,7 @@ If a filter file is used then points from the &**IN1** file are copied to the &*
         if z_f != "optional":
             command += " *z=" + z_f
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
         if radius_p != "optional":
@@ -16537,11 +16720,11 @@ SUBS |  Return the substring of alpha OLDFIELD that begins at position FROM and 
     def getsamp(self,
                 in_i="required",
                 sample_o="required",
-                f1_f="optional",
-                f2_f30_f="optional",
+                fields_f=['optional'],
                 csvout_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -16583,13 +16766,8 @@ The resulting downhole sample file can then be merged with existing drillhole sa
         Fields:
         -------
 
-        f1: Any : IN
+        fields: Undefined : Undefined
             First sample attribute field for saving to sample output.
-            Default=Undefined
-            Required=Yes
-
-        f2_f30: Any : IN
-            Sample attribute fields for saving to sample output.
             Default=Undefined
             Required=No
 
@@ -16607,6 +16785,10 @@ The resulting downhole sample file can then be merged with existing drillhole sa
         import warnings
         warnings.warn("`getsamp` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 30, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"getsamp() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "getsamp "
 
         if in_i == "required":
@@ -16621,11 +16803,8 @@ The resulting downhole sample file can then be merged with existing drillhole sa
         if sample_o != "optional":
             command += " &sample=" + sample_o
 
-        if f1_f != "optional":
-            command += " *f1=" + f1_f
-
-        if f2_f30_f != "optional":
-            command += " *f2-f30=" + f2_f30_f
+        if fields_f and fields_f[0] != "optional":
+            command += self.parse_infields_list("f", fields_f, 30, "*")
 
         if csvout_p != "optional":
             try:
@@ -16688,7 +16867,8 @@ The resulting downhole sample file can then be merged with existing drillhole sa
                 zsubcell_p=1,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -17102,6 +17282,12 @@ The samples from the input sample file &**IN** can be weighted by specifying a *
         import warnings
         warnings.warn("`grade` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        sdists_f = self._resolve_sequential_param("sdists_f", "sdist", sdists_f, 3, "f", kwargs)
+        sangles_f = self._resolve_sequential_param("sangles_f", "sangle", sangles_f, 3, "f", kwargs)
+        saxiss_f = self._resolve_sequential_param("saxiss_f", "saxis", saxiss_f, 3, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"grade() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "grade "
 
         if proto_i == "required":
@@ -17146,13 +17332,13 @@ The samples from the input sample file &**IN** can be weighted by specifying a *
         if length_f != "optional":
             command += " *length=" + length_f
 
-        if sdists_f[0] != "optional":
+        if sdists_f and sdists_f[0] != "optional":
             command += self.parse_infields_list("sdist", sdists_f, 3, "@")
 
-        if sangles_f[0] != "optional":
+        if sangles_f and sangles_f[0] != "optional":
             command += self.parse_infields_list("sangle", sangles_f, 3, "@")
 
-        if saxiss_f[0] != "optional":
+        if saxiss_f and saxiss_f[0] != "optional":
             command += self.parse_infields_list("saxis", saxiss_f, 3, "@")
 
         if minnum_p != "optional":
@@ -17389,7 +17575,8 @@ The samples from the input sample file &**IN** can be weighted by specifying a *
                 norig_p=1,
                 excel_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -17588,6 +17775,10 @@ Only weights for the optimum grid size are reported. If you want weights for a d
         import warnings
         warnings.warn("`griddc` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        zones_f = self._resolve_sequential_param("zones_f", "zone", zones_f, 2, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"griddc() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "griddc "
 
         if in_i == "required":
@@ -17611,7 +17802,7 @@ Only weights for the optimum grid size are reported. If you want weights for a d
         if grade_f != "optional":
             command += " *grade=" + grade_f
 
-        if zones_f[0] != "optional":
+        if zones_f and zones_f[0] != "optional":
             command += self.parse_infields_list("zone", zones_f, 2, "*")
 
         if maxmean_p != "optional":
@@ -17993,7 +18184,8 @@ Note: Any sample value below @**MINIMUM** will be put into the bottom bin. Any s
                 keepname_p="optional",
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         HOLES3D
@@ -18268,6 +18460,10 @@ It is often the case that the first one or two samples in exploration holes cont
             Required=No
 
         """
+        samples_i = self._resolve_sequential_param("samples_i", "sample", samples_i, 10, "i", kwargs)
+        if kwargs:
+            raise TypeError(f"holes3d() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "holes3d "
 
         if collar_i == "required":
@@ -18318,7 +18514,7 @@ It is often the case that the first one or two samples in exploration holes cont
         if dip_f != "optional":
             command += " *dip=" + dip_f
 
-        if samples_i[0] != "optional":
+        if samples_i and samples_i[0] != "optional":
             command += self.parse_infields_list("sample", samples_i, 10, "&")
 
         if survsmth_p != "optional":
@@ -18405,7 +18601,8 @@ It is often the case that the first one or two samples in exploration holes cont
                 from_f="optional",
                 to_f="optional",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -18465,6 +18662,10 @@ The two input files must be sorted on fields * **BHID** and * **FROM**. Holes ar
         import warnings
         warnings.warn("`holmer` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        if kwargs:
+            raise TypeError(f"holmer() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "holmer "
 
         if out_o == "required":
@@ -18482,7 +18683,7 @@ The two input files must be sorted on fields * **BHID** and * **FROM**. Holes ar
         if to_f != "optional":
             command += " *to=" + to_f
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
         if arguments != "optional":
@@ -21408,7 +21609,8 @@ Note: Scaling is fully automatic in this process.
                 keytol_p=1e-05,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         JOIN
@@ -21503,6 +21705,10 @@ Both input files must be sorted in the order of the key fields before they can b
             Required=No
 
         """
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        if kwargs:
+            raise TypeError(f"join() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "join "
 
         if out_o == "required":
@@ -21511,7 +21717,7 @@ Both input files must be sorted in the order of the key fields before they can b
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
         if subsetr_p != "optional":
@@ -21839,7 +22045,8 @@ The output file **OUT** lists block size, block group, discretization, search pa
                 fieldnam_f="optional",
                 prompt_p=20,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -21909,6 +22116,10 @@ If the input is a catalogue file (as created by the **[LISTDR](<listdr.md>)** pr
         import warnings
         warnings.warn("`list` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"list() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "list "
 
         if in_i == "required":
@@ -21923,7 +22134,7 @@ If the input is a catalogue file (as created by the **[LISTDR](<listdr.md>)** pr
         if fieldnam_f != "optional":
             command += " *fieldnam=" + fieldnam_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 10, "*")
 
         if prompt_p != "optional":
@@ -22456,7 +22667,8 @@ Note: Selecting this option can introduce a performance hit, so where large coin
                 inverse_p=0,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -22686,6 +22898,11 @@ The @INVERSE parameter allows an inverse coordinate rotation. If @**INVERSE** =1
         import warnings
         warnings.warn("`mdtran` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        angles_f = self._resolve_sequential_param("angles_f", "angle", angles_f, 3, "f", kwargs)
+        rotaxiss_f = self._resolve_sequential_param("rotaxiss_f", "rotaxis", rotaxiss_f, 3, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"mdtran() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "mdtran "
 
         if in_i == "required":
@@ -22709,10 +22926,10 @@ The @INVERSE parameter allows an inverse coordinate rotation. If @**INVERSE** =1
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if angles_f[0] != "optional":
+        if angles_f and angles_f[0] != "optional":
             command += self.parse_infields_list("angle", angles_f, 3, "@")
 
-        if rotaxiss_f[0] != "optional":
+        if rotaxiss_f and rotaxiss_f[0] != "optional":
             command += self.parse_infields_list("rotaxis", rotaxiss_f, 3, "@")
 
         if x0_p != "optional":
@@ -22813,7 +23030,8 @@ The @INVERSE parameter allows an inverse coordinate rotation. If @**INVERSE** =1
                 roworder_p=1,
                 keytol_p=1e-05,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         MGSORT
@@ -22893,6 +23111,10 @@ Note: Although the order of fields in a file does not affect subsequent processi
             Required=No
 
         """
+        keys_f = self._resolve_sequential_param("keys_f", "key", keys_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"mgsort() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "mgsort "
 
         if in_i == "required":
@@ -22907,7 +23129,7 @@ Note: Although the order of fields in a file does not affect subsequent processi
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if keys_f[0] != "optional":
+        if keys_f and keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 10, "*")
 
         if order_p != "optional":
@@ -23568,7 +23790,8 @@ Using the wireframe model produced in step (5), section profile strings along an
                 diln_p="required",
                 dilint_p="required",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -23702,6 +23925,10 @@ Although the ore body orientation is not explicit in the drill hole data, diluti
         import warnings
         warnings.warn("`minwid` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        narwasts_f = self._resolve_sequential_param("narwasts_f", "narwast", narwasts_f, 2, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"minwid() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "minwid "
 
         if in_i == "required":
@@ -23728,7 +23955,7 @@ Although the ore body orientation is not explicit in the drill hole data, diluti
         if density_f != "optional":
             command += " *density=" + density_f
 
-        if narwasts_f[0] != "optional":
+        if narwasts_f and narwasts_f[0] != "optional":
             command += self.parse_infields_list("narwast", narwasts_f, 2, "@")
 
         if cutoff_p == "required":
@@ -23818,7 +24045,8 @@ Although the ore body orientation is not explicit in the drill hole data, diluti
                 slicefld_p=1,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -24024,6 +24252,11 @@ The process requires as input a geological model, a set of zone definitions, and
         import warnings
         warnings.warn("`minzon` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        priorties_f = self._resolve_sequential_param("priorties_f", "priorty", priorties_f, 5, "f", kwargs)
+        prints_f = self._resolve_sequential_param("prints_f", "print", prints_f, 5, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"minzon() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "minzon "
 
         if in_i == "required":
@@ -24065,10 +24298,10 @@ The process requires as input a geological model, a set of zone definitions, and
         if slicewid_f != "optional":
             command += " *slicewid=" + slicewid_f
 
-        if priorties_f[0] != "optional":
+        if priorties_f and priorties_f[0] != "optional":
             command += self.parse_infields_list("priorty", priorties_f, 5, "*")
 
-        if prints_f[0] != "optional":
+        if prints_f and prints_f[0] != "optional":
             command += self.parse_infields_list("print", prints_f, 5, "*")
 
         if minadv_p == "required":
@@ -24341,7 +24574,8 @@ For example, if carrying out a pre-feasibility study, a strategic planning exerc
                 z_f="optional",
                 fields_f=['optional'],
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -24412,6 +24646,11 @@ The IN1 file is a standard block model file with one or more attribute fields. T
         import warnings
         warnings.warn("`mod2xyz` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"mod2xyz() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "mod2xyz "
 
         if out_o == "required":
@@ -24429,10 +24668,10 @@ The IN1 file is a standard block model file with one or more attribute fields. T
         if z_f != "optional":
             command += " *z=" + z_f
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 10, "*")
 
         if arguments != "optional":
@@ -26385,7 +26624,7 @@ If both the input model file and the input wireframe triangle file include field
                 model_i="required",
                 grid_i="optional",
                 out_o="required",
-                f1_f5_f="optional",
+                fields_f=['optional'],
                 xg_f="optional",
                 yg_f="optional",
                 zg_f="optional",
@@ -26402,7 +26641,8 @@ If both the input model file and the input wireframe triangle file include field
                 miss_p="optional",
                 print_p="optional",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         MODTRA
@@ -26449,10 +26689,10 @@ The specified fields * **F1** \- * **Fn** should have discrete values rather tha
         Fields:
         -------
 
-        f1_f5: Any : MODEL
+        fields: Undefined : Undefined
             Fields over which continuity is required within a sample.
             Default=Undefined
-            Required=Yes
+            Required=No
 
         xg: Numeric : GRID
             Optional **GRID** field name holding X co-ordinate. Default is **XG**. Ignored if
@@ -26574,6 +26814,10 @@ The specified fields * **F1** \- * **Fn** should have discrete values rather tha
             Required=No
 
         """
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 5, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"modtra() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "modtra "
 
         if model_i == "required":
@@ -26591,10 +26835,6 @@ The specified fields * **F1** \- * **Fn** should have discrete values rather tha
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if f1_f5_f != "optional":
-            f_list = [x.strip() for x in f1_f5_f.split(",")] if isinstance(f1_f5_f, str) else list(f1_f5_f)
-            command += self.parse_infields_list("f", f_list, 5, "*")
-
         if xg_f != "optional":
             command += " *xg=" + xg_f
 
@@ -26603,6 +26843,9 @@ The specified fields * **F1** \- * **Fn** should have discrete values rather tha
 
         if zg_f != "optional":
             command += " *zg=" + zg_f
+
+        if fields_f and fields_f[0] != "optional":
+            command += self.parse_infields_list("f", fields_f, 5, "*")
 
         if plane_p != "optional":
             try:
@@ -26794,7 +27037,8 @@ The standard wireframe GROUP, SURFACE, adjacency and orientation data is output 
                 ysubcell_p=1,
                 resol_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -26909,6 +27153,10 @@ The metal content and mass from the stope wireframe data is the same in the bloc
         import warnings
         warnings.warn("`mso2npv` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        modouts_o = self._resolve_sequential_param("modouts_o", "modout", modouts_o, 2, "o", kwargs)
+        if kwargs:
+            raise TypeError(f"mso2npv() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "mso2npv "
 
         if modelin_i == "required":
@@ -26948,7 +27196,7 @@ The metal content and mass from the stope wireframe data is the same in the bloc
         if instope_f != "optional":
             command += " *instope=" + instope_f
 
-        if modouts_o[0] != "optional":
+        if modouts_o and modouts_o[0] != "optional":
             command += self.parse_infields_list("modout", modouts_o, 2, "@")
 
         if splits_p != "optional":
@@ -27381,7 +27629,8 @@ You can also restrict the scope of transformation by setting a minimum (@MINGRAD
                 zinc_p=10,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -27551,6 +27800,11 @@ The optional wireframe file is created around the limits of the prototype model.
         import warnings
         warnings.warn("`origin` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        angles_f = self._resolve_sequential_param("angles_f", "angle", angles_f, 3, "f", kwargs)
+        rotaxiss_f = self._resolve_sequential_param("rotaxiss_f", "rotaxis", rotaxiss_f, 3, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"origin() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "origin "
 
         if in_i == "required":
@@ -27577,10 +27831,10 @@ The optional wireframe file is created around the limits of the prototype model.
         if z_f != "optional":
             command += " *z=" + z_f
 
-        if angles_f[0] != "optional":
+        if angles_f and angles_f[0] != "optional":
             command += self.parse_infields_list("angle", angles_f, 3, "@")
 
-        if rotaxiss_f[0] != "optional":
+        if rotaxiss_f and rotaxiss_f[0] != "optional":
             command += self.parse_infields_list("rotaxis", rotaxiss_f, 3, "@")
 
         if margin_p != "optional":
@@ -27629,12 +27883,13 @@ The optional wireframe file is created around the limits of the prototype model.
                 fieldlst_i="optional",
                 fields_f=['optional'],
                 fieldnam_f="optional",
-                csv_p="optional",
-                nodd_p="optional",
-                dplace_p="optional",
-                implicit_p="optional",
+                csv_p=0,
+                nodd_p=0,
+                dplace_p=-1,
+                implicit_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         OUTPUT
@@ -27734,6 +27989,10 @@ The maximum permitted width of 240 characters is not applicable when using this 
             Required=No
 
         """
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 25, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"output() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "output "
 
         if in_i == "required":
@@ -27748,7 +28007,7 @@ The maximum permitted width of 240 characters is not applicable when using this 
         if fieldnam_f != "optional":
             command += " *fieldnam=" + fieldnam_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 25, "*")
 
         if csv_p != "optional":
@@ -27784,7 +28043,7 @@ The maximum permitted width of 240 characters is not applicable when using this 
                 if isinstance(dplace_p, (int, float)):
                     raise e
 
-        if dplace_p != "optional" and dplace_p != -1:
+        if dplace_p != "optional":
             command += " @dplace=" + str(dplace_p)
 
         if implicit_p != "optional":
@@ -27842,7 +28101,8 @@ The maximum permitted width of 240 characters is not applicable when using this 
                 andists_f=['optional'],
                 print_p=1,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -28243,6 +28503,12 @@ The results for each panel are displayed in the **Output** window. If [kriging](
         import warnings
         warnings.warn("`panelest` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        anangles_f = self._resolve_sequential_param("anangles_f", "anangle", anangles_f, 3, "f", kwargs)
+        anaxiss_f = self._resolve_sequential_param("anaxiss_f", "anaxis", anaxiss_f, 3, "f", kwargs)
+        andists_f = self._resolve_sequential_param("andists_f", "andist", andists_f, 3, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"panelest() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "panelest "
 
         if in_i == "required":
@@ -28290,13 +28556,13 @@ The results for each panel are displayed in the **Output** window. If [kriging](
         if zpt_f != "optional":
             command += " *zpt=" + zpt_f
 
-        if anangles_f[0] != "optional":
+        if anangles_f and anangles_f[0] != "optional":
             command += self.parse_infields_list("anangle", anangles_f, 3, "@")
 
-        if anaxiss_f[0] != "optional":
+        if anaxiss_f and anaxiss_f[0] != "optional":
             command += self.parse_infields_list("anaxis", anaxiss_f, 3, "@")
 
-        if andists_f[0] != "optional":
+        if andists_f and andists_f[0] != "optional":
             command += self.parse_infields_list("andist", andists_f, 3, "@")
 
         if minnum_p != "optional":
@@ -28428,7 +28694,8 @@ The results for each panel are displayed in the **Output** window. If [kriging](
                 vgram_p=1,
                 print_p=1,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -28619,6 +28886,11 @@ Warning: If two or more samples have the same X and Y coordinate then an error w
         import warnings
         warnings.warn("`panelk` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        ranges_f = self._resolve_sequential_param("ranges_f", "range", ranges_f, 2, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"panelk() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "panelk "
 
         if out_o != "optional":
@@ -28636,10 +28908,10 @@ Warning: If two or more samples have the same X and Y coordinate then an error w
         if panel_f != "optional":
             command += " *panel=" + panel_f
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
-        if ranges_f[0] != "optional":
+        if ranges_f and ranges_f[0] != "optional":
             command += self.parse_infields_list("range", ranges_f, 2, "@")
 
         if nugget_p != "optional":
@@ -28729,7 +29001,8 @@ Warning: If two or more samples have the same X and Y coordinate then an error w
                 loadeign_p=0,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -28860,6 +29133,10 @@ MATXTYPE |  LOADEIGN |  SCNORM
         import warnings
         warnings.warn("`pca` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"pca() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "pca "
 
         if in_i == "required":
@@ -28874,7 +29151,7 @@ MATXTYPE |  LOADEIGN |  SCNORM
         if sampid_f != "optional":
             command += " *sampid=" + sampid_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 10, "*")
 
         if matxtype_p != "optional":
@@ -29050,7 +29327,8 @@ Values for additional fields in the input perimeter are taken as constant for th
                 resol_p=0,
                 ovcheck_p=1,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -29232,6 +29510,10 @@ If no perimeter file is specified or if no attributes are specified then the pro
         import warnings
         warnings.warn("`perfil` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        attribs_f = self._resolve_sequential_param("attribs_f", "attrib", attribs_f, 5, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"perfil() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "perfil "
 
         if proto_i == "required":
@@ -29255,7 +29537,7 @@ If no perimeter file is specified or if no attributes are specified then the pro
         if dminus_f != "optional":
             command += " *dminus=" + dminus_f
 
-        if attribs_f[0] != "optional":
+        if attribs_f and attribs_f[0] != "optional":
             command += self.parse_infields_list("attrib", attribs_f, 5, "*")
 
         if mode_p != "optional":
@@ -29974,7 +30256,8 @@ The result of a pattern matching expression is either TRUE or FALSE. Any result 
                 fieldnam_f="optional",
                 append_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -30167,6 +30450,10 @@ TEST> DEVFILE MATCHES \reg* END
         import warnings
         warnings.warn("`picrec` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 5, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"picrec() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "picrec "
 
         if in_i == "required":
@@ -30187,7 +30474,7 @@ TEST> DEVFILE MATCHES \reg* END
         if fieldnam_f != "optional":
             command += " *fieldnam=" + fieldnam_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 5, "*")
 
         if append_p != "optional":
@@ -30227,7 +30514,8 @@ TEST> DEVFILE MATCHES \reg* END
                 bheight_p=0,
                 checkrot_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -30359,6 +30647,10 @@ Subcell splitting is controlled by the parameters @**XSUBCELL** , @**YSUBCELL** 
         import warnings
         warnings.warn("`pitmod` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 5, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"pitmod() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "pitmod "
 
         if wiretr_i == "required":
@@ -30394,7 +30686,7 @@ Subcell splitting is controlled by the parameters @**XSUBCELL** , @**YSUBCELL** 
         if density_f != "optional":
             command += " *density=" + density_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 5, "*")
 
         if density_p == "required":
@@ -33359,7 +33651,8 @@ Also note:
                 xscale_p="optional",
                 yscale_p="optional",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -33742,6 +34035,11 @@ If no prototype is used then all 6 of the scale and size parameters must be set 
         import warnings
         warnings.warn("`plotfx` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        plxs_f = self._resolve_sequential_param("plxs_f", "plx", plxs_f, 2, "f", kwargs)
+        plys_f = self._resolve_sequential_param("plys_f", "ply", plys_f, 2, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"plotfx() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "plotfx "
 
         if proto_i != "optional":
@@ -33753,10 +34051,10 @@ If no prototype is used then all 6 of the scale and size parameters must be set 
         if plot_o != "optional":
             command += " &plot=" + plot_o
 
-        if plxs_f[0] != "optional":
+        if plxs_f and plxs_f[0] != "optional":
             command += self.parse_infields_list("plx", plxs_f, 2, "@")
 
-        if plys_f[0] != "optional":
+        if plys_f and plys_f[0] != "optional":
             command += self.parse_infields_list("ply", plys_f, 2, "@")
 
         if xinc_p == "required":
@@ -34405,7 +34703,8 @@ Use of the @**FACTOR** parameter allows for example section lines in feet or hun
                 xscale_p="optional",
                 yscale_p="optional",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -34510,6 +34809,10 @@ If the **[HISTOG](<histog.md>)** process was used to generate the input file, th
         import warnings
         warnings.warn("`plothi` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        xs_f = self._resolve_sequential_param("xs_f", "x", xs_f, 2, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"plothi() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "plothi "
 
         if in_i == "required":
@@ -34533,7 +34836,7 @@ If the **[HISTOG](<histog.md>)** process was used to generate the input file, th
         if y_f != "optional":
             command += " *y=" + y_f
 
-        if xs_f[0] != "optional":
+        if xs_f and xs_f[0] != "optional":
             command += self.parse_infields_list("x", xs_f, 2, "*")
 
         if append_p != "optional":
@@ -34837,7 +35140,8 @@ The line type may be chosen by optional parameter. Currently available are broad
                 xscale_p="optional",
                 yscale_p="optional",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -34964,6 +35268,11 @@ Note: An empty plot file may be generated if the specified fields do not exist, 
         import warnings
         warnings.warn("`plotln` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        xs_f = self._resolve_sequential_param("xs_f", "x", xs_f, 2, "f", kwargs)
+        ys_f = self._resolve_sequential_param("ys_f", "y", ys_f, 2, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"plotln() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "plotln "
 
         if in_i == "required":
@@ -34984,10 +35293,10 @@ Note: An empty plot file may be generated if the specified fields do not exist, 
         if plot_o != "optional":
             command += " &plot=" + plot_o
 
-        if xs_f[0] != "optional":
+        if xs_f and xs_f[0] != "optional":
             command += self.parse_infields_list("x", xs_f, 2, "*")
 
-        if ys_f[0] != "optional":
+        if ys_f and ys_f[0] != "optional":
             command += self.parse_infields_list("y", ys_f, 2, "*")
 
         if linecode_p != "optional":
@@ -35087,7 +35396,8 @@ Note: An empty plot file may be generated if the specified fields do not exist, 
                 yscale_p="optional",
                 vertexag_p=1,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -35397,6 +35707,10 @@ Note: A 'box' is defined as the intersection of the specified plane with a model
         import warnings
         warnings.warn("`plotmx` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        iconcols_f = self._resolve_sequential_param("iconcols_f", "iconcol", iconcols_f, 2, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"plotmx() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "plotmx "
 
         if in_i == "required":
@@ -35429,7 +35743,7 @@ Note: A 'box' is defined as the intersection of the specified plane with a model
         if modcol_f != "optional":
             command += " *modcol=" + modcol_f
 
-        if iconcols_f[0] != "optional":
+        if iconcols_f and iconcols_f[0] != "optional":
             command += self.parse_infields_list("iconcol", iconcols_f, 2, "@")
 
         if charsize_p != "optional":
@@ -35635,7 +35949,8 @@ Note: A 'box' is defined as the intersection of the specified plane with a model
                 xscale_p="optional",
                 yscale_p="optional",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -35875,6 +36190,11 @@ The line type may be chosen by optional parameter. Currently available are broad
         import warnings
         warnings.warn("`plotpa` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 5, "f", kwargs)
+        ndps_f = self._resolve_sequential_param("ndps_f", "ndp", ndps_f, 5, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"plotpa() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "plotpa "
 
         if in_i == "required":
@@ -35913,10 +36233,10 @@ The line type may be chosen by optional parameter. Currently available are broad
         if pcode_f != "optional":
             command += " *pcode=" + pcode_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 5, "*")
 
-        if ndps_f[0] != "optional":
+        if ndps_f and ndps_f[0] != "optional":
             command += self.parse_infields_list("ndp", ndps_f, 5, "@")
 
         if linecode_p != "optional":
@@ -37924,7 +38244,8 @@ The value used in the process will be selected in the following order of priorit
                 xscale_p="optional",
                 yscale_p="optional",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -38275,6 +38596,11 @@ The value used in the process will be selected in the following order of priorit
         import warnings
         warnings.warn("`plotsk` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        xs_f = self._resolve_sequential_param("xs_f", "x", xs_f, 2, "f", kwargs)
+        ys_f = self._resolve_sequential_param("ys_f", "y", ys_f, 2, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"plotsk() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "plotsk "
 
         if in_i == "required":
@@ -38322,10 +38648,10 @@ The value used in the process will be selected in the following order of priorit
         if to_f != "optional":
             command += " *to=" + to_f
 
-        if xs_f[0] != "optional":
+        if xs_f and xs_f[0] != "optional":
             command += self.parse_infields_list("x", xs_f, 2, "@")
 
-        if ys_f[0] != "optional":
+        if ys_f and ys_f[0] != "optional":
             command += self.parse_infields_list("y", ys_f, 2, "@")
 
         if distance_p == "required":
@@ -38584,7 +38910,8 @@ The value used in the process will be selected in the following order of priorit
                 xscale_p="optional",
                 yscale_p="optional",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -39024,6 +39351,12 @@ Interaction depends on the value of **PLTYPE** selected:
         import warnings
         warnings.warn("`plotsx` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 3, "i", kwargs)
+        xs_f = self._resolve_sequential_param("xs_f", "x", xs_f, 2, "f", kwargs)
+        ys_f = self._resolve_sequential_param("ys_f", "y", ys_f, 2, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"plotsx() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "plotsx "
 
         if proto_i == "required":
@@ -39044,13 +39377,13 @@ Interaction depends on the value of **PLTYPE** selected:
         if sampcolr_f != "optional":
             command += " *sampcolr=" + sampcolr_f
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 3, "&")
 
-        if xs_f[0] != "optional":
+        if xs_f and xs_f[0] != "optional":
             command += self.parse_infields_list("x", xs_f, 2, "@")
 
-        if ys_f[0] != "optional":
+        if ys_f and ys_f[0] != "optional":
             command += self.parse_infields_list("y", ys_f, 2, "@")
 
         if ndp_p == "required":
@@ -41108,7 +41441,8 @@ The optional output wireframe model (POLYTR, POLYPT) is created using the [BLKTR
                 progress_p=1,
                 display_p=1,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -41268,6 +41602,14 @@ If the **KEY** field only exists in the **IN1** file then all the samples from t
         import warnings
         warnings.warn("`ppqqplot` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        values_f = self._resolve_sequential_param("values_f", "value", values_f, 2, "f", kwargs)
+        weights_f = self._resolve_sequential_param("weights_f", "weight", weights_f, 2, "f", kwargs)
+        minimums_f = self._resolve_sequential_param("minimums_f", "minimum", minimums_f, 2, "f", kwargs)
+        maximums_f = self._resolve_sequential_param("maximums_f", "maximum", maximums_f, 2, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"ppqqplot() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "ppqqplot "
 
         if ppout_o != "optional":
@@ -41285,19 +41627,19 @@ If the **KEY** field only exists in the **IN1** file then all the samples from t
         if key_f != "optional":
             command += " *key=" + key_f
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
-        if values_f[0] != "optional":
+        if values_f and values_f[0] != "optional":
             command += self.parse_infields_list("value", values_f, 2, "*")
 
-        if weights_f[0] != "optional":
+        if weights_f and weights_f[0] != "optional":
             command += self.parse_infields_list("weight", weights_f, 2, "*")
 
-        if minimums_f[0] != "optional":
+        if minimums_f and minimums_f[0] != "optional":
             command += self.parse_infields_list("minimum", minimums_f, 2, "@")
 
-        if maximums_f[0] != "optional":
+        if maximums_f and maximums_f[0] != "optional":
             command += self.parse_infields_list("maximum", maximums_f, 2, "@")
 
         if plottype_p != "optional":
@@ -41375,7 +41717,8 @@ If the **KEY** field only exists in the **IN1** file then all the samples from t
                 accuracy_p=0.001,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -41688,6 +42031,10 @@ SETC GEOCAT |  60
         import warnings
         warnings.warn("`promod` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        keys_f = self._resolve_sequential_param("keys_f", "key", keys_f, 20, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"promod() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "promod "
 
         if in_i == "required":
@@ -41708,7 +42055,7 @@ SETC GEOCAT |  60
         if density_f != "optional":
             command += " *density=" + density_f
 
-        if keys_f[0] != "optional":
+        if keys_f and keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 20, "*")
 
         if density_p != "optional":
@@ -42319,7 +42666,8 @@ Another example: if @WFMETHOD is not 1, @BOUNDTYP is not used.
                 znorm_p=0,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -42424,6 +42772,10 @@ In order to present a two dimensional view of multi-dimensional space with minim
         import warnings
         warnings.warn("`qnlm` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"qnlm() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "qnlm "
 
         if in_i == "required":
@@ -42438,7 +42790,7 @@ In order to present a two dimensional view of multi-dimensional space with minim
         if sampid_f != "optional":
             command += " *sampid=" + sampid_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 10, "*")
 
         if convlim_p != "optional":
@@ -42509,7 +42861,8 @@ In order to present a two dimensional view of multi-dimensional space with minim
                 topgrade_p="optional",
                 ndp_p=2,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -42673,6 +43026,10 @@ If a **KEY** field has been specified, then the quantile analysis is done separa
         import warnings
         warnings.warn("`quantile` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        quantils_f = self._resolve_sequential_param("quantils_f", "quantil", quantils_f, 2, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"quantile() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "quantile "
 
         if in_i == "required":
@@ -42705,7 +43062,7 @@ If a **KEY** field has been specified, then the quantile analysis is done separa
         if weight_f != "optional":
             command += " *weight=" + weight_f
 
-        if quantils_f[0] != "optional":
+        if quantils_f and quantils_f[0] != "optional":
             command += self.parse_infields_list("quantil", quantils_f, 2, "@")
 
         if cutoff_p != "optional":
@@ -42775,7 +43132,8 @@ If a **KEY** field has been specified, then the quantile analysis is done separa
                 zsubcell_p=1,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -43062,6 +43420,12 @@ The **QUICKEST** process interpolates grades into a block model using basic calc
         import warnings
         warnings.warn("`quickest` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        sdists_f = self._resolve_sequential_param("sdists_f", "sdist", sdists_f, 3, "f", kwargs)
+        sangles_f = self._resolve_sequential_param("sangles_f", "sangle", sangles_f, 3, "f", kwargs)
+        saxiss_f = self._resolve_sequential_param("saxiss_f", "saxis", saxiss_f, 3, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"quickest() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "quickest "
 
         if proto_i == "required":
@@ -43103,13 +43467,13 @@ The **QUICKEST** process interpolates grades into a block model using basic calc
         if length_f != "optional":
             command += " *length=" + length_f
 
-        if sdists_f[0] != "optional":
+        if sdists_f and sdists_f[0] != "optional":
             command += self.parse_infields_list("sdist", sdists_f, 3, "@")
 
-        if sangles_f[0] != "optional":
+        if sangles_f and sangles_f[0] != "optional":
             command += self.parse_infields_list("sangle", sangles_f, 3, "@")
 
-        if saxiss_f[0] != "optional":
+        if saxiss_f and saxiss_f[0] != "optional":
             command += self.parse_infields_list("saxis", saxiss_f, 3, "@")
 
         if minnum_p != "optional":
@@ -43408,7 +43772,8 @@ Output fields created are as follows:
                 unmodgrd_p=0,
                 unmodden_p=1,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -43680,6 +44045,14 @@ The **UNMODDEN** parameter defines the density of unmodelled volumes. It is only
         import warnings
         warnings.warn("`reblock` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        vwflds_f = self._resolve_sequential_param("vwflds_f", "vwfld", vwflds_f, 15, "f", kwargs)
+        domflds_f = self._resolve_sequential_param("domflds_f", "domfld", domflds_f, 10, "f", kwargs)
+        addflds_f = self._resolve_sequential_param("addflds_f", "addfld", addflds_f, 10, "f", kwargs)
+        minflds_f = self._resolve_sequential_param("minflds_f", "minfld", minflds_f, 5, "f", kwargs)
+        maxflds_f = self._resolve_sequential_param("maxflds_f", "maxfld", maxflds_f, 5, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"reblock() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "reblock "
 
         if modin_i == "required":
@@ -43703,19 +44076,19 @@ The **UNMODDEN** parameter defines the density of unmodelled volumes. It is only
         if voidvol_f != "optional":
             command += " *voidvol=" + voidvol_f
 
-        if vwflds_f[0] != "optional":
+        if vwflds_f and vwflds_f[0] != "optional":
             command += self.parse_infields_list("vwfld", vwflds_f, 15, "*")
 
-        if domflds_f[0] != "optional":
+        if domflds_f and domflds_f[0] != "optional":
             command += self.parse_infields_list("domfld", domflds_f, 10, "*")
 
-        if addflds_f[0] != "optional":
+        if addflds_f and addflds_f[0] != "optional":
             command += self.parse_infields_list("addfld", addflds_f, 10, "*")
 
-        if minflds_f[0] != "optional":
+        if minflds_f and minflds_f[0] != "optional":
             command += self.parse_infields_list("minfld", minflds_f, 5, "*")
 
-        if maxflds_f[0] != "optional":
+        if maxflds_f and maxflds_f[0] != "optional":
             command += self.parse_infields_list("maxfld", maxflds_f, 5, "*")
 
         if xinc_p != "optional":
@@ -43911,7 +44284,8 @@ The records passing the retrieval criteria (if any) are numbered and those satis
                 setabsnt_p=0,
                 bench_p='Do not categorize by benches',
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -44022,6 +44396,10 @@ The records passing the retrieval criteria (if any) are numbered and those satis
         import warnings
         warnings.warn("`recmodel` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        grades_f = self._resolve_sequential_param("grades_f", "grade", grades_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"recmodel() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "recmodel "
 
         if model_i == "required":
@@ -44048,7 +44426,7 @@ The records passing the retrieval criteria (if any) are numbered and those satis
         if density_f != "optional":
             command += " *density=" + density_f
 
-        if grades_f[0] != "optional":
+        if grades_f and grades_f[0] != "optional":
             command += self.parse_infields_list("grade", grades_f, 10, "*")
 
         if value_p != "optional":
@@ -44100,7 +44478,8 @@ The records passing the retrieval criteria (if any) are numbered and those satis
                 setabsnt_p=0,
                 bench_p='Do not categorize by benches',
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -44286,6 +44665,10 @@ The total amount of material in the model with a specified value of **IDFIELD2**
         import warnings
         warnings.warn("`recmodwf` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        grades_f = self._resolve_sequential_param("grades_f", "grade", grades_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"recmodwf() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "recmodwf "
 
         if model_i == "required":
@@ -44327,7 +44710,7 @@ The total amount of material in the model with a specified value of **IDFIELD2**
         if density_f != "optional":
             command += " *density=" + density_f
 
-        if grades_f[0] != "optional":
+        if grades_f and grades_f[0] != "optional":
             command += self.parse_infields_list("grade", grades_f, 10, "*")
 
         if value_p != "optional":
@@ -44366,11 +44749,12 @@ The total amount of material in the model with a specified value of **IDFIELD2**
                 inmods_i=['optional'],
                 fieldlst_i="optional",
                 out_o="required",
-                f1_f25_f="optional",
+                fields_f=['optional'],
                 fieldnam_f="optional",
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -44436,7 +44820,7 @@ If **REGMOD** is used for other purposes then the implication of this treatment 
         Fields:
         -------
 
-        f1_f25: Any : IN2
+        fields: Undefined : Undefined
             Explicit numeric fields to be averaged.
             Default=Undefined
             Required=No
@@ -44464,6 +44848,11 @@ If **REGMOD** is used for other purposes then the implication of this treatment 
         import warnings
         warnings.warn("`regmod` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 25, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"regmod() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "regmod "
 
         if fieldlst_i != "optional":
@@ -44475,15 +44864,14 @@ If **REGMOD** is used for other purposes then the implication of this treatment 
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if f1_f25_f != "optional":
-            f_list = [x.strip() for x in f1_f25_f.split(",")] if isinstance(f1_f25_f, str) else list(f1_f25_f)
-            command += self.parse_infields_list("f", f_list, 25, "*")
-
         if fieldnam_f != "optional":
             command += " *fieldnam=" + fieldnam_f
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
+
+        if fields_f and fields_f[0] != "optional":
+            command += self.parse_infields_list("f", fields_f, 25, "*")
 
         if print_p != "optional":
             try:
@@ -44509,13 +44897,14 @@ If **REGMOD** is used for other purposes then the implication of this treatment 
                 inmods_i=['optional'],
                 out_o="required",
                 bltype_f="optional",
-                f1_f5_f="optional",
+                fields_f=['optional'],
                 airval_p="optional",
                 cutoff1_p="optional",
                 restrict_p=0,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -44564,7 +44953,7 @@ Note: This can be performed on any type of Datamine block model.
             Default=Undefined
             Required=No
 
-        f1_f5: Numeric : IN2
+        fields: Undefined : Undefined
             Explicit numeric fields to be averaged. F1 is mandatory.
             Default=Undefined
             Required=No
@@ -44610,6 +44999,11 @@ Note: This can be performed on any type of Datamine block model.
         import warnings
         warnings.warn("`regmow` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 5, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"regmow() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "regmow "
 
         if out_o == "required":
@@ -44621,12 +45015,11 @@ Note: This can be performed on any type of Datamine block model.
         if bltype_f != "optional":
             command += " *bltype=" + bltype_f
 
-        if f1_f5_f != "optional":
-            f_list = [x.strip() for x in f1_f5_f.split(",")] if isinstance(f1_f5_f, str) else list(f1_f5_f)
-            command += self.parse_infields_list("f", f_list, 5, "*")
-
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
+
+        if fields_f and fields_f[0] != "optional":
+            command += self.parse_infields_list("f", fields_f, 5, "*")
 
         if airval_p != "optional":
             command += " @airval=" + str(airval_p)
@@ -44980,7 +45373,8 @@ Note: AXIS 1 is in the Y direction, if unrotated. Distances along e.g. AXIS 2 wi
                 out_o="required",
                 keys_f=['optional'],
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -45032,6 +45426,11 @@ A typical use of the **RESTRI** process is to select drillholes from a file by s
         import warnings
         warnings.warn("`restri` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        keys_f = self._resolve_sequential_param("keys_f", "key", keys_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"restri() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "restri "
 
         if out_o == "required":
@@ -45040,10 +45439,10 @@ A typical use of the **RESTRI** process is to select drillholes from a file by s
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
-        if keys_f[0] != "optional":
+        if keys_f and keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 10, "*")
 
         if arguments != "optional":
@@ -45064,7 +45463,8 @@ A typical use of the **RESTRI** process is to select drillholes from a file by s
                 maxit_p=100,
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -45153,6 +45553,10 @@ In order to present a two dimensional view of multi-dimensional space with minim
         import warnings
         warnings.warn("`rnlm` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"rnlm() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "rnlm "
 
         if in_i == "required":
@@ -45167,7 +45571,7 @@ In order to present a two dimensional view of multi-dimensional space with minim
         if sampid_f != "optional":
             command += " *sampid=" + sampid_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 10, "*")
 
         if convlim_p != "optional":
@@ -45206,7 +45610,8 @@ In order to present a two dimensional view of multi-dimensional space with minim
                 angles_f=['optional'],
                 outaxiss_f=['optional'],
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -45279,6 +45684,12 @@ In order to present a two dimensional view of multi-dimensional space with minim
         import warnings
         warnings.warn("`rotorder` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        rotaxiss_f = self._resolve_sequential_param("rotaxiss_f", "rotaxis", rotaxiss_f, 3, "f", kwargs)
+        angles_f = self._resolve_sequential_param("angles_f", "angle", angles_f, 3, "f", kwargs)
+        outaxiss_f = self._resolve_sequential_param("outaxiss_f", "outaxis", outaxiss_f, 3, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"rotorder() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "rotorder "
 
         if in_i == "required":
@@ -45293,13 +45704,13 @@ In order to present a two dimensional view of multi-dimensional space with minim
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if rotaxiss_f[0] != "optional":
+        if rotaxiss_f and rotaxiss_f[0] != "optional":
             command += self.parse_infields_list("rotaxis", rotaxiss_f, 3, "*")
 
-        if angles_f[0] != "optional":
+        if angles_f and angles_f[0] != "optional":
             command += self.parse_infields_list("angle", angles_f, 3, "*")
 
-        if outaxiss_f[0] != "optional":
+        if outaxiss_f and outaxiss_f[0] != "optional":
             command += self.parse_infields_list("outaxis", outaxiss_f, 3, "@")
 
         if arguments != "optional":
@@ -45314,13 +45725,13 @@ In order to present a two dimensional view of multi-dimensional space with minim
                 in_i="required",
                 fieldlst_i="optional",
                 out_o="required",
-                f1_f="optional",
-                f2_f25_f="optional",
+                fields_f=['optional'],
                 fieldnam_f="optional",
                 keepall_p=0,
                 keytol_p=1e-05,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         SELCOP
@@ -45348,13 +45759,8 @@ In order to present a two dimensional view of multi-dimensional space with minim
         Fields:
         -------
 
-        f1: Any : IN
+        fields: Undefined : Undefined
             Selected field 1.
-            Default=Undefined
-            Required=Yes
-
-        f2_f25: Any : IN
-            Optional selected fields.
             Default=Undefined
             Required=No
 
@@ -45385,6 +45791,10 @@ In order to present a two dimensional view of multi-dimensional space with minim
             Required=No
 
         """
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 25, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"selcop() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "selcop "
 
         if in_i == "required":
@@ -45402,14 +45812,11 @@ In order to present a two dimensional view of multi-dimensional space with minim
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if f1_f != "optional":
-            command += " *f1=" + f1_f
-
-        if f2_f25_f != "optional":
-            command += " *f2-f25=" + f2_f25_f
-
         if fieldnam_f != "optional":
             command += " *fieldnam=" + fieldnam_f
+
+        if fields_f and fields_f[0] != "optional":
+            command += self.parse_infields_list("f", fields_f, 25, "*")
 
         if keepall_p != "optional":
             try:
@@ -45438,13 +45845,13 @@ In order to present a two dimensional view of multi-dimensional space with minim
                 in_i="required",
                 fieldlst_i="optional",
                 out_o="required",
-                f1_f="optional",
-                f2_f25_f="optional",
+                fields_f=['optional'],
                 fieldnam_f="optional",
                 keepall_p=0,
                 keytol_p=1e-05,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         SELDEL
@@ -45480,13 +45887,8 @@ The process works by checking the selected field values against the values just 
         Fields:
         -------
 
-        f1: Any : IN
+        fields: Undefined : Undefined
             Deleted field 1.
-            Default=Undefined
-            Required=No
-
-        f2_f25: Any : IN
-            Optional selected fields.
             Default=Undefined
             Required=No
 
@@ -45519,6 +45921,10 @@ The process works by checking the selected field values against the values just 
             Required=No
 
         """
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 25, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"seldel() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "seldel "
 
         if in_i == "required":
@@ -45536,14 +45942,11 @@ The process works by checking the selected field values against the values just 
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if f1_f != "optional":
-            command += " *f1=" + f1_f
-
-        if f2_f25_f != "optional":
-            command += " *f2-f25=" + f2_f25_f
-
         if fieldnam_f != "optional":
             command += " *fieldnam=" + fieldnam_f
+
+        if fields_f and fields_f[0] != "optional":
+            command += self.parse_infields_list("f", fields_f, 25, "*")
 
         if keepall_p != "optional":
             try:
@@ -45579,7 +45982,8 @@ The process works by checking the selected field values against the values just 
                 perim_p="optional",
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         SELEXY
@@ -45684,6 +46088,10 @@ The input and output files may be the same for in-place flagging of values. Retr
             Required=No
 
         """
+        attribs_f = self._resolve_sequential_param("attribs_f", "attrib", attribs_f, 4, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"selexy() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "selexy "
 
         if in_i == "required":
@@ -45710,7 +46118,7 @@ The input and output files may be the same for in-place flagging of values. Retr
         if y_f != "optional":
             command += " *y=" + y_f
 
-        if attribs_f[0] != "optional":
+        if attribs_f and attribs_f[0] != "optional":
             command += self.parse_infields_list("attrib", attribs_f, 4, "*")
 
         if outside_p != "optional":
@@ -45767,7 +46175,8 @@ The input and output files may be the same for in-place flagging of values. Retr
                 ijksort_p="optional",
                 print_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -45941,6 +46350,10 @@ Note: [SELEXY](<selexy.md>) is a similar process to **SELPER** but **SELPER** ha
         import warnings
         warnings.warn("`selper` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        attribs_f = self._resolve_sequential_param("attribs_f", "attrib", attribs_f, 5, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"selper() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "selper "
 
         if in_i == "required":
@@ -45973,7 +46386,7 @@ Note: [SELEXY](<selexy.md>) is a similar process to **SELPER** but **SELPER** ha
         if dminus_f != "optional":
             command += " *dminus=" + dminus_f
 
-        if attribs_f[0] != "optional":
+        if attribs_f and attribs_f[0] != "optional":
             command += self.parse_infields_list("attrib", attribs_f, 5, "*")
 
         if outside_p != "optional":
@@ -46049,7 +46462,8 @@ Note: [SELEXY](<selexy.md>) is a similar process to **SELPER** but **SELPER** ha
                 select_p="required",
                 toleranc_p=0.001,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -46163,6 +46577,10 @@ An outside point is outside all wireframe models. Attribute fields will not be c
         import warnings
         warnings.warn("`seltri` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        attribs_f = self._resolve_sequential_param("attribs_f", "attrib", attribs_f, 4, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"seltri() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "seltri "
 
         if in_i == "required":
@@ -46201,7 +46619,7 @@ An outside point is outside all wireframe models. Attribute fields will not be c
         if zone_f != "optional":
             command += " *zone=" + zone_f
 
-        if attribs_f[0] != "optional":
+        if attribs_f and attribs_f[0] != "optional":
             command += self.parse_infields_list("attrib", attribs_f, 4, "*")
 
         if zone_p != "optional":
@@ -46252,7 +46670,8 @@ An outside point is outside all wireframe models. Attribute fields will not be c
                 setabsnt_p=0,
                 fixnorm_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -46424,6 +46843,10 @@ A wireframe surface or DTM is one which contains no vertical or overhanging port
         import warnings
         warnings.warn("`selwf` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        attribs_f = self._resolve_sequential_param("attribs_f", "attrib", attribs_f, 4, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"selwf() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "selwf "
 
         if in_i == "required":
@@ -46462,7 +46885,7 @@ A wireframe surface or DTM is one which contains no vertical or overhanging port
         if zone_f != "optional":
             command += " *zone=" + zone_f
 
-        if attribs_f[0] != "optional":
+        if attribs_f and attribs_f[0] != "optional":
             command += self.parse_infields_list("attrib", attribs_f, 4, "*")
 
         if select_p == "required":
@@ -46708,7 +47131,8 @@ The value to be set into the given field name. If the value is alphanumeric, thi
                 rectgrid_p=0,
                 dbglevel_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -47391,6 +47815,12 @@ All files matching the template _sgs_*.txt and _sp*.dm will be deleted as the pr
         import warnings
         warnings.warn("`sgsim` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        secflds_f = self._resolve_sequential_param("secflds_f", "secfld", secflds_f, 2, "f", kwargs)
+        sdists_f = self._resolve_sequential_param("sdists_f", "sdist", sdists_f, 3, "f", kwargs)
+        sangles_f = self._resolve_sequential_param("sangles_f", "sangle", sangles_f, 3, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"sgsim() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "sgsim "
 
         if in_i != "optional":
@@ -47447,13 +47877,13 @@ All files matching the template _sgs_*.txt and _sp*.dm will be deleted as the pr
         if refwgt_f != "optional":
             command += " *refwgt=" + refwgt_f
 
-        if secflds_f[0] != "optional":
+        if secflds_f and secflds_f[0] != "optional":
             command += self.parse_infields_list("secfld", secflds_f, 2, "*")
 
-        if sdists_f[0] != "optional":
+        if sdists_f and sdists_f[0] != "optional":
             command += self.parse_infields_list("sdist", sdists_f, 3, "@")
 
-        if sangles_f[0] != "optional":
+        if sangles_f and sangles_f[0] != "optional":
             command += self.parse_infields_list("sangle", sangles_f, 3, "@")
 
         if mingrade_p != "optional":
@@ -48817,7 +49247,8 @@ If this is not the case then the step value will be reset as one twentieth of th
                 inmods_i=['optional'],
                 out_o="required",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -48864,6 +49295,10 @@ A typical use for SPLAT is to add fields onto the end of existing records in a f
         import warnings
         warnings.warn("`splat` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        if kwargs:
+            raise TypeError(f"splat() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "splat "
 
         if out_o == "required":
@@ -48872,7 +49307,7 @@ A typical use for SPLAT is to add fields onto the end of existing records in a f
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
         if arguments != "optional":
@@ -49637,7 +50072,8 @@ The output workbook also includes a "Box & Whisker" worksheet. This includes, fo
                 sortout_p=1,
                 print_p=2,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         STATS
@@ -49794,6 +50230,11 @@ The following fields are also output:
             Required=No
 
         """
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 20, "f", kwargs)
+        keys_f = self._resolve_sequential_param("keys_f", "key", keys_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"stats() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "stats "
 
         if in_i == "required":
@@ -49814,10 +50255,10 @@ The following fields are also output:
         if weight_f != "optional":
             command += " *weight=" + weight_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 20, "*")
 
-        if keys_f[0] != "optional":
+        if keys_f and keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 10, "*")
 
         if keysort_p != "optional":
@@ -49876,7 +50317,8 @@ The following fields are also output:
                 keys_f=['optional'],
                 keytol_p=1e-05,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -49942,6 +50384,11 @@ Both input files must be sorted in the order of the keyfields before they can be
         import warnings
         warnings.warn("`subjoi` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        keys_f = self._resolve_sequential_param("keys_f", "key", keys_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"subjoi() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "subjoi "
 
         if out_o == "required":
@@ -49950,10 +50397,10 @@ Both input files must be sorted in the order of the keyfields before they can be
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
-        if keys_f[0] != "optional":
+        if keys_f and keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 10, "*")
 
         if keytol_p != "optional":
@@ -49973,7 +50420,8 @@ Both input files must be sorted in the order of the keyfields before they can be
                 keys_f=['optional'],
                 keytol_p=1e-05,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -50039,6 +50487,11 @@ Both input files must be sorted in the order of the keyfields before they can be
         import warnings
         warnings.warn("`subwve` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        keys_f = self._resolve_sequential_param("keys_f", "key", keys_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"subwve() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "subwve "
 
         if out_o == "required":
@@ -50047,10 +50500,10 @@ Both input files must be sorted in the order of the keyfields before they can be
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
-        if keys_f[0] != "optional":
+        if keys_f and keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 10, "*")
 
         if keytol_p != "optional":
@@ -52396,7 +52849,8 @@ If the input perimeter file does not contain the fields **PSYMBOL** , **PSYMSZE*
                 excel_p=0,
                 rotaxiss_f=['optional'],
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -52616,6 +53070,14 @@ Swaths can either be unrotated or rotated. **SWATHPLT** provides **ANGLE** and *
         import warnings
         warnings.warn("`swathplt` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        swaths_o = self._resolve_sequential_param("swaths_o", "swath", swaths_o, 2, "o", kwargs)
+        grades_f = self._resolve_sequential_param("grades_f", "grade", grades_f, 10, "f", kwargs)
+        sgrades_f = self._resolve_sequential_param("sgrades_f", "sgrade", sgrades_f, 10, "f", kwargs)
+        csvouts_f = self._resolve_sequential_param("csvouts_f", "csvout", csvouts_f, 2, "f", kwargs)
+        rotaxiss_f = self._resolve_sequential_param("rotaxiss_f", "rotaxis", rotaxiss_f, 3, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"swathplt() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "swathplt "
 
         if model_i == "required":
@@ -52654,19 +53116,19 @@ Swaths can either be unrotated or rotated. **SWATHPLT** provides **ANGLE** and *
         if dcweight_f != "optional":
             command += " *dcweight=" + dcweight_f
 
-        if swaths_o[0] != "optional":
+        if swaths_o and swaths_o[0] != "optional":
             command += self.parse_infields_list("swath", swaths_o, 2, "@")
 
-        if grades_f[0] != "optional":
+        if grades_f and grades_f[0] != "optional":
             command += self.parse_infields_list("grade", grades_f, 10, "*")
 
-        if sgrades_f[0] != "optional":
+        if sgrades_f and sgrades_f[0] != "optional":
             command += self.parse_infields_list("sgrade", sgrades_f, 10, "*")
 
-        if csvouts_f[0] != "optional":
+        if csvouts_f and csvouts_f[0] != "optional":
             command += self.parse_infields_list("csvout", csvouts_f, 2, "@")
 
-        if rotaxiss_f[0] != "optional":
+        if rotaxiss_f and rotaxiss_f[0] != "optional":
             command += self.parse_infields_list("rotaxis", rotaxiss_f, 3, "@")
 
         if directn_p == "required":
@@ -52963,7 +53425,8 @@ Note: PROTODD AND FIELDLST can not be used at the same time. Data records contai
                 keytol_p=1e-05,
                 excel_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         TONGRAD
@@ -53190,6 +53653,12 @@ Also note that the process will not complete until an automatically-launched ins
             Required=No
 
         """
+        keys_f = self._resolve_sequential_param("keys_f", "key", keys_f, 20, "f", kwargs)
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 20, "f", kwargs)
+        addfs_f = self._resolve_sequential_param("addfs_f", "addf", addfs_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"tongrad() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "tongrad "
 
         if in_i == "required":
@@ -53216,13 +53685,13 @@ Also note that the process will not complete until an automatically-launched ins
         if density_f != "optional":
             command += " *density=" + density_f
 
-        if keys_f[0] != "optional":
+        if keys_f and keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 20, "*")
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 20, "*")
 
-        if addfs_f[0] != "optional":
+        if addfs_f and addfs_f[0] != "optional":
             command += self.parse_infields_list("addf", addfs_f, 10, "*")
 
         if factor_p != "optional":
@@ -56405,7 +56874,8 @@ The process is divided into two parts:
                 search3f_p=1,
                 invdistp_p=1,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -56562,6 +57032,10 @@ The difference between the two GRIDMODE settings is therefore the spatial locati
         import warnings
         warnings.warn("`vgm3dmap` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        gs_f = self._resolve_sequential_param("gs_f", "g", gs_f, 20, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"vgm3dmap() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "vgm3dmap "
 
         if samples_i == "required":
@@ -56573,7 +57047,7 @@ The difference between the two GRIDMODE settings is therefore the spatial locati
         if vgram_o != "optional":
             command += " &vgram=" + vgram_o
 
-        if gs_f[0] != "optional":
+        if gs_f and gs_f[0] != "optional":
             command += self.parse_infields_list("g", gs_f, 20, "*")
 
         if nblocks_p == "required":
@@ -56765,7 +57239,8 @@ The difference between the two GRIDMODE settings is therefore the spatial locati
                 laymeth_p=0,
                 spacing_p=100,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -57493,6 +57968,13 @@ The lower shaded area represents the intersection of the volume of regularizatio
         import warnings
         warnings.warn("`vgram` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 30, "f", kwargs)
+        keys_f = self._resolve_sequential_param("keys_f", "key", keys_f, 5, "f", kwargs)
+        angles_f = self._resolve_sequential_param("angles_f", "angle", angles_f, 3, "f", kwargs)
+        axiss_f = self._resolve_sequential_param("axiss_f", "axis", axiss_f, 3, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"vgram() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "vgram "
 
         if in_i == "required":
@@ -57531,16 +58013,16 @@ The lower shaded area represents the intersection of the volume of regularizatio
         if in2_f != "optional":
             command += " *in=" + in2_f
 
-        if fields_f[0] != "optional":
+        if fields_f and fields_f[0] != "optional":
             command += self.parse_infields_list("f", fields_f, 30, "*")
 
-        if keys_f[0] != "optional":
+        if keys_f and keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 5, "*")
 
-        if angles_f[0] != "optional":
+        if angles_f and angles_f[0] != "optional":
             command += self.parse_infields_list("angle", angles_f, 3, "@")
 
-        if axiss_f[0] != "optional":
+        if axiss_f and axiss_f[0] != "optional":
             command += self.parse_infields_list("axis", axiss_f, 3, "@")
 
         if lag_p == "required":
@@ -57704,7 +58186,8 @@ The lower shaded area represents the intersection of the volume of regularizatio
                 keys_f=['optional'],
                 keytol_p=1e-05,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -57764,6 +58247,11 @@ This process belongs to a group of four similar ones within the Datamine process
         import warnings
         warnings.warn("`weave` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        keys_f = self._resolve_sequential_param("keys_f", "key", keys_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"weave() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "weave "
 
         if out_o == "required":
@@ -57772,10 +58260,10 @@ This process belongs to a group of four similar ones within the Datamine process
         if out_o != "optional":
             command += " &out=" + out_o
 
-        if inmods_i[0] != "optional":
+        if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
 
-        if keys_f[0] != "optional":
+        if keys_f and keys_f[0] != "optional":
             command += self.parse_infields_list("key", keys_f, 10, "*")
 
         if keytol_p != "optional":
@@ -57801,7 +58289,8 @@ This process belongs to a group of four similar ones within the Datamine process
                 zmin_p="required",
                 zmax_p="required",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -57930,6 +58419,12 @@ The output from this process is an (evaluation) results file and optionally the 
         import warnings
         warnings.warn("`wedgevol` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        wiretrs_i = self._resolve_sequential_param("wiretrs_i", "wiretr", wiretrs_i, 3, "i", kwargs)
+        wirepts_i = self._resolve_sequential_param("wirepts_i", "wirept", wirepts_i, 3, "i", kwargs)
+        sftypes_f = self._resolve_sequential_param("sftypes_f", "sftype", sftypes_f, 3, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"wedgevol() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "wedgevol "
 
         if proto_i == "required":
@@ -57947,13 +58442,13 @@ The output from this process is an (evaluation) results file and optionally the 
         if results_o != "optional":
             command += " &results=" + results_o
 
-        if wiretrs_i[0] != "optional":
+        if wiretrs_i and wiretrs_i[0] != "optional":
             command += self.parse_infields_list("wiretr", wiretrs_i, 3, "&")
 
-        if wirepts_i[0] != "optional":
+        if wirepts_i and wirepts_i[0] != "optional":
             command += self.parse_infields_list("wirept", wirepts_i, 3, "&")
 
-        if sftypes_f[0] != "optional":
+        if sftypes_f and sftypes_f[0] != "optional":
             command += self.parse_infields_list("sftype", sftypes_f, 3, "@")
 
         if density_p == "required":
@@ -58025,7 +58520,8 @@ The output from this process is an (evaluation) results file and optionally the 
                 checkrot_p=1,
                 outside_p=0,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -58300,6 +58796,10 @@ This option may be useful if you are coding points within classification surface
         import warnings
         warnings.warn("`wfcode` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        attribs_f = self._resolve_sequential_param("attribs_f", "attrib", attribs_f, 4, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"wfcode() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "wfcode "
 
         if points_i == "required":
@@ -58341,7 +58841,7 @@ This option may be useful if you are coding points within classification surface
         if zone_f != "optional":
             command += " *zone=" + zone_f
 
-        if attribs_f[0] != "optional":
+        if attribs_f and attribs_f[0] != "optional":
             command += self.parse_infields_list("attrib", attribs_f, 4, "*")
 
         if code_p == "required":
@@ -59072,7 +59572,8 @@ The **WIRETYPE** parameter is used to define the type of wireframe model to be f
                 azincr_p="optional",
                 dipincr_p="optional",
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -59170,6 +59671,10 @@ The **WIRETYPE** parameter is used to define the type of wireframe model to be f
         import warnings
         warnings.warn("`wirepe` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        attribs_f = self._resolve_sequential_param("attribs_f", "attrib", attribs_f, 4, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"wirepe() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "wirepe "
 
         if wiretr_i == "required":
@@ -59193,7 +59698,7 @@ The **WIRETYPE** parameter is used to define the type of wireframe model to be f
         if perimout_o != "optional":
             command += " &perimout=" + perimout_o
 
-        if attribs_f[0] != "optional":
+        if attribs_f and attribs_f[0] != "optional":
             command += self.parse_infields_list("attrib", attribs_f, 4, "*")
 
         if xincr_p != "optional":

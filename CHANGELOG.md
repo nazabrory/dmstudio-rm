@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.0b13 - 2026-09-16
+
+- **Dual-Mode Parameter Resolution**: Added dual-mode parameter resolution across all sequential command wrappers. Commands with sequential CLI parameters (e.g. `fields_f`, `keys_f`, `inmods_i`, `samples_i`) now support both canonical list arguments and legacy individual keyword arguments (`f1_f`, `f2_f`, `key1_f`, etc.) via dynamic `**kwargs` resolution.
+- **Contiguous Gap & Typo Protection**: Enforced strict validation preventing index gaps in sequential arguments, disallowing conflicting specifications (both canonical list and numbered kwargs), and rejecting unknown keyword arguments with `TypeError`.
+- **Fixed Repeated Prefix Range Regex**: Resolved generator bug in `tests/generate_wrappers.py` where repeated prefixes like `F2-F25`, `F1-F5`, `F2-F30` failed to expand to numbered sequences, which had previously caused `selcop`, `seldel`, `factor`, `getsamp`, `modtra`, `mso2npv`, `regmod`, and `regmow` to emit invalid CLI strings like `*f2-f25=`.
+- **Domain Vocabulary**: Added *Sequential parameter*, *Canonical list parameter*, and *Dual-mode parameter resolution* definitions to `CONTEXT.md`.
+
 ## 2.0.0b12 - 2026-07-19
 
 - **Wrapper Consolidation**: Consolidated unverified command wrappers from `dmcommands_generated.py` and `dmfiles_generated.py` directly into `dmcommands.py` and `dmfiles.py`. Added user warnings when unverified wrappers are called.

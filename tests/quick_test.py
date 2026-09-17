@@ -28,6 +28,7 @@ try:
         read_dm_summary,
         scratch_context,
         ScratchManager,
+        batch_append,
     )
     from dmstudio.agent import (
         read_datamine_header as agent_read_header,
@@ -36,6 +37,7 @@ try:
         read_dm_summary as agent_read_dm_summary,
         scratch_context as agent_scratch_context,
         ScratchManager as AgentScratchManager,
+        batch_append as agent_batch_append,
     )
     print(f"  dmstudio version: {version.__version__}")
     print("  All imports OK")

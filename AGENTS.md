@@ -115,7 +115,8 @@ To maintain codebase simplicity and a clean experience for the user:
 | `bootstrap` | Tutorial download | `download_tutorials(target_dir)` (also `dmstudio.download_tutorials`) |
 | `sandbox` | Sandbox dataset helpers | `copy_database_files()`, `initialize_sandbox()` |
 | `notebook_builder` | Programmatic `.ipynb` | `NotebookBuilder` |
-| `special` / `superprocess` | Extra COM workflows | e.g. `dxf_to_dm`, plot/PDF helpers |
+| `superprocess` | Multi-command workflows | `batch_append()`, `dxf_to_dm()`, `display_ellipsoids()` |
+| `special` | Extra COM workflows | `dmfile_def`, `inpfil`, plot/PDF helpers |
 
 ### `dmstudio/agent.py` (compat re-export)
 
@@ -130,6 +131,7 @@ Import: `from dmstudio import agent`.
 | `dialog_dismiss_context` | `dialog` |
 | `lint_command`, `validate_command` | `validator` |
 | `scratch_context`, `ScratchManager` | `scratch` |
+| `batch_append` | `superprocess` |
 | `copy_database_files`, `initialize_sandbox` | `sandbox` |
 | `download_tutorials` | `bootstrap` |
 

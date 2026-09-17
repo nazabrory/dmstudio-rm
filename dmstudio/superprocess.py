@@ -1,8 +1,12 @@
 '''
 Superprocess module - multi-command Studio RM workflows.
 '''
+from typing import List, Dict, Optional, Union, Any
+
 from dmstudio import initialize
 from dmstudio import dmcommands
+from dmstudio.scratch import scratch_context
+
 
 def dxf_to_dm(dxf_i, out_o, zone_f=None, zone_p=None):
 
@@ -144,3 +148,213 @@ def display_ellipsoids(in_i='required', out_o='required',
     dm.delete('_2pt')
     dm.delete('_3tr')
     dm.delete('_3pt')
+
+
+def batch_append(
+    tables_i: Optional[List[str]] = None,
+    out_o: Optional[str] = None,
+    flag_f: Optional[str] = None,
+    flag_map: Optional[Dict[str, Any]] = None,
+    sort_keys_f: Optional[Union[str, List[str]]] = None,
+    cmd: Optional[Any] = None,
+    **kwargs: Any,
+) -> str:
+    '''
+    BATCH_APPEND
+    ------------
+    Consolidates an arbitrary list of Datamine tables into a single output table
+    in one unified call, eliminating manual CLI string concatenation and sequential
+    chaining errors.
+
+    Intermediate chaining steps use managed in-memory scratch tables, leaving no
+    permanent temporary files on disk. When flag_f is specified, each input table's
+    records are tagged with provenance metadata prior to appending (defaulting to
+    the source table name or custom mapped values from flag_map). When sort_keys_f
+    is specified, the final table is sorted using Datamine's mgsort process.
+
+    Parameters:
+    -----------
+    tables_i: List[str]
+        List of Datamine table names (without .dm/.dmx extension) to append.
+        Can also be passed as `tables` or `in_tables`.
+    out_o: str
+        Target output table name in the active project.
+        Can also be passed as `out` or `out_table`.
+    flag_f: Optional[str]
+        Optional provenance flag field name to create in output table.
+        Can also be passed as `flag_column`.
+    flag_map: Optional[Dict[str, Any]]
+        Optional dictionary mapping source table names to custom flag values
+        (strings or numbers). Tables not in flag_map default to their table name.
+    sort_keys_f: Optional[Union[str, List[str]]]
+        Optional field name or list of field names to sort the output table by
+        using mgsort. Can also be passed as `sort_keys` or `keys_f`.
+    cmd: Optional[Any]
+        Datamine command engine instance (e.g. from `dmcommands.init()`).
+        If None, initializes a new command engine via `dmcommands.init()`.
+
+    Returns:
+    --------
+    str:
+        The target output table name (out_o).
+    '''
+    if tables_i is None:
+        tables_i = kwargs.pop('tables', None) or kwargs.pop('in_tables', None)
+    if out_o is None:
+        out_o = kwargs.pop('out', None) or kwargs.pop('out_table', None)
+    if flag_f is None:
+        flag_f = kwargs.pop('flag_column', None)
+    if sort_keys_f is None:
+        sort_keys_f = kwargs.pop('sort_keys', None) or kwargs.pop('keys_f', None)
+
+    if kwargs:
+        raise TypeError(f"batch_append() got unexpected keyword argument(s): {', '.join(kwargs.keys())}")
+
+    if tables_i is None:
+        raise ValueError("tables_i is required and cannot be None.")
+    if not isinstance(tables_i, (list, tuple)):
+        raise ValueError(f"tables_i must be a list or tuple of table names, got {type(tables_i).__name__}.")
+    if len(tables_i) == 0:
+        raise ValueError("tables_i cannot be empty; provide at least one table name.")
+
+    clean_tables: List[str] = []
+    for idx, name in enumerate(tables_i):
+        if not isinstance(name, str):
+            raise ValueError(
+                f"All elements in tables_i must be strings. Element at index {idx} is {type(name).__name__}: {name}"
+            )
+        stripped = name.strip()
+        if not stripped:
+            raise ValueError(f"Table name at index {idx} is empty or whitespace.")
+        if '\\' in stripped:
+            raise ValueError(
+                f"Table name '{stripped}' contains Windows backslashes. "
+                "Datamine command parser breaks on backslashes. Register files with ActiveProject.AddFile() and use logical names."
+            )
+        if ' ' in stripped:
+            raise ValueError(
+                f"Table name '{stripped}' contains spaces. "
+                "Spaces break the Datamine command parser. Register files with ActiveProject.AddFile() and use logical names without spaces."
+            )
+        clean_tables.append(stripped)
+
+    if out_o is None or not isinstance(out_o, str):
+        raise ValueError(f"out_o must be a non-empty string, got {type(out_o).__name__ if out_o is not None else 'None'}.")
+    clean_out = out_o.strip()
+    if not clean_out:
+        raise ValueError("out_o cannot be empty or whitespace.")
+    if '\\' in clean_out:
+        raise ValueError(
+            f"Output table name '{clean_out}' contains Windows backslashes. "
+            "Datamine command parser breaks on backslashes. Use a logical name residing in the active project."
+        )
+    if ' ' in clean_out:
+        raise ValueError(
+            f"Output table name '{clean_out}' contains spaces. "
+            "Spaces break the Datamine command parser. Use a logical name without spaces."
+        )
+
+    clean_flag_f: Optional[str] = None
+    if flag_f is not None:
+        if not isinstance(flag_f, str):
+            raise ValueError(f"flag_f must be a string, got {type(flag_f).__name__}.")
+        clean_flag_f = flag_f.strip()
+        if not clean_flag_f:
+            raise ValueError("flag_f cannot be empty or whitespace.")
+        if '\\' in clean_flag_f or ' ' in clean_flag_f:
+            raise ValueError(f"flag_f '{clean_flag_f}' cannot contain backslashes or spaces.")
+
+    if flag_map is not None:
+        if not isinstance(flag_map, dict):
+            raise ValueError(f"flag_map must be a dictionary, got {type(flag_map).__name__}.")
+
+    clean_sort_keys: Optional[List[str]] = None
+    if sort_keys_f is not None:
+        if isinstance(sort_keys_f, str):
+            sk = sort_keys_f.strip()
+            if not sk:
+                raise ValueError("sort_keys_f string cannot be empty.")
+            clean_sort_keys = [sk]
+        elif isinstance(sort_keys_f, (list, tuple)):
+            if len(sort_keys_f) == 0:
+                clean_sort_keys = None
+            else:
+                clean_sort_keys = []
+                for s_idx, k in enumerate(sort_keys_f):
+                    if not isinstance(k, str):
+                        raise ValueError(
+                            f"All elements in sort_keys_f must be strings. Element at index {s_idx} is {type(k).__name__}."
+                        )
+                    sk_clean = k.strip()
+                    if not sk_clean:
+                        raise ValueError(f"Sort key at index {s_idx} is empty or whitespace.")
+                    clean_sort_keys.append(sk_clean)
+        else:
+            raise ValueError(f"sort_keys_f must be a string or list/tuple of strings, got {type(sort_keys_f).__name__}.")
+
+    if cmd is None:
+        cmd = dmcommands.init()
+
+    with scratch_context(cmd=cmd, auto_cleanup=True) as sc:
+        # 1. Provenance flag tagging (if requested)
+        if clean_flag_f is not None:
+            raw_values = [
+                flag_map.get(t, t) if flag_map is not None and t in flag_map else t
+                for t in clean_tables
+            ]
+            has_string = any(not isinstance(v, (int, float)) or isinstance(v, bool) for v in raw_values)
+            if has_string:
+                max_vlen = max(len(str(v)) for v in raw_values)
+                flag_len = max(24, int((max_vlen - 1) // 4 + 1) * 4)
+                flag_len = min(flag_len, 256)
+
+            prep_tables: List[str] = []
+            for t, val in zip(clean_tables, raw_values):
+                if has_string:
+                    val_str = str(val).replace('"', '')
+                    expr = f'{clean_flag_f};A{flag_len} = "{val_str}"'
+                else:
+                    expr = f'{clean_flag_f};N = {val}'
+
+                # If single table and no sorting, tag directly into target output
+                if len(clean_tables) == 1 and clean_sort_keys is None:
+                    cmd.extra(in_i=t, out_o=clean_out, arguments=f" '{expr}' 'GO' ")
+                    return clean_out
+
+                tagged_sc = sc.temp(suffix=f'tag_{t}')
+                cmd.extra(in_i=t, out_o=tagged_sc, arguments=f" '{expr}' 'GO' ")
+                prep_tables.append(tagged_sc)
+        else:
+            prep_tables = list(clean_tables)
+
+        n = len(prep_tables)
+
+        # 2. Single table pass-through
+        if n == 1:
+            single_input = prep_tables[0]
+            if clean_sort_keys is not None:
+                cmd.mgsort(in_i=single_input, out_o=clean_out, keys_f=clean_sort_keys)
+            else:
+                cmd.copy(in_i=single_input, out_o=clean_out)
+            return clean_out
+
+        # 3. Multi-table sequential append chaining
+        curr = prep_tables[0]
+        for i in range(1, n):
+            is_last = (i == n - 1)
+            next_input = prep_tables[i]
+
+            if is_last and clean_sort_keys is None:
+                target = clean_out
+            else:
+                target = sc.temp(suffix=f'chain_{i}')
+
+            cmd.append(in1_i=curr, in2_i=next_input, out_o=target)
+            curr = target
+
+        # 4. Final sorting (if requested)
+        if clean_sort_keys is not None:
+            cmd.mgsort(in_i=curr, out_o=clean_out, keys_f=clean_sort_keys)
+
+        return clean_out
+

@@ -289,10 +289,11 @@ print()
 print("[TEST 10] Superprocess Module")
 try:
     from dmstudio import superprocess
-    print("  [OK] superprocess imported")
+    assert hasattr(superprocess, 'batch_append'), "superprocess missing batch_append"
+    print("  [OK] superprocess and batch_append imported")
     results['superprocess'] = 'PASS'
 except Exception as e:
-    print(f"  [WARN] superprocess import issue (expected if pyrpa missing): {e}")
+    print(f"  [WARN] superprocess issue: {e}")
     results['superprocess'] = 'SKIP'
 
 print()

@@ -20,6 +20,18 @@ import win32com.client
 from dmstudio import special
 
 
+# Recognized global/implicit block model attribute names
+_BLOCK_MODEL_ATTRIBUTES = [
+    'XMORIG', 'YMORIG', 'ZMORIG',
+    'XINC', 'YINC', 'ZINC',
+    'NX', 'NY', 'NZ',
+    'XSUBDIV', 'YSUBDIV', 'ZSUBDIV',
+    'ROTX', 'ROTY', 'ROTZ',
+    'DX', 'DY', 'DZ',
+]
+_BLOCK_MODEL_ATTRIBUTES_SET = set(_BLOCK_MODEL_ATTRIBUTES)
+
+
 def read_datamine_header(filepath):
     '''
     read_datamine_header
@@ -127,19 +139,12 @@ def read_datamine_header(filepath):
             })
 
         attributes = {}
-        if record_count and record_count > 0:
-            try:
-                table.MoveFirst()
-                model_candidates = [
-                    'XMORIG', 'YMORIG', 'ZMORIG',
-                    'XINC', 'YINC', 'ZINC',
-                    'NX', 'NY', 'NZ',
-                    'XSUBDIV', 'YSUBDIV', 'ZSUBDIV',
-                    'ROTX', 'ROTY', 'ROTZ',
-                    'DX', 'DY', 'DZ'
-                ]
+        # 1. Attempt to capture model attributes from first record
+        try:
+            table.MoveFirst()
+            if not getattr(table, 'EOF', False):
                 implicit_field_names = [f['name'] for f in fields if f.get('implicit')]
-                check_keys = set(k.upper() for k in model_candidates + implicit_field_names)
+                check_keys = _BLOCK_MODEL_ATTRIBUTES_SET.union(k.upper() for k in implicit_field_names)
                 name_map = {f['name'].upper(): f['name'] for f in fields}
 
                 for key in check_keys:
@@ -147,11 +152,21 @@ def read_datamine_header(filepath):
                         actual_name = name_map[key]
                         try:
                             val = table.GetNamedColumn(actual_name)
-                            attributes[actual_name] = val
-                        except Exception as e:
+                            if val is not None:
+                                attributes[actual_name] = val
+                        except Exception:
                             pass
-            except Exception as e:
-                pass
+        except Exception:
+            pass
+
+        # 2. Fallback to schema field defaults (crucial for 0-record prototype models)
+        for f in fields:
+            fname = f['name']
+            fname_upper = fname.upper()
+            if (fname_upper in _BLOCK_MODEL_ATTRIBUTES_SET or f.get('implicit')) and fname not in attributes:
+                default_val = f.get('default')
+                if default_val is not None:
+                    attributes[fname] = default_val
 
         description = getattr(schema, 'Description', '')
         double_precision = bool(getattr(schema, 'DoublePrecision', False))
@@ -212,16 +227,12 @@ def read_datamine_summary(filepath):
 
     # Case-insensitive model attribute resolution
     upper_attrs = {k.upper(): v for k, v in header['attributes'].items()}
-    model_keys = [
-        'XMORIG', 'YMORIG', 'ZMORIG',
-        'XINC', 'YINC', 'ZINC',
-        'NX', 'NY', 'NZ',
-        'XSUBDIV', 'YSUBDIV', 'ZSUBDIV',
-        'ROTX', 'ROTY', 'ROTZ',
-        'DX', 'DY', 'DZ',
-    ]
-    model_attrs = {k: upper_attrs[k] for k in model_keys if k in upper_attrs}
-    is_block_model = all(k in upper_attrs for k in ('XMORIG', 'YMORIG', 'ZMORIG'))
+    upper_field_names = {f.upper() for f in header['field_names']}
+    model_attrs = {k: upper_attrs[k] for k in _BLOCK_MODEL_ATTRIBUTES if k in upper_attrs}
+    is_block_model = all(
+        (k in upper_attrs or k in upper_field_names)
+        for k in ('XMORIG', 'YMORIG', 'ZMORIG')
+    )
 
     return {
         'filepath': header['filepath'],

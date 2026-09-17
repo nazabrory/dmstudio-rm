@@ -123,6 +123,41 @@ class TestReadDatamineHeader(unittest.TestCase):
                 read_datamine_header(COLLARS_FILE)
             mock_table.Close.assert_called_once()
 
+    def test_read_header_zero_record_prototype_model(self):
+        '''Extracts model attributes and recognizes block model status for 0-record prototypes via schema defaults.'''
+        mock_table = MagicMock()
+        mock_table.GetRowCount.return_value = 0
+        mock_table.EOF = True
+
+        mock_schema = MagicMock()
+        mock_fields = ['XMORIG', 'YMORIG', 'ZMORIG', 'XINC', 'YINC', 'ZINC', 'NX', 'NY', 'NZ']
+        mock_defaults = {
+            'XMORIG': 1000.0, 'YMORIG': 2000.0, 'ZMORIG': 300.0,
+            'XINC': 10.0, 'YINC': 10.0, 'ZINC': 5.0,
+            'NX': 50, 'NY': 60, 'NZ': 20
+        }
+        mock_schema.FieldCount = len(mock_fields)
+        mock_schema.GetFieldName.side_effect = lambda idx: mock_fields[idx - 1]
+        mock_schema.GetFieldType.return_value = 1  # numeric
+        mock_schema.GetFieldSize.return_value = 4
+        mock_schema.GetFieldSizeChars.return_value = 4
+        mock_schema.GetFieldDefault.side_effect = lambda idx: mock_defaults.get(mock_fields[idx - 1])
+        mock_schema.IsFieldImplicit.return_value = True
+        mock_schema.Description = 'Model Prototype'
+        mock_schema.DoublePrecision = False
+        mock_schema.TypeHint = 1
+        type(mock_table).Schema = mock_schema
+
+        with patch('win32com.client.Dispatch', return_value=mock_table):
+            header = read_datamine_header(COLLARS_FILE)
+            self.assertEqual(header['record_count'], 0)
+            self.assertEqual(header['attributes'].get('XMORIG'), 1000.0)
+            self.assertEqual(header['attributes'].get('XINC'), 10.0)
+
+            summary = read_datamine_summary(COLLARS_FILE)
+            self.assertTrue(summary['is_block_model'])
+            self.assertEqual(summary['model_attributes'].get('XMORIG'), 1000.0)
+
 
 class TestReadDatamineSummary(unittest.TestCase):
     '''Test suite for Seam 2: read_datamine_summary.'''

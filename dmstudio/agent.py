@@ -15,6 +15,8 @@ Provides:
 - search_commands()       : Fuzzy-search commands by name or keyword.
 - read_datamine()         : Read a .dm or .dmx binary file into a pandas DataFrame using
                             the DmFile.DmTableADO COM object — no proprietary deps required.
+- read_datamine_header()  : Lightweight metadata and schema inspection without reading records.
+- read_datamine_summary() : High-level summary metrics dictionary suitable for pipeline logging.
 - dialog_dismiss_context(): Context manager that auto-dismisses blocking Studio RM modal
                             dialogs in a background thread (opt-in).
 - lint_command()          : Inspect a command string for syntax errors and unsafe patterns.
@@ -32,10 +34,12 @@ from dmstudio.command_registry import (  # noqa: F401
 )
 
 # ---------------------------------------------------------------------------
-# DataFrame I/O — re-exported from dm_io for backwards compat
+# DataFrame & Binary I/O — re-exported from dm_io for backwards compat
 # ---------------------------------------------------------------------------
 from dmstudio.dm_io import (  # noqa: F401
     read_datamine,
+    read_datamine_header,
+    read_datamine_summary,
     to_datamine,
     patch_dataframe,
 )

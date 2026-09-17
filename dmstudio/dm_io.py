@@ -5,9 +5,11 @@ dmstudio.dm_io
 High-level pandas DataFrame ↔ Datamine binary file (.dm/.dmx) I/O module.
 
 Provides:
-- read_datamine()     : Read a .dm or .dmx binary file into a pandas DataFrame.
-- to_datamine()       : Save a pandas DataFrame to a Datamine .dm or .dmx binary file.
-- patch_dataframe()   : Monkey-patch pandas.DataFrame to support the .to_datamine() method.
+- read_datamine()            : Read a .dm or .dmx binary file into a pandas DataFrame.
+- read_datamine_header()     : Lightweight header and metadata inspection without loading records.
+- read_datamine_summary()    : High-level summary metrics for logging and validation.
+- to_datamine()              : Save a pandas DataFrame to a Datamine .dm or .dmx binary file.
+- patch_dataframe()          : Monkey-patch pandas.DataFrame to support the .to_datamine() method.
 '''
 import os
 import tempfile
@@ -16,6 +18,199 @@ import pandas as pd
 import win32com.client
 
 from dmstudio import special
+
+
+def read_datamine_header(filepath):
+    '''
+    read_datamine_header
+    --------------------
+
+    Lightweight metadata and schema inspection for Datamine binary files (.dm or .dmx).
+    Queries total record count, column schemas (names, types, character lengths, defaults),
+    and global/model header attributes (e.g. XMORIG, YMORIG, ZMORIG, cell increments)
+    directly via DmFile.DmTableADO in milliseconds, without loading table records into memory.
+
+    Parameters:
+    -----------
+    filepath: str
+        Full or relative path to a .dm or .dmx file.
+
+    Returns:
+    --------
+    dict
+        Metadata dictionary with keys:
+          - 'filepath': str (absolute path)
+          - 'record_count': int
+          - 'field_count': int
+          - 'fields': list of dicts (name, type, type_name, size, size_chars, default, implicit)
+          - 'field_names': list of str
+          - 'attributes': dict of global/model attributes from the first record
+          - 'description': str
+          - 'double_precision': bool
+          - 'type_hint': int or None
+
+    Raises:
+    -------
+    RuntimeError
+        If the file does not exist, cannot be opened, or COM object is unavailable.
+    '''
+    abs_path = os.path.abspath(filepath)
+    if not os.path.exists(abs_path):
+        raise RuntimeError('Datamine file "{}" does not exist.'.format(filepath))
+
+    try:
+        table = win32com.client.Dispatch('DmFile.DmTableADO')
+    except Exception as e:
+        raise RuntimeError(
+            'Could not initialise DmFile.DmTableADO COM object. '
+            'Ensure Datamine Studio RM is installed: {}'.format(e)
+        )
+
+    try:
+        table.Open(abs_path, 0)  # 0 = read-only
+    except Exception as e:
+        raise RuntimeError('Could not open Datamine file "{}": {}'.format(filepath, e))
+
+    try:
+        try:
+            raw_count = table.GetRowCount()
+            record_count = int(raw_count) if raw_count is not None else 0
+        except Exception as e:
+            record_count = 0
+
+        schema = table.Schema
+        n_fields = int(schema.FieldCount) if schema and schema.FieldCount else 0
+
+        fields = []
+        field_names = []
+        for i in range(1, n_fields + 1):
+            try:
+                name = schema.GetFieldName(i)
+            except Exception as e:
+                name = 'FIELD_{}'.format(i)
+            field_names.append(name)
+
+            field_type = getattr(schema, 'GetFieldType', lambda idx: 1)(i)
+            type_name = 'alphanumeric' if field_type == 3 else 'numeric'
+            field_size = getattr(schema, 'GetFieldSize', lambda idx: 4)(i)
+            size_chars = getattr(schema, 'GetFieldSizeChars', lambda idx: field_size)(i)
+            field_default = getattr(schema, 'GetFieldDefault', lambda idx: None)(i)
+            is_implicit = bool(getattr(schema, 'IsFieldImplicit', lambda idx: False)(i))
+
+            fields.append({
+                'name': name,
+                'type': field_type,
+                'type_name': type_name,
+                'size': field_size,
+                'size_chars': size_chars,
+                'default': field_default,
+                'implicit': is_implicit,
+            })
+
+        attributes = {}
+        if record_count and record_count > 0:
+            try:
+                table.MoveFirst()
+                model_candidates = [
+                    'XMORIG', 'YMORIG', 'ZMORIG',
+                    'XINC', 'YINC', 'ZINC',
+                    'NX', 'NY', 'NZ',
+                    'XSUBDIV', 'YSUBDIV', 'ZSUBDIV',
+                    'ROTX', 'ROTY', 'ROTZ',
+                    'DX', 'DY', 'DZ'
+                ]
+                implicit_field_names = [f['name'] for f in fields if f.get('implicit')]
+                check_keys = set(k.upper() for k in model_candidates + implicit_field_names)
+                name_map = {f['name'].upper(): f['name'] for f in fields}
+
+                for key in check_keys:
+                    if key in name_map:
+                        actual_name = name_map[key]
+                        try:
+                            val = table.GetNamedColumn(actual_name)
+                            attributes[actual_name] = val
+                        except Exception as e:
+                            pass
+            except Exception as e:
+                pass
+
+        description = getattr(schema, 'Description', '')
+        double_precision = bool(getattr(schema, 'DoublePrecision', False))
+        type_hint = getattr(schema, 'TypeHint', None)
+
+        return {
+            'filepath': abs_path,
+            'record_count': record_count,
+            'field_count': n_fields,
+            'fields': fields,
+            'field_names': field_names,
+            'attributes': attributes,
+            'description': description,
+            'double_precision': double_precision,
+            'type_hint': type_hint,
+        }
+
+    finally:
+        try:
+            table.Close()
+        except Exception as e:
+            pass
+
+
+def read_datamine_summary(filepath):
+    '''
+    read_datamine_summary
+    ---------------------
+
+    High-level summary of a Datamine binary file (.dm/.dmx) schema and model metrics.
+    Suitable for logging in automated pipeline runs, diagnostics, and data validation.
+
+    Parameters:
+    -----------
+    filepath: str
+        Full or relative path to a .dm or .dmx file.
+
+    Returns:
+    --------
+    dict
+        Summary metrics dictionary:
+          - 'filepath': str (absolute path)
+          - 'filename': str (basename)
+          - 'record_count': int
+          - 'field_count': int
+          - 'field_names': list of str
+          - 'numeric_fields': list of str
+          - 'alphanumeric_fields': list of str
+          - 'is_block_model': bool
+          - 'model_attributes': dict (e.g. XMORIG, YMORIG, ZMORIG, cell increments)
+          - 'description': str
+          - 'double_precision': bool
+    '''
+    header = read_datamine_header(filepath)
+
+    numeric_fields = [f['name'] for f in header['fields'] if f.get('type_name') == 'numeric']
+    alphanumeric_fields = [f['name'] for f in header['fields'] if f.get('type_name') == 'alphanumeric']
+
+    # Case-insensitive model attribute resolution
+    upper_attrs = {k.upper(): v for k, v in header['attributes'].items()}
+    model_keys = ['XMORIG', 'YMORIG', 'ZMORIG', 'XINC', 'YINC', 'ZINC', 'NX', 'NY', 'NZ']
+    model_attrs = {k: upper_attrs[k] for k in model_keys if k in upper_attrs}
+    is_block_model = all(k in upper_attrs for k in ('XMORIG', 'YMORIG', 'ZMORIG'))
+
+    return {
+        'filepath': header['filepath'],
+        'filename': os.path.basename(header['filepath']),
+        'record_count': header['record_count'],
+        'field_count': header['field_count'],
+        'field_names': header['field_names'],
+        'numeric_fields': numeric_fields,
+        'alphanumeric_fields': alphanumeric_fields,
+        'is_block_model': is_block_model,
+        'model_attributes': model_attrs,
+        'description': header['description'],
+        'double_precision': header['double_precision'],
+    }
+
 
 
 def read_datamine(filepath):

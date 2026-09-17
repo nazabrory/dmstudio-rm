@@ -21,6 +21,11 @@ print("Testing imports...")
 try:
     from dmstudio import dmcommands, dmfiles, initialize, special
     from dmstudio import version
+    from dmstudio import read_datamine_header, read_datamine_summary
+    from dmstudio.agent import (
+        read_datamine_header as agent_read_header,
+        read_datamine_summary as agent_read_summary,
+    )
     print(f"  dmstudio version: {version.__version__}")
     print("  All imports OK")
 except Exception as e:

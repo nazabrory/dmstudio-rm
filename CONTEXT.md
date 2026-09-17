@@ -95,3 +95,7 @@ _Avoid_: helper script, COM wrapper
 The direct ingestion and serialization of Datamine binary tables (`.dm`, `.dmx`) via `dmstudio.dm_io.read_datamine` and `to_datamine`, bypassing intermediate CSV files and Studio COM export processes.
 _Avoid_: CSV export fallback, pandas export
 
+**Lightweight header inspection**:
+Direct interrogation of Datamine binary table schemas, field types, character widths, record counts, and global block model attributes (e.g. `XMORIG`, `YMORIG`, `ZMORIG`, cell increments) via `read_datamine_header` and `read_datamine_summary` using underlying COM ADO objects without materializing records into memory or invoking `STATS`.
+_Avoid_: table scan, full read inspection
+

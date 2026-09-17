@@ -90,12 +90,31 @@ def read_datamine_header(filepath):
                 name = 'FIELD_{}'.format(i)
             field_names.append(name)
 
-            field_type = getattr(schema, 'GetFieldType', lambda idx: 1)(i)
+            try:
+                field_type = schema.GetFieldType(i)
+            except Exception:
+                field_type = 1
             type_name = 'alphanumeric' if field_type == 3 else 'numeric'
-            field_size = getattr(schema, 'GetFieldSize', lambda idx: 4)(i)
-            size_chars = getattr(schema, 'GetFieldSizeChars', lambda idx: field_size)(i)
-            field_default = getattr(schema, 'GetFieldDefault', lambda idx: None)(i)
-            is_implicit = bool(getattr(schema, 'IsFieldImplicit', lambda idx: False)(i))
+
+            try:
+                field_size = schema.GetFieldSize(i)
+            except Exception:
+                field_size = 4
+
+            try:
+                size_chars = schema.GetFieldSizeChars(i)
+            except Exception:
+                size_chars = field_size
+
+            try:
+                field_default = schema.GetFieldDefault(i)
+            except Exception:
+                field_default = None
+
+            try:
+                is_implicit = bool(schema.IsFieldImplicit(i))
+            except Exception:
+                is_implicit = False
 
             fields.append({
                 'name': name,
@@ -193,7 +212,14 @@ def read_datamine_summary(filepath):
 
     # Case-insensitive model attribute resolution
     upper_attrs = {k.upper(): v for k, v in header['attributes'].items()}
-    model_keys = ['XMORIG', 'YMORIG', 'ZMORIG', 'XINC', 'YINC', 'ZINC', 'NX', 'NY', 'NZ']
+    model_keys = [
+        'XMORIG', 'YMORIG', 'ZMORIG',
+        'XINC', 'YINC', 'ZINC',
+        'NX', 'NY', 'NZ',
+        'XSUBDIV', 'YSUBDIV', 'ZSUBDIV',
+        'ROTX', 'ROTY', 'ROTZ',
+        'DX', 'DY', 'DZ',
+    ]
     model_attrs = {k: upper_attrs[k] for k in model_keys if k in upper_attrs}
     is_block_model = all(k in upper_attrs for k in ('XMORIG', 'YMORIG', 'ZMORIG'))
 
@@ -210,6 +236,11 @@ def read_datamine_summary(filepath):
         'description': header['description'],
         'double_precision': header['double_precision'],
     }
+
+
+# Convenience aliases
+read_dm_header = read_datamine_header
+read_dm_summary = read_datamine_summary
 
 
 

@@ -166,18 +166,30 @@ class TestPackagingAndReExports(unittest.TestCase):
         # Canonical module
         self.assertTrue(hasattr(dm_io, 'read_datamine_header'))
         self.assertTrue(hasattr(dm_io, 'read_datamine_summary'))
+        self.assertTrue(hasattr(dm_io, 'read_dm_header'))
+        self.assertTrue(hasattr(dm_io, 'read_dm_summary'))
+        self.assertIs(dm_io.read_dm_header, dm_io.read_datamine_header)
+        self.assertIs(dm_io.read_dm_summary, dm_io.read_datamine_summary)
 
         # agent.py compat re-export layer
         self.assertTrue(hasattr(agent, 'read_datamine_header'))
         self.assertTrue(hasattr(agent, 'read_datamine_summary'))
+        self.assertTrue(hasattr(agent, 'read_dm_header'))
+        self.assertTrue(hasattr(agent, 'read_dm_summary'))
         self.assertIs(agent.read_datamine_header, dm_io.read_datamine_header)
         self.assertIs(agent.read_datamine_summary, dm_io.read_datamine_summary)
+        self.assertIs(agent.read_dm_header, dm_io.read_datamine_header)
+        self.assertIs(agent.read_dm_summary, dm_io.read_datamine_summary)
 
         # dmstudio root package shortcuts
         self.assertTrue(hasattr(dmstudio, 'read_datamine_header'))
         self.assertTrue(hasattr(dmstudio, 'read_datamine_summary'))
+        self.assertTrue(hasattr(dmstudio, 'read_dm_header'))
+        self.assertTrue(hasattr(dmstudio, 'read_dm_summary'))
         self.assertIs(dmstudio.read_datamine_header, dm_io.read_datamine_header)
         self.assertIs(dmstudio.read_datamine_summary, dm_io.read_datamine_summary)
+        self.assertIs(dmstudio.read_dm_header, dm_io.read_datamine_header)
+        self.assertIs(dmstudio.read_dm_summary, dm_io.read_datamine_summary)
 
 
 if __name__ == '__main__':

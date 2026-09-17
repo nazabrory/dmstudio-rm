@@ -21,10 +21,17 @@ print("Testing imports...")
 try:
     from dmstudio import dmcommands, dmfiles, initialize, special
     from dmstudio import version
-    from dmstudio import read_datamine_header, read_datamine_summary
+    from dmstudio import (
+        read_datamine_header,
+        read_datamine_summary,
+        read_dm_header,
+        read_dm_summary,
+    )
     from dmstudio.agent import (
         read_datamine_header as agent_read_header,
         read_datamine_summary as agent_read_summary,
+        read_dm_header as agent_read_dm_header,
+        read_dm_summary as agent_read_dm_summary,
     )
     print(f"  dmstudio version: {version.__version__}")
     print("  All imports OK")

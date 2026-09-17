@@ -40,6 +40,8 @@ from dmstudio.dm_io import (  # noqa: F401
     read_datamine,
     read_datamine_header,
     read_datamine_summary,
+    read_dm_header,
+    read_dm_summary,
     to_datamine,
     patch_dataframe,
 )

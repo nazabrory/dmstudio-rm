@@ -26,12 +26,16 @@ try:
         read_datamine_summary,
         read_dm_header,
         read_dm_summary,
+        scratch_context,
+        ScratchManager,
     )
     from dmstudio.agent import (
         read_datamine_header as agent_read_header,
         read_datamine_summary as agent_read_summary,
         read_dm_header as agent_read_dm_header,
         read_dm_summary as agent_read_dm_summary,
+        scratch_context as agent_scratch_context,
+        ScratchManager as AgentScratchManager,
     )
     print(f"  dmstudio version: {version.__version__}")
     print("  All imports OK")
@@ -65,6 +69,19 @@ try:
     })
     print("  DataFrame creation OK")
     print(f"  Rows: {len(df)}")
+except Exception as e:
+    print(f"  FAILED: {e}")
+    sys.exit(1)
+
+# Test scratch_context (doesn't need Studio)
+print("\nTesting scratch_context...")
+try:
+    with scratch_context() as sc:
+        tmp = sc.temp(suffix='test_step')
+        assert tmp.startswith('_')
+        assert 'test_step' in tmp
+        assert tmp in sc
+    print("  scratch_context OK")
 except Exception as e:
     print(f"  FAILED: {e}")
     sys.exit(1)

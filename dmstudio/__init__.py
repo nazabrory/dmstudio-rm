@@ -17,6 +17,7 @@ Submodules:
     dialog          - Windows modal dialog auto-dismissal context.
     bootstrap       - Tutorial bootstrapping and download helpers.
     validator       - Pre-flight CLI command parser linter and safe validator.
+    scratch         - Managed in-memory scratch file context manager.
 '''
 
 # Proactively import pandas at the package root to avoid Python 3.14 / Cython circular import conflicts in debuggers
@@ -37,10 +38,12 @@ from dmstudio import dm_io
 from dmstudio import dialog
 from dmstudio import bootstrap
 from dmstudio import validator
+from dmstudio import scratch
 
 # Shortcuts
 from dmstudio.bootstrap import download_tutorials, install_agent_skills
 from dmstudio.validator import lint_command, validate_command
+from dmstudio.scratch import scratch_context, ScratchManager
 from dmstudio.dm_io import (
     read_datamine_header,
     read_datamine_summary,

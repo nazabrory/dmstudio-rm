@@ -21,6 +21,8 @@ Provides:
                             dialogs in a background thread (opt-in).
 - lint_command()          : Inspect a command string for syntax errors and unsafe patterns.
 - validate_command()      : Pre-flight validator (warns or raises on malformed command strings).
+- scratch_context()       : Managed in-memory scratch file context manager.
+- ScratchManager          : Manager for unique in-memory scratch file generation and tracking.
 '''
 
 
@@ -75,6 +77,15 @@ from dmstudio.bootstrap import download_tutorials  # noqa: F401
 from dmstudio.validator import (  # noqa: F401
     lint_command,
     validate_command,
+)
+
+
+# ---------------------------------------------------------------------------
+# Scratch file management — re-exported from scratch for backwards compat
+# ---------------------------------------------------------------------------
+from dmstudio.scratch import (  # noqa: F401
+    scratch_context,
+    ScratchManager,
 )
 
 

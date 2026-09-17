@@ -111,6 +111,7 @@ To maintain codebase simplicity and a clean experience for the user:
 | `dm_io` | Binary table I/O via `DmFile.DmTableADO` | `read_datamine()`, `read_datamine_header()`, `read_datamine_summary()`, `to_datamine()`, `patch_dataframe()` |
 | `dialog` | Opt-in modal dismissal | `dialog_dismiss_context()` |
 | `validator` | Pre-flight CLI command parser linter and validator | `lint_command()`, `validate_command()` |
+| `scratch` | Managed in-memory scratch file context manager | `scratch_context()`, `ScratchManager` |
 | `bootstrap` | Tutorial download | `download_tutorials(target_dir)` (also `dmstudio.download_tutorials`) |
 | `sandbox` | Sandbox dataset helpers | `copy_database_files()`, `initialize_sandbox()` |
 | `notebook_builder` | Programmatic `.ipynb` | `NotebookBuilder` |
@@ -128,6 +129,7 @@ Import: `from dmstudio import agent`.
 | `read_datamine`, `read_datamine_header`, `read_datamine_summary`, `to_datamine`, `patch_dataframe` | `dm_io` |
 | `dialog_dismiss_context` | `dialog` |
 | `lint_command`, `validate_command` | `validator` |
+| `scratch_context`, `ScratchManager` | `scratch` |
 | `copy_database_files`, `initialize_sandbox` | `sandbox` |
 | `download_tutorials` | `bootstrap` |
 

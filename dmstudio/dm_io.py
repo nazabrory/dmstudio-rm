@@ -13,6 +13,7 @@ Provides:
 '''
 import os
 import tempfile
+from typing import Any, List, Optional, Union
 
 import pandas as pd
 import win32com.client
@@ -32,7 +33,126 @@ _BLOCK_MODEL_ATTRIBUTES = [
 _BLOCK_MODEL_ATTRIBUTES_SET = set(_BLOCK_MODEL_ATTRIBUTES)
 
 
-def read_datamine_header(filepath):
+def resolve_table_path(
+    table_name: Union[str, os.PathLike],
+    project_folder: Optional[Union[str, os.PathLike]] = None,
+    cmd: Optional[Any] = None,
+) -> str:
+    '''
+    resolve_table_path
+    ------------------
+
+    Centralized table path resolution seam that resolves bare logical Datamine table names
+    (e.g. 'collars', 'zone_bm'), relative paths, and extensionless identifiers to verified
+    .dm or .dmx files in either the active Studio RM project directory or local filesystem.
+
+    Resolution follows a strict three-tier precedence:
+      1. Exact file match (absolute or relative to current working directory).
+      2. Extension probing (.dm, .dmx) in current working directory / relative base.
+      3. Active project folder probing (via explicit project_folder, cmd.oScript.ActiveProject,
+         or active Studio RM COM session).
+
+    Parameters:
+    -----------
+    table_name: str or os.PathLike
+        Logical table name, filename, or file path.
+    project_folder: Optional[str or os.PathLike]
+        Explicit project directory path (useful for testing or non-standard project roots).
+    cmd: Optional[Any]
+        Studio RM command engine instance with active COM session.
+
+    Returns:
+    --------
+    str:
+        Verified absolute path to the .dm or .dmx file on disk.
+
+    Raises:
+    -------
+    ValueError:
+        If table_name is not a string/PathLike or is empty/whitespace.
+    RuntimeError:
+        If the table cannot be resolved across any evaluated location.
+    '''
+    if table_name is None or not isinstance(table_name, (str, os.PathLike)):
+        raise ValueError(
+            f"table_name must be a non-empty string or path, got {type(table_name).__name__ if table_name is not None else 'None'}."
+        )
+    clean_name = str(table_name).strip()
+    if not clean_name:
+        raise ValueError("table_name cannot be empty or whitespace.")
+
+    evaluated_paths: List[str] = []
+
+    def _check(path_str: str) -> Optional[str]:
+        norm = os.path.normpath(path_str)
+        if norm not in evaluated_paths:
+            evaluated_paths.append(norm)
+        if os.path.isfile(norm):
+            return os.path.abspath(norm)
+        return None
+
+    # Tier 1: Exact match (as given, relative to CWD or absolute)
+    res = _check(clean_name)
+    if res:
+        return res
+
+    # Tier 2: Extension probing (.dm, .dmx) in CWD / relative directory
+    for ext in ('.dm', '.dmx'):
+        if not clean_name.lower().endswith(ext):
+            res = _check(clean_name + ext)
+            if res:
+                return res
+
+    # Tier 3: Active project folder probing
+    proj_dir: Optional[str] = None
+    if project_folder is not None:
+        proj_dir = str(project_folder).strip()
+    elif cmd is not None and getattr(cmd, 'oScript', None):
+        studio_app = cmd.oScript
+        if getattr(studio_app, 'ActiveProject', None):
+            proj_dir = getattr(studio_app.ActiveProject, 'Folder', None) or getattr(
+                studio_app.ActiveProject, 'Directory', None
+            )
+    else:
+        try:
+            from dmstudio import dmfiles
+            dmf = dmfiles.init()
+            if dmf.oScript and getattr(dmf.oScript, 'ActiveProject', None):
+                proj_dir = getattr(dmf.oScript.ActiveProject, 'Folder', None) or getattr(
+                    dmf.oScript.ActiveProject, 'Directory', None
+                )
+        except Exception as e:
+            pass
+
+    if proj_dir:
+        candidates = [
+            os.path.join(proj_dir, clean_name),
+            os.path.join(proj_dir, os.path.basename(clean_name)),
+        ]
+        base = os.path.basename(clean_name)
+        for ext in ('.dm', '.dmx'):
+            if not clean_name.lower().endswith(ext):
+                candidates.append(os.path.join(proj_dir, clean_name + ext))
+            if not base.lower().endswith(ext):
+                candidates.append(os.path.join(proj_dir, base + ext))
+
+        for cand in candidates:
+            res = _check(cand)
+            if res:
+                return res
+
+    eval_list = '\n'.join(f'  - {p}' for p in evaluated_paths)
+    raise RuntimeError(
+        f"Could not resolve Datamine table '{clean_name}' (file does not exist). Evaluated candidate locations:\n{eval_list}"
+    )
+
+
+
+def read_datamine_header(
+    filepath: Union[str, os.PathLike],
+    project_folder: Optional[Union[str, os.PathLike]] = None,
+    cmd: Optional[Any] = None,
+) -> dict:
     '''
     read_datamine_header
     --------------------
@@ -42,10 +162,17 @@ def read_datamine_header(filepath):
     and global/model header attributes (e.g. XMORIG, YMORIG, ZMORIG, cell increments)
     directly via DmFile.DmTableADO in milliseconds, without loading table records into memory.
 
+    Accepts bare logical table names (e.g. 'collars') and resolves paths against the active
+    Studio RM project directory or local filesystem via resolve_table_path.
+
     Parameters:
     -----------
-    filepath: str
-        Full or relative path to a .dm or .dmx file.
+    filepath: str or os.PathLike
+        Logical table name, relative path, or full path to a .dm or .dmx file.
+    project_folder: Optional[str or os.PathLike]
+        Optional explicit project folder to search for tables.
+    cmd: Optional[Any]
+        Optional Studio RM command engine instance with active COM session.
 
     Returns:
     --------
@@ -66,9 +193,7 @@ def read_datamine_header(filepath):
     RuntimeError
         If the file does not exist, cannot be opened, or COM object is unavailable.
     '''
-    abs_path = os.path.abspath(filepath)
-    if not os.path.exists(abs_path):
-        raise RuntimeError('Datamine file "{}" does not exist.'.format(filepath))
+    abs_path = resolve_table_path(filepath, project_folder=project_folder, cmd=cmd)
 
     try:
         table = win32com.client.Dispatch('DmFile.DmTableADO')
@@ -191,18 +316,27 @@ def read_datamine_header(filepath):
             pass
 
 
-def read_datamine_summary(filepath):
+def read_datamine_summary(
+    filepath: Union[str, os.PathLike],
+    project_folder: Optional[Union[str, os.PathLike]] = None,
+    cmd: Optional[Any] = None,
+) -> dict:
     '''
     read_datamine_summary
     ---------------------
 
     High-level summary of a Datamine binary file (.dm/.dmx) schema and model metrics.
     Suitable for logging in automated pipeline runs, diagnostics, and data validation.
+    Accepts bare logical table names and resolves paths via resolve_table_path.
 
     Parameters:
     -----------
-    filepath: str
-        Full or relative path to a .dm or .dmx file.
+    filepath: str or os.PathLike
+        Logical table name, relative path, or full path to a .dm or .dmx file.
+    project_folder: Optional[str or os.PathLike]
+        Optional explicit project folder to search for tables.
+    cmd: Optional[Any]
+        Optional Studio RM command engine instance with active COM session.
 
     Returns:
     --------
@@ -220,7 +354,7 @@ def read_datamine_summary(filepath):
           - 'description': str
           - 'double_precision': bool
     '''
-    header = read_datamine_header(filepath)
+    header = read_datamine_header(filepath, project_folder=project_folder, cmd=cmd)
 
     numeric_fields = [f['name'] for f in header['fields'] if f.get('type_name') == 'numeric']
     alphanumeric_fields = [f['name'] for f in header['fields'] if f.get('type_name') == 'alphanumeric']
@@ -255,18 +389,27 @@ read_dm_summary = read_datamine_summary
 
 
 
-def read_datamine(filepath):
+def read_datamine(
+    filepath: Union[str, os.PathLike],
+    project_folder: Optional[Union[str, os.PathLike]] = None,
+    cmd: Optional[Any] = None,
+) -> pd.DataFrame:
     '''
     read_datamine
     -------------
 
     Read a Datamine binary file (.dm or .dmx) into a pandas DataFrame using
-    the DmFile.DmTableADO COM object.
+    the DmFile.DmTableADO COM object. Accepts bare logical table names and resolves
+    paths via resolve_table_path.
 
     Parameters:
     -----------
-    filepath: str
-        Full or relative path to a .dm or .dmx file.
+    filepath: str or os.PathLike
+        Logical table name, relative path, or full path to a .dm or .dmx file.
+    project_folder: Optional[str or os.PathLike]
+        Optional explicit project folder to search for tables.
+    cmd: Optional[Any]
+        Optional Studio RM command engine instance with active COM session.
 
     Returns:
     --------
@@ -279,6 +422,8 @@ def read_datamine(filepath):
         If the DmFile.DmTableADO COM object is not available or the file
         cannot be opened.
     '''
+    abs_path = resolve_table_path(filepath, project_folder=project_folder, cmd=cmd)
+
     try:
         table = win32com.client.Dispatch('DmFile.DmTableADO')
     except Exception as e:
@@ -288,7 +433,7 @@ def read_datamine(filepath):
         )
 
     try:
-        table.Open(filepath, 0)  # 0 = read-only
+        table.Open(abs_path, 0)  # 0 = read-only
     except Exception as e:
         raise RuntimeError('Could not open Datamine file "{}": {}'.format(filepath, e))
 

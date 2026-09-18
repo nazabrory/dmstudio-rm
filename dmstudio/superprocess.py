@@ -10,7 +10,7 @@ from dmstudio import dmcommands
 from dmstudio import dmfiles
 from dmstudio.dialog import dialog_dismiss_context
 from dmstudio.scratch import scratch_context
-from dmstudio.dm_io import read_datamine_header
+from dmstudio.dm_io import read_datamine_header, resolve_table_path
 
 
 def dxf_to_dm(dxf_i, out_o, zone_f=None, zone_p=None):
@@ -597,59 +597,35 @@ def transform_model(
 
     # Inspect input table header if any parameter is missing
     if any(v is None for v in [x_orig, y_orig, z_orig, xinc, yinc, zinc, nx, ny, nz]):
+        hdr = None
         try:
-            hdr = None
-            candidate_paths = [clean_model, f"{clean_model}.dmx", f"{clean_model}.dm"]
-            # Also check within active project directory if COM session is available
-            try:
-                if cmd is not None and getattr(cmd, 'oScript', None):
-                    studio_app = cmd.oScript
-                    if getattr(studio_app, 'ActiveProject', None):
-                        proj_folder = getattr(studio_app.ActiveProject, 'Folder', None) or getattr(
-                            studio_app.ActiveProject, 'Directory', None
-                        )
-                        if proj_folder:
-                            candidate_paths.extend([
-                                os.path.join(proj_folder, clean_model),
-                                os.path.join(proj_folder, f"{clean_model}.dmx"),
-                                os.path.join(proj_folder, f"{clean_model}.dm"),
-                            ])
-            except Exception as e:
-                pass
-
-            for cand in candidate_paths:
-                if os.path.exists(cand):
-                    try:
-                        hdr = read_datamine_header(cand)
-                        break
-                    except Exception as e:
-                        pass
-
-            if hdr:
-                if auto_proto is None and hdr.get('record_count', 0) == 0:
-                    auto_proto = True
-                if 'attributes' in hdr:
-                    attrs = hdr['attributes']
-                    if x_orig is None:
-                        x_orig = float(attrs.get('XMORIG', attrs.get('X0', 0.0)))
-                    if y_orig is None:
-                        y_orig = float(attrs.get('YMORIG', attrs.get('Y0', 0.0)))
-                    if z_orig is None:
-                        z_orig = float(attrs.get('ZMORIG', attrs.get('Z0', 0.0)))
-                    if xinc is None:
-                        xinc = float(attrs.get('XINC', 10.0))
-                    if yinc is None:
-                        yinc = float(attrs.get('YINC', 10.0))
-                    if zinc is None:
-                        zinc = float(attrs.get('ZINC', 10.0))
-                    if nx is None:
-                        nx = int(attrs.get('NX', 10))
-                    if ny is None:
-                        ny = int(attrs.get('NY', 10))
-                    if nz is None:
-                        nz = int(attrs.get('NZ', 10))
+            hdr = read_datamine_header(clean_model, cmd=cmd)
         except Exception as e:
             pass
+
+        if hdr:
+            if auto_proto is None and hdr.get('record_count', 0) == 0:
+                auto_proto = True
+            if 'attributes' in hdr:
+                attrs = hdr['attributes']
+                if x_orig is None:
+                    x_orig = float(attrs.get('XMORIG', attrs.get('X0', 0.0)))
+                if y_orig is None:
+                    y_orig = float(attrs.get('YMORIG', attrs.get('Y0', 0.0)))
+                if z_orig is None:
+                    z_orig = float(attrs.get('ZMORIG', attrs.get('Z0', 0.0)))
+                if xinc is None:
+                    xinc = float(attrs.get('XINC', 10.0))
+                if yinc is None:
+                    yinc = float(attrs.get('YINC', 10.0))
+                if zinc is None:
+                    zinc = float(attrs.get('ZINC', 10.0))
+                if nx is None:
+                    nx = int(attrs.get('NX', 10))
+                if ny is None:
+                    ny = int(attrs.get('NY', 10))
+                if nz is None:
+                    nz = int(attrs.get('NZ', 10))
 
     # Defaults for unassigned origin/increments
     x_orig = 0.0 if x_orig is None else float(x_orig)

@@ -54,8 +54,8 @@ class TestSandboxTransformModel(unittest.TestCase):
             arguments=" 'N' 'Y' '5000' '4000' '100' '10' '10' '10' '20' '20' '10'",
         )
 
-        # Verify base prototype origin
-        hdr_orig = read_datamine_header(f"{orig_proto}.dmx")
+        # Verify base prototype origin via bare logical table name resolution
+        hdr_orig = read_datamine_header(orig_proto)
         attrs_orig = hdr_orig['attributes']
         self.assertAlmostEqual(float(attrs_orig['XMORIG']), 5000.0, places=2)
         self.assertAlmostEqual(float(attrs_orig['YMORIG']), 4000.0, places=2)
@@ -73,8 +73,8 @@ class TestSandboxTransformModel(unittest.TestCase):
         )
         self.assertEqual(result, trans_proto)
 
-        # 3. Verify transformed prototype origin
-        hdr_trans = read_datamine_header(f"{trans_proto}.dmx")
+        # 3. Verify transformed prototype origin via bare logical table name resolution
+        hdr_trans = read_datamine_header(trans_proto)
         attrs_trans = hdr_trans['attributes']
         self.assertAlmostEqual(float(attrs_trans['XMORIG']), 5500.0, places=2)
         self.assertAlmostEqual(float(attrs_trans['YMORIG']), 4600.0, places=2)

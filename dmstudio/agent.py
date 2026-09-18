@@ -46,6 +46,7 @@ from dmstudio.dm_io import (  # noqa: F401
     read_datamine_summary,
     read_dm_header,
     read_dm_summary,
+    resolve_table_path,
     to_datamine,
     patch_dataframe,
 )

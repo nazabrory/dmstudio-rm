@@ -5,68 +5,92 @@ import os
 import math
 from typing import List, Dict, Optional, Union, Any
 
+import numpy as np
+
 from dmstudio import initialize
 from dmstudio import dmcommands
 from dmstudio import dmfiles
 from dmstudio.dialog import dialog_dismiss_context
 from dmstudio.scratch import scratch_context
-from dmstudio.dm_io import read_datamine_header, resolve_table_path
+from dmstudio.dm_io import read_datamine, read_datamine_header, resolve_table_path
 
 
-def dxf_to_dm(dxf_i, out_o, zone_f=None, zone_p=None):
-
+def dxf_to_dm(dxf_i, out_o, zone_f=None, zone_p=None, cmd=None):
     '''
+    dxf_to_dm
+    ---------
+    Imports a 3D DXF file and saves it as Datamine wireframe triangle (tr) and point (pt) files.
+    Optionally assigns a zone field and value to the wireframe.
 
-    :param dxf_i: File in dxf format. The dxfin can also be provided as a full path
-    :param out_o: Name of output file without the tr and pt suffix
-    :param zone_f: zone field to be created in wireframe file
-    :param zone_p: zone value - can be numeric or alphanumeric
-    :return: returns a datamine tr and pt file
+    Parameters:
+    -----------
+    dxf_i: str
+        File in dxf format. Can be provided as filename or full path.
+    out_o: str
+        Name of output file without the tr and pt suffix.
+    zone_f: Optional[str]
+        Zone field to be created in wireframe file.
+    zone_p: Optional[Union[int, float, str]]
+        Zone value - can be numeric or alphanumeric.
+    cmd: Optional[Any]
+        Studio RM command engine instance. If None, initializes via dmcommands.init().
+
+    Returns:
+    --------
+    tuple:
+        (out_o + 'tr', out_o + 'pt')
     '''
-
     assert dxf_i.lower().endswith('.dxf'), "Input file is not a dxf"
 
-    oScript = initialize.studio(version=None)
-    dmc = dmcommands.init()
+    if cmd is None:
+        cmd = dmcommands.init()
+    oScript = cmd.oScript if hasattr(cmd, 'oScript') else initialize.studio(version=None)
 
-    dmc.oScript.ActiveProject.Data.LoadFile(dxf_i)
+    oScript.ActiveProject.Data.LoadFile(dxf_i)
     obj3d = oScript.ActiveProject.Data.LastObjectAdded
 
     if zone_f is None:
         obj3d.SaveAsDatamineFile(out_o, oScript.ActiveProject.ExtendedPrecision, True, "")
         obj3d.Unload()
+        return (out_o + 'tr', out_o + 'pt')
 
-    else:
-        obj3d.SaveAsDatamineFile('_t1', oScript.ActiveProject.ExtendedPrecision, True, "")
+    with scratch_context(cmd=cmd, auto_cleanup=True) as sc:
+        temp_root = sc.temp(suffix='dxf')
+        temp_tr = sc.register(temp_root + 'tr')
+        temp_pt = sc.register(temp_root + 'pt')
+
+        obj3d.SaveAsDatamineFile(temp_root, oScript.ActiveProject.ExtendedPrecision, True, "")
         obj3d.Unload()
 
-        # check if zone_value is numeric or alphanumeric
-
-        if type(zone_p) is float or type(zone_p) is int:
-            expression = " '" + zone_f + "=" + str(zone_p) + " '"
+        if isinstance(zone_p, (int, float)) and not isinstance(zone_p, bool):
+            expression = f"{zone_f};N = {zone_p}"
         else:
-            expression = " '" + zone_f + ";a24=" + '"' + zone_p + '"' + " '"
+            val_str = str(zone_p).replace('"', '')
+            expression = f'{zone_f};A24 = "{val_str}"'
 
-        dmc.extra('_t1tr', out_o + 'tr', expression=expression)
-        dmc.copy('_t1pt', out_o + 'pt')
-        dmc.delete(in_i='_t1tr')
-        dmc.delete(in_i='_t1pt')
+        extra_args = f" '{expression}' 'GO' "
+        cmd.extra(in_i=temp_tr, out_o=out_o + 'tr', arguments=extra_args)
+        cmd.copy(in_i=temp_pt, out_o=out_o + 'pt')
+
+    return (out_o + 'tr', out_o + 'pt')
+
 
 def display_ellipsoids(in_i='required', out_o='required',
                        x_f='XPT', y_f='YPT', z_f='ZPT', trdipdir_f='TRDIPDIR', trdip_d='TRDIP', plunge_f='optional',
                        sdist1_p=100., sdist2_p=50., sdist3_p=25.,
-                       num_ellipsoids_p=10, plunge_p=-90, invert_range_p=None):
+                       num_ellipsoids_p=10, plunge_p=-90, invert_range_p=None,
+                       cmd=None):
     '''
     display_ellipsoids
     ------------------
 
     Generates wireframe ellipsoids for a set of randomly sampled spatial data points.
-    Uses native dmstudio commands and the agent.read_datamine() function.
+    Uses native dmstudio commands and read_datamine().
 
     Parameters:
     -----------
     in_i: str
-        Input datamine file (without extension).
+        Input datamine file (without extension or with .dm/.dmx).
     out_o: str
         Output datamine file prefix (without tr/pt suffix).
     x_f, y_f, z_f: str
@@ -85,10 +109,14 @@ def display_ellipsoids(in_i='required', out_o='required',
         Default plunge value when plunge_f is 'optional'. Default: -90.
     invert_range_p: list
         [min, max] trend range for plunge inversion. Default: [90, 270].
-    '''
-    import numpy as np
-    from dmstudio import agent
+    cmd: Optional[Any]
+        Studio RM command engine instance. If None, initializes via dmcommands.init().
 
+    Returns:
+    --------
+    tuple:
+        (out_o + 'tr', out_o + 'pt')
+    '''
     if invert_range_p is None:
         invert_range_p = [90, 270]
 
@@ -97,62 +125,70 @@ def display_ellipsoids(in_i='required', out_o='required',
     if out_o == 'required':
         raise ValueError('out_o is required.')
 
-    # Use native read_datamine instead of proprietary pyrpa dependency
-    df = agent.read_datamine(in_i + '.dm')
+    if cmd is None:
+        cmd = dmcommands.init()
+
+    df = read_datamine(in_i, cmd=cmd)
+    if len(df) == 0:
+        raise ValueError(f"Input table '{in_i}' has 0 records.")
+
     choice = np.random.choice(df.index, min(num_ellipsoids_p, len(df)), replace=False)
     df_choice = df.loc[choice, :].copy().reset_index(drop=True)
-    dm = dmcommands.init()
 
     if plunge_f == 'optional':
         df_choice = df_choice.copy()
         df_choice['_PLUNGE'] = plunge_p
         plunge_f = '_PLUNGE'
 
-    for i in range(len(df_choice)):
+    with scratch_context(cmd=cmd, auto_cleanup=True) as sc:
+        sc_accum_tr = sc.temp(suffix='acc_tr')
+        sc_accum_pt = sc.temp(suffix='acc_pt')
 
-        plunge = df_choice.loc[i, plunge_f]
+        for i in range(len(df_choice)):
+            plunge = df_choice.loc[i, plunge_f]
 
-        if df_choice.loc[i, trdipdir_f] > invert_range_p[1] or df_choice.loc[i, trdipdir_f] < invert_range_p[0]:
-            plunge *= -1
+            if df_choice.loc[i, trdipdir_f] > invert_range_p[1] or df_choice.loc[i, trdipdir_f] < invert_range_p[0]:
+                plunge *= -1
 
-        dm.ellipse(
-            wiretr_o='_1tr',
-            wirept_o='_1pt',
-            sangle1_p=df_choice.loc[i, trdipdir_f],
-            sangle2_p=df_choice.loc[i, trdip_d],
-            sangle3_p=plunge,
-            saxis1_p=3,
-            saxis2_p=1,
-            saxis3_p=3,
-            sdist1_p=sdist1_p,
-            sdist2_p=sdist2_p,
-            sdist3_p=sdist3_p,
-            xcentre_p=df_choice.loc[i, x_f],
-            ycentre_p=df_choice.loc[i, y_f],
-            zcentre_p=df_choice.loc[i, z_f])
+            sc_curr_tr = sc.temp(suffix=f'ell_{i}_tr')
+            sc_curr_pt = sc.temp(suffix=f'ell_{i}_pt')
 
-        if i == 0:
-            dm.copy('_1tr', '_2tr')
-            dm.copy('_1pt', '_2pt')
-        else:
-            dm.addtri(
-                wiretr1_i='_1tr',
-                wirept1_i='_1pt',
-                wiretr2_i='_2tr',
-                wirept2_i='_2pt',
-                wiretrou_o='_3tr',
-                wireptou_o='_3pt')
-            dm.copy('_3tr', '_2tr')
-            dm.copy('_3pt', '_2pt')
-    dm.copy('_2tr', out_o=out_o + "tr")
-    dm.copy('_2pt', out_o=out_o + "pt")
+            cmd.ellipse(
+                wiretr_o=sc_curr_tr,
+                wirept_o=sc_curr_pt,
+                sangle1_p=df_choice.loc[i, trdipdir_f],
+                sangle2_p=df_choice.loc[i, trdip_d],
+                sangle3_p=plunge,
+                saxis1_p=3,
+                saxis2_p=1,
+                saxis3_p=3,
+                sdist1_p=sdist1_p,
+                sdist2_p=sdist2_p,
+                sdist3_p=sdist3_p,
+                xcentre_p=df_choice.loc[i, x_f],
+                ycentre_p=df_choice.loc[i, y_f],
+                zcentre_p=df_choice.loc[i, z_f])
 
-    dm.delete('_1tr')
-    dm.delete('_1pt')
-    dm.delete('_2tr')
-    dm.delete('_2pt')
-    dm.delete('_3tr')
-    dm.delete('_3pt')
+            if i == 0:
+                cmd.copy(in_i=sc_curr_tr, out_o=sc_accum_tr)
+                cmd.copy(in_i=sc_curr_pt, out_o=sc_accum_pt)
+            else:
+                sc_joined_tr = sc.temp(suffix=f'join_{i}_tr')
+                sc_joined_pt = sc.temp(suffix=f'join_{i}_pt')
+                cmd.addtri(
+                    wiretr1_i=sc_curr_tr,
+                    wirept1_i=sc_curr_pt,
+                    wiretr2_i=sc_accum_tr,
+                    wirept2_i=sc_accum_pt,
+                    wiretrou_o=sc_joined_tr,
+                    wireptou_o=sc_joined_pt)
+                sc_accum_tr = sc_joined_tr
+                sc_accum_pt = sc_joined_pt
+
+        cmd.copy(in_i=sc_accum_tr, out_o=out_o + 'tr')
+        cmd.copy(in_i=sc_accum_pt, out_o=out_o + 'pt')
+
+    return (out_o + 'tr', out_o + 'pt')
 
 
 def batch_append(

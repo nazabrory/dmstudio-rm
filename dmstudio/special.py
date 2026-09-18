@@ -9,10 +9,14 @@ and to facilitate more readable code.
 
 '''
 
+import os
+import uuid
+
+import pandas as pd
+
 import dmstudio.dmfiles
 import dmstudio.dmcommands
 from dmstudio import validator
-import pandas as pd
 
 # -----------------------------------------------------------------------------------#
 # Special fields
@@ -68,52 +72,82 @@ class dmfile_def(object):
         dmtemp = dmtemp[field_order]
         self.definition = pd.concat([self.definition, dmtemp], ignore_index=True)
 
-def inpfil(csv=None, out_o=None, definition=None):
+def inpfil(csv=None, out_o=None, definition=None, df=None, cmd=None, project_folder=None):
+    '''
+    inpfil
+    ------
+    Datamine INPFIL wrapper. Creates a Datamine binary file from a pandas DataFrame
+    or CSV file according to a field definition schema.
 
-    if definition is None:
-        definition = csv_to_definition(csv)
+    Parameters:
+    -----------
+    csv: Optional[str]
+        Path to CSV file. Optional if df is provided.
+    out_o: str
+        Target Datamine output table name.
+    definition: Optional[pd.DataFrame]
+        Schema definition DataFrame. If None, derived from df or csv.
+    df: Optional[pd.DataFrame]
+        Direct pandas DataFrame to export. If provided, skips reading from csv.
+    cmd: Optional[Any]
+        Studio RM command engine or dmfiles instance.
+    project_folder: Optional[str]
+        Explicit project directory to stage temporary files.
+    '''
+    if df is not None:
+        if definition is None:
+            definition = pd_to_definition(df)
+    elif csv is not None:
+        df = pd.read_csv(csv)
+        if definition is None:
+            definition = csv_to_definition(csv)
+    else:
+        raise ValueError("Either 'df' or 'csv' must be provided to inpfil.")
+
+    # Make a shallow copy of definition to avoid mutating caller's DataFrame
+    definition = definition.copy()
 
     arguments = " 'csvfile' "
-    df = pd.read_csv(csv)
 
     for i in range(len(definition)):
-
         idx = definition.index[i]
-        if definition['Field Name'].iloc[i] in CHAR8_FIELDS:
+        field_name = str(definition['Field Name'].iloc[i]).strip()
+
+        if field_name in CHAR8_FIELDS:
             definition.loc[idx, 'Field Type'] = 'A'
             definition.loc[idx, 'Length'] = 8
 
-        if definition['Field Name'].iloc[i].strip() in IMPLICIT_FIELDS:
+        if field_name in IMPLICIT_FIELDS:
             definition.loc[idx, 'Field Type'] = 'N'
             definition.loc[idx, 'Keep'] = 'N'
-            definition.loc[idx, 'Default'] = df[definition['Field Name'].iloc[i]].iloc[0]
+            if field_name in df.columns and len(df) > 0:
+                definition.loc[idx, 'Default'] = df[field_name].iloc[0]
 
         for column in definition.columns:
             if column == 'Length' and definition['Field Type'].iloc[i] == 'N':
                 continue
             arguments += " '" + (str(definition[column].iloc[i])).strip()[:8] + "' "
 
-    dmf = dmstudio.dmfiles.init()
+    if cmd is not None:
+        dmf = cmd if hasattr(cmd, 'inpfil') else getattr(cmd, 'dmfiles', None) or dmstudio.dmfiles.init()
+    else:
+        dmf = dmstudio.dmfiles.init()
 
-    # To avoid command length limits with large datasets in Parsecommand(),
-    # write the data rows to a temporary CSV file in the active project folder
-    # and instruct INPFIL to load it.
-    import os
-    import uuid
-    
-    project_folder = None
-    try:
-        if dmf.oScript and dmf.oScript.ActiveProject:
-            project_folder = getattr(dmf.oScript.ActiveProject, 'Folder', None) or getattr(dmf.oScript.ActiveProject, 'Directory', None)
-    except Exception:
-        pass
+    # Determine project folder for staging temporary INPFIL data file
+    if project_folder is None:
+        try:
+            if hasattr(dmf, 'oScript') and dmf.oScript and getattr(dmf.oScript, 'ActiveProject', None):
+                project_folder = getattr(dmf.oScript.ActiveProject, 'Folder', None) or getattr(dmf.oScript.ActiveProject, 'Directory', None)
+        except Exception as e:
+            pass
     if not project_folder:
         project_folder = os.getcwd()
 
-    temp_csv_name = 'in_' + uuid.uuid4().hex[:8] + '.csv'
+    # Underscore-prefixed temporary file name to prevent unmanaged project pollution
+    temp_csv_name = '_in_' + uuid.uuid4().hex[:8] + '.csv'
     temp_csv_path = os.path.join(project_folder, temp_csv_name)
-    
-    # Save the dataframe without headers/index, formatting floats to avoid trailing .0
+
+    # Save data rows without headers/index, formatting floats cleanly
     formatted_rows = []
     for _, row in df.iterrows():
         row_vals = []
@@ -121,15 +155,17 @@ def inpfil(csv=None, out_o=None, definition=None):
             val = row[fname]
             if isinstance(val, float) and not (val != val) and val == int(val):
                 row_vals.append(str(int(val)))
+            elif val is None or (isinstance(val, float) and val != val):
+                row_vals.append('-')
             else:
                 row_vals.append(str(val))
         formatted_rows.append(','.join(row_vals))
-        
+
     with open(temp_csv_path, 'w', encoding='utf-8') as f_out:
         f_out.write('\n'.join(formatted_rows) + '\n')
 
-    # '!'  = end of DD
-    # 'Y'  = answer to INPFIL's "Use system file? Y/N" prompt
+    # '!' = end of DD
+    # 'Y' = answer to INPFIL's "Use system file? Y/N" prompt
     # temp_csv_name = local CSV file containing the data rows
     arguments += " '!' 'Y' '" + temp_csv_name + "' "
 
@@ -142,7 +178,7 @@ def inpfil(csv=None, out_o=None, definition=None):
         if os.path.exists(temp_csv_path):
             try:
                 os.remove(temp_csv_path)
-            except Exception:
+            except Exception as e:
                 pass
 
 def csv_to_definition(csv):

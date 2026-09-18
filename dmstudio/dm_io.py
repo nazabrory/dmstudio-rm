@@ -12,6 +12,7 @@ Provides:
 - patch_dataframe()          : Monkey-patch pandas.DataFrame to support the .to_datamine() method.
 '''
 import os
+import shutil
 import tempfile
 from typing import Any, List, Optional, Union
 
@@ -19,6 +20,7 @@ import pandas as pd
 import win32com.client
 
 from dmstudio import special
+from dmstudio.scratch import scratch_context
 
 
 # Recognized global/implicit block model attribute names
@@ -477,76 +479,108 @@ def read_datamine(
             pass
 
 
-def to_datamine(df, filepath):
+def to_datamine(
+    df: pd.DataFrame,
+    filepath: Union[str, os.PathLike],
+    project_folder: Optional[Union[str, os.PathLike]] = None,
+    cmd: Optional[Any] = None,
+) -> str:
     '''
     to_datamine
     -----------
 
     Save a pandas DataFrame to a Datamine .dm or .dmx binary file using the special.inpfil utility.
+    Routes intermediate table creation through in-memory scratch tables prefixed with an underscore,
+    eliminating redundant intermediate CSV roundtrips on disk and leaving zero un-underscored
+    temporary files in the project folder on normal completion or error.
 
     Parameters:
     -----------
     df: pandas.DataFrame
         DataFrame to export.
-    filepath: str
-        Target file path.
+    filepath: str or os.PathLike
+        Target file path or table name.
+    project_folder: Optional[str or os.PathLike]
+        Explicit project directory to search or stage files.
+    cmd: Optional[Any]
+        Studio RM command engine instance.
+
+    Returns:
+    --------
+    str:
+        The target file path where the Datamine table was saved.
     '''
-    import shutil
-    import uuid
+    with scratch_context(cmd=cmd, auto_cleanup=True) as sc:
+        # Generate an in-memory scratch name starting with an underscore
+        temp_name = sc.temp(suffix='df_out')
 
-    # Generate a safe, simple alphanumeric temporary name for Datamine
-    temp_name = 'df_out_' + uuid.uuid4().hex[:8]
-
-    fd, temp_csv = tempfile.mkstemp(suffix='.csv')
-    os.close(fd)
-    try:
-        df.to_csv(temp_csv, index=False)
+        # Directly export without intermediate df.to_csv on disk
         defn = special.pd_to_definition(df)
-        
-        # Use the simple temp name for the Datamine command to avoid path / backslash issues
-        special.inpfil(csv=temp_csv, out_o=temp_name, definition=defn)
 
-        # Locate the created file in either the active project folder or current working directory
-        project_folder = None
+        # Resolve project folder if not provided
+        active_proj_dir = project_folder
+        if not active_proj_dir:
+            try:
+                if cmd is not None and getattr(cmd, 'oScript', None) and getattr(cmd.oScript, 'ActiveProject', None):
+                    active_proj_dir = getattr(cmd.oScript.ActiveProject, 'Folder', None) or getattr(
+                        cmd.oScript.ActiveProject, 'Directory', None
+                    )
+                else:
+                    from dmstudio import dmfiles
+                    dmf = dmfiles.init()
+                    if dmf.oScript and getattr(dmf.oScript, 'ActiveProject', None):
+                        active_proj_dir = getattr(dmf.oScript.ActiveProject, 'Folder', None) or getattr(
+                            dmf.oScript.ActiveProject, 'Directory', None
+                        )
+            except Exception as e:
+                pass
+
+        if not active_proj_dir:
+            active_proj_dir = os.getcwd()
+        else:
+            active_proj_dir = str(active_proj_dir)
+
         try:
-            from dmstudio import dmfiles
-            dmf = dmfiles.init()
-            if dmf.oScript and dmf.oScript.ActiveProject:
-                project_folder = getattr(dmf.oScript.ActiveProject, 'Folder', None) or getattr(dmf.oScript.ActiveProject, 'Directory', None)
-        except Exception:
-            pass
+            special.inpfil(
+                df=df,
+                out_o=temp_name,
+                definition=defn,
+                cmd=cmd,
+                project_folder=active_proj_dir,
+            )
 
-        if not project_folder:
-            project_folder = os.getcwd()
-
-        created_file = None
-        for ext in ('.dm', '.dmx'):
-            p = os.path.join(project_folder, temp_name + ext)
-            if os.path.exists(p):
-                created_file = p
-                break
-
-        if not created_file:
-            # Fallback to current working directory if project folder search did not find it
-            for ext in ('.dm', '.dmx'):
-                p = os.path.join(os.getcwd(), temp_name + ext)
-                if os.path.exists(p):
-                    created_file = p
+            # Locate the created file in active project folder or current working directory
+            created_file = None
+            for folder in (active_proj_dir, os.getcwd()):
+                for ext in ('.dm', '.dmx'):
+                    p = os.path.join(folder, temp_name + ext)
+                    if os.path.isfile(p):
+                        created_file = p
+                        break
+                if created_file:
                     break
 
-        if created_file:
-            # Ensure target directory exists
-            target_dir = os.path.dirname(os.path.abspath(filepath))
-            if target_dir and not os.path.exists(target_dir):
-                os.makedirs(target_dir, exist_ok=True)
-            # Move and rename to the final requested path
-            shutil.move(created_file, filepath)
-            print('Saved DataFrame to Datamine file: {}'.format(filepath))
-        else:
-            raise RuntimeError('Datamine failed to generate output file.')
-    finally:
-        if os.path.exists(temp_csv):
-            os.remove(temp_csv)
+            if created_file:
+                target_str = str(filepath)
+                target_dir = os.path.dirname(os.path.abspath(target_str))
+                if target_dir and not os.path.exists(target_dir):
+                    os.makedirs(target_dir, exist_ok=True)
+                # Move and rename to final requested path
+                shutil.move(created_file, target_str)
+                return target_str
+            else:
+                raise RuntimeError(f"Datamine failed to generate intermediate table '{temp_name}'.")
+
+        finally:
+            # Guarantee zero lingering temporary files matching temp_name in project folder / CWD
+            for folder in (active_proj_dir, os.getcwd()):
+                for ext in ('.dm', '.dmx', '.csv'):
+                    p = os.path.join(folder, temp_name + ext)
+                    if os.path.exists(p):
+                        try:
+                            os.remove(p)
+                        except Exception as e:
+                            pass
 
 
 def patch_dataframe():

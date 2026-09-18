@@ -41,7 +41,7 @@ from dmstudio import validator
 from dmstudio import scratch
 
 # Shortcuts
-from dmstudio.superprocess import batch_append
+from dmstudio.superprocess import batch_append, transform_model, transform_block_model, coordinate_transform
 from dmstudio.bootstrap import download_tutorials, install_agent_skills
 from dmstudio.validator import lint_command, validate_command
 from dmstudio.scratch import scratch_context, ScratchManager

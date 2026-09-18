@@ -290,7 +290,9 @@ print("[TEST 10] Superprocess Module")
 try:
     from dmstudio import superprocess
     assert hasattr(superprocess, 'batch_append'), "superprocess missing batch_append"
-    print("  [OK] superprocess and batch_append imported")
+    assert hasattr(superprocess, 'transform_model'), "superprocess missing transform_model"
+    assert hasattr(superprocess, 'transform_block_model'), "superprocess missing transform_block_model"
+    print("  [OK] superprocess, batch_append, and transform_model imported")
     results['superprocess'] = 'PASS'
 except Exception as e:
     print(f"  [WARN] superprocess issue: {e}")

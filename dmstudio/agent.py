@@ -24,6 +24,7 @@ Provides:
 - scratch_context()       : Managed in-memory scratch file context manager.
 - ScratchManager          : Manager for unique in-memory scratch file generation and tracking.
 - batch_append()          : Consolidate multiple Datamine tables into a single table with managed scratch chaining, provenance tagging, and sorting.
+- transform_model()       : Native block model coordinate transformation superprocess (COPYMOD, PROTOM, EXTRA).
 '''
 
 
@@ -95,6 +96,9 @@ from dmstudio.scratch import (  # noqa: F401
 # ---------------------------------------------------------------------------
 from dmstudio.superprocess import (  # noqa: F401
     batch_append,
+    transform_model,
+    transform_block_model,
+    coordinate_transform,
 )
 
 

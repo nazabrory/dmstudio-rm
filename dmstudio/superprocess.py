@@ -1,11 +1,16 @@
 '''
 Superprocess module - multi-command Studio RM workflows.
 '''
+import os
+import math
 from typing import List, Dict, Optional, Union, Any
 
 from dmstudio import initialize
 from dmstudio import dmcommands
+from dmstudio import dmfiles
+from dmstudio.dialog import dialog_dismiss_context
 from dmstudio.scratch import scratch_context
+from dmstudio.dm_io import read_datamine_header
 
 
 def dxf_to_dm(dxf_i, out_o, zone_f=None, zone_p=None):
@@ -357,4 +362,401 @@ def batch_append(
             cmd.mgsort(in_i=curr, out_o=clean_out, keys_f=clean_sort_keys)
 
         return clean_out
+
+
+def _validate_numeric_param(
+    val: Any,
+    name: str,
+    min_val: Optional[float] = None,
+    max_val: Optional[float] = None,
+) -> float:
+    '''Validate numeric parameter rejecting bools, None, NaN, and inf.'''
+    if val is None or isinstance(val, bool) or not isinstance(val, (int, float)):
+        raise ValueError(
+            f"{name} must be a numeric value, got {type(val).__name__ if val is not None else 'None'}."
+        )
+    f_val = float(val)
+    if math.isnan(f_val) or math.isinf(f_val):
+        raise ValueError(f"{name} cannot be NaN or infinite.")
+    if min_val is not None and f_val < min_val:
+        raise ValueError(f"{name} must be >= {min_val}, got {f_val}.")
+    if max_val is not None and f_val > max_val:
+        raise ValueError(f"{name} must be <= {max_val}, got {f_val}.")
+    return f_val
+
+
+def transform_model(
+    model_i: Optional[str] = None,
+    out_o: Optional[str] = None,
+    dx_p: Optional[float] = None,
+    dy_p: Optional[float] = None,
+    dz_p: float = 0.0,
+    angle_p: float = 0.0,
+    axis_p: int = 3,
+    angle2_p: float = 0.0,
+    axis2_p: int = 0,
+    angle3_p: float = 0.0,
+    axis3_p: int = 0,
+    rotmod_p: Optional[int] = None,
+    xworld_f: Optional[str] = None,
+    yworld_f: Optional[str] = None,
+    zworld_f: Optional[str] = None,
+    is_prototype_p: Optional[bool] = None,
+    method_p: Optional[str] = None,
+    adjust_cells_p: bool = False,
+    x_orig_p: Optional[float] = None,
+    y_orig_p: Optional[float] = None,
+    z_orig_p: Optional[float] = None,
+    xinc_p: Optional[float] = None,
+    yinc_p: Optional[float] = None,
+    zinc_p: Optional[float] = None,
+    nx_p: Optional[int] = None,
+    ny_p: Optional[int] = None,
+    nz_p: Optional[int] = None,
+    cmd: Optional[Any] = None,
+    **kwargs: Any,
+) -> str:
+    '''
+    TRANSFORM_MODEL
+    ---------------
+    Translates, rotates, and recalculates block model prototypes and cell positions
+    between local mine grids and UTM coordinate reference systems using approved
+    Datamine file-based processes (COPYMOD, PROTOM, and EXTRA).
+
+    Automates coordinate origin offsets, rotation axes, and cell position recalculation
+    without requiring custom 3D matrix math or manual trigonometry in user notebooks.
+    Intermediate transformation steps use managed in-memory scratch tables, leaving no
+    temporary files on disk.
+
+    Parameters:
+    -----------
+    model_i: str
+        Input block model prototype or model file name (without .dm/.dmx extension).
+        Can also be passed as `model`, `in_i`, `modelin_i`, `proto_i`, or `prototype_i`.
+    out_o: str
+        Target output transformed block model or prototype file name.
+        Can also be passed as `out`, `modelout_o`, `proto_o`, or `prototype_o`.
+    dx_p: float
+        Translation offset along X axis (dx). Can also be passed as `dx`, `x_offset`, or `offset_x`.
+    dy_p: float
+        Translation offset along Y axis (dy). Can also be passed as `dy`, `y_offset`, or `offset_y`.
+    dz_p: float
+        Translation offset along Z axis (dz). Default: 0.0.
+        Can also be passed as `dz`, `z_offset`, or `offset_z`.
+    angle_p: float
+        Primary rotation angle clockwise in degrees (-360 to 360). Default: 0.0.
+        Can also be passed as `angle`, `angle1`, `angle1_p`, `rotation`, or `rot_angle`.
+    axis_p: int
+        Primary rotation axis (1=X, 2=Y, 3=Z, 0=None). Default: 3 (Z-axis / horizontal strike rotation).
+        Can also be passed as `axis`, `axis1`, `axis1_p`, `rotaxis`, or `rotaxis_p`.
+    angle2_p: float
+        Secondary rotation angle clockwise in degrees. Default: 0.0.
+    axis2_p: int
+        Secondary rotation axis (0, 1, 2, 3). Default: 0.
+    angle3_p: float
+        Tertiary rotation angle clockwise in degrees. Default: 0.0.
+    axis3_p: int
+        Tertiary rotation axis (0, 1, 2, 3). Default: 0.
+    rotmod_p: Optional[int]
+        Model rotation mode (0 = non-rotated, 1 = rotated). If None, automatically inferred
+        as 1 if angle_p != 0.0 or angle2_p != 0.0 or angle3_p != 0.0, else 0.
+    xworld_f, yworld_f, zworld_f: Optional[str]
+        Optional field names to store world coordinates in output rotated model.
+    is_prototype: Optional[bool]
+        Whether the input is a 0-record prototype. If None, auto-detected via header inspection.
+    method: Optional[str]
+        Transformation method: 'auto' (default), 'copymod', or 'protom'.
+    adjust_cells: bool
+        Whether to adjust cell center coordinates (XC, YC, ZC) via EXTRA. Default: False.
+    x_orig_p, y_orig_p, z_orig_p: Optional[float]
+        Explicit base model origin coordinates. If None, inspected from input table header.
+    xinc_p, yinc_p, zinc_p: Optional[float]
+        Explicit cell increments (XINC, YINC, ZINC). If None, inspected from input table header.
+    nx_p, ny_p, nz_p: Optional[int]
+        Explicit cell counts (NX, NY, NZ). If None, inspected from input table header.
+    cmd: Optional[Any]
+        Studio RM command engine instance (e.g. from dmcommands.init()).
+        If None, initializes a new command engine via dmcommands.init().
+
+    Returns:
+    --------
+    str:
+        The target output table name (out_o).
+    '''
+    if model_i is None:
+        model_i = (
+            kwargs.pop('model', None)
+            or kwargs.pop('in_i', None)
+            or kwargs.pop('modelin_i', None)
+            or kwargs.pop('proto_i', None)
+            or kwargs.pop('prototype_i', None)
+        )
+    if out_o is None:
+        out_o = (
+            kwargs.pop('out', None)
+            or kwargs.pop('modelout_o', None)
+            or kwargs.pop('proto_o', None)
+            or kwargs.pop('prototype_o', None)
+        )
+    if dx_p is None:
+        dx_p = kwargs.pop('dx', None) or kwargs.pop('x_offset', None) or kwargs.pop('offset_x', None)
+    if dy_p is None:
+        dy_p = kwargs.pop('dy', None) or kwargs.pop('y_offset', None) or kwargs.pop('offset_y', None)
+    if dz_p == 0.0:
+        dz_p = kwargs.pop('dz', None) or kwargs.pop('z_offset', None) or kwargs.pop('offset_z', dz_p)
+    if angle_p == 0.0:
+        angle_p = (
+            kwargs.pop('angle', None)
+            or kwargs.pop('angle1', None)
+            or kwargs.pop('angle1_p', None)
+            or kwargs.pop('rotation', None)
+            or kwargs.pop('rot_angle', angle_p)
+        )
+    if axis_p == 3:
+        axis_p = (
+            kwargs.pop('axis', None)
+            or kwargs.pop('axis1', None)
+            or kwargs.pop('axis1_p', None)
+            or kwargs.pop('rotaxis', None)
+            or kwargs.pop('rotaxis_p', axis_p)
+        )
+
+    if is_prototype_p is None:
+        is_prototype_p = kwargs.pop('is_prototype', None)
+    if method_p is None:
+        method_p = kwargs.pop('method', None)
+    if not adjust_cells_p:
+        adjust_cells_p = bool(kwargs.pop('adjust_cells', adjust_cells_p))
+
+    if kwargs:
+        raise TypeError(f"transform_model() got unexpected keyword argument(s): {', '.join(kwargs.keys())}")
+
+    # Validate table names
+    if model_i is None or not isinstance(model_i, str):
+        raise ValueError(
+            f"model_i is required and must be a non-empty string, got {type(model_i).__name__ if model_i is not None else 'None'}."
+        )
+    clean_model = model_i.strip()
+    if not clean_model:
+        raise ValueError("model_i cannot be empty or whitespace.")
+    if '\\' in clean_model:
+        raise ValueError(
+            f"model_i '{clean_model}' contains Windows backslashes. "
+            "Datamine command parser breaks on backslashes. Register files with ActiveProject.AddFile() and use logical names."
+        )
+    if ' ' in clean_model:
+        raise ValueError(
+            f"model_i '{clean_model}' contains spaces. "
+            "Spaces break the Datamine command parser. Register files with ActiveProject.AddFile() and use logical names without spaces."
+        )
+
+    if out_o is None or not isinstance(out_o, str):
+        raise ValueError(
+            f"out_o is required and must be a non-empty string, got {type(out_o).__name__ if out_o is not None else 'None'}."
+        )
+    clean_out = out_o.strip()
+    if not clean_out:
+        raise ValueError("out_o cannot be empty or whitespace.")
+    if '\\' in clean_out:
+        raise ValueError(
+            f"out_o '{clean_out}' contains Windows backslashes. "
+            "Datamine command parser breaks on backslashes. Use a logical name residing in the active project."
+        )
+    if ' ' in clean_out:
+        raise ValueError(
+            f"out_o '{clean_out}' contains spaces. "
+            "Spaces break the Datamine command parser. Use a logical name without spaces."
+        )
+
+    # Validate numeric parameters
+    clean_dx = _validate_numeric_param(dx_p, 'dx_p')
+    clean_dy = _validate_numeric_param(dy_p, 'dy_p')
+    clean_dz = _validate_numeric_param(dz_p, 'dz_p')
+
+    clean_angle1 = _validate_numeric_param(angle_p, 'angle_p', min_val=-360.0, max_val=360.0)
+    clean_angle2 = _validate_numeric_param(angle2_p, 'angle2_p', min_val=-360.0, max_val=360.0)
+    clean_angle3 = _validate_numeric_param(angle3_p, 'angle3_p', min_val=-360.0, max_val=360.0)
+
+    for ax_val, ax_name in [(axis_p, 'axis_p'), (axis2_p, 'axis2_p'), (axis3_p, 'axis3_p')]:
+        if isinstance(ax_val, bool) or not isinstance(ax_val, int):
+            raise ValueError(f"{ax_name} must be an integer in {{0, 1, 2, 3}}, got {type(ax_val).__name__}.")
+        if ax_val not in (0, 1, 2, 3):
+            raise ValueError(f"{ax_name} must be in {{0, 1, 2, 3}}, got {ax_val}.")
+
+    # Determine base origin, cell sizes, and counts
+    x_orig = x_orig_p
+    y_orig = y_orig_p
+    z_orig = z_orig_p
+    xinc = xinc_p
+    yinc = yinc_p
+    zinc = zinc_p
+    nx = nx_p
+    ny = ny_p
+    nz = nz_p
+    auto_proto = is_prototype_p
+
+    # Inspect input table header if any parameter is missing
+    if any(v is None for v in [x_orig, y_orig, z_orig, xinc, yinc, zinc, nx, ny, nz]):
+        try:
+            hdr = None
+            candidate_paths = [clean_model, f"{clean_model}.dmx", f"{clean_model}.dm"]
+            # Also check within active project directory if COM session is available
+            try:
+                if cmd is not None and getattr(cmd, 'oScript', None):
+                    studio_app = cmd.oScript
+                    if getattr(studio_app, 'ActiveProject', None):
+                        proj_folder = getattr(studio_app.ActiveProject, 'Folder', None) or getattr(
+                            studio_app.ActiveProject, 'Directory', None
+                        )
+                        if proj_folder:
+                            candidate_paths.extend([
+                                os.path.join(proj_folder, clean_model),
+                                os.path.join(proj_folder, f"{clean_model}.dmx"),
+                                os.path.join(proj_folder, f"{clean_model}.dm"),
+                            ])
+            except Exception as e:
+                pass
+
+            for cand in candidate_paths:
+                if os.path.exists(cand):
+                    try:
+                        hdr = read_datamine_header(cand)
+                        break
+                    except Exception as e:
+                        pass
+
+            if hdr:
+                if auto_proto is None and hdr.get('record_count', 0) == 0:
+                    auto_proto = True
+                if 'attributes' in hdr:
+                    attrs = hdr['attributes']
+                    if x_orig is None:
+                        x_orig = float(attrs.get('XMORIG', attrs.get('X0', 0.0)))
+                    if y_orig is None:
+                        y_orig = float(attrs.get('YMORIG', attrs.get('Y0', 0.0)))
+                    if z_orig is None:
+                        z_orig = float(attrs.get('ZMORIG', attrs.get('Z0', 0.0)))
+                    if xinc is None:
+                        xinc = float(attrs.get('XINC', 10.0))
+                    if yinc is None:
+                        yinc = float(attrs.get('YINC', 10.0))
+                    if zinc is None:
+                        zinc = float(attrs.get('ZINC', 10.0))
+                    if nx is None:
+                        nx = int(attrs.get('NX', 10))
+                    if ny is None:
+                        ny = int(attrs.get('NY', 10))
+                    if nz is None:
+                        nz = int(attrs.get('NZ', 10))
+        except Exception as e:
+            pass
+
+    # Defaults for unassigned origin/increments
+    x_orig = 0.0 if x_orig is None else float(x_orig)
+    y_orig = 0.0 if y_orig is None else float(y_orig)
+    z_orig = 0.0 if z_orig is None else float(z_orig)
+    xinc = 10.0 if xinc is None else float(xinc)
+    yinc = 10.0 if yinc is None else float(yinc)
+    zinc = 10.0 if zinc is None else float(zinc)
+    nx = 10 if nx is None else int(nx)
+    ny = 10 if ny is None else int(ny)
+    nz = 10 if nz is None else int(nz)
+
+    # Calculate transformed origin
+    new_x = x_orig + clean_dx
+    new_y = y_orig + clean_dy
+    new_z = z_orig + clean_dz
+
+    # Determine rotation mode
+    is_rotated = (clean_angle1 != 0.0 or clean_angle2 != 0.0 or clean_angle3 != 0.0 or rotmod_p == 1)
+    clean_rotmod = 1 if is_rotated else 0
+    if rotmod_p is not None:
+        clean_rotmod = int(rotmod_p)
+
+    if cmd is None:
+        cmd = dmcommands.init()
+
+    with scratch_context(cmd=cmd, auto_cleanup=True) as sc:
+        # Prototype definition workflow (PROTOM)
+        if auto_proto or method_p == 'protom':
+            sc_proto = sc.temp(suffix='proto')
+            if clean_rotmod == 0:
+                protom_args = (
+                    f" 'N' 'Y' '{new_x}' '{new_y}' '{new_z}' '{xinc}' '{yinc}' '{zinc}' '{nx}' '{ny}' '{nz}'"
+                )
+            else:
+                protom_args = (
+                    f" 'N' 'Y' '{new_x}' '{new_y}' '{new_z}' '0' '0' '0' "
+                    f"'{clean_angle1}' '{axis_p}' '{clean_angle2}' '{axis2_p}' '{clean_angle3}' '{axis3_p}' "
+                    f"'{xinc}' '{yinc}' '{zinc}' '{nx}' '{ny}' '{nz}'"
+                )
+
+            with dialog_dismiss_context():
+                if hasattr(cmd, 'protom'):
+                    cmd.protom(out_o=sc_proto, rotmod_p=clean_rotmod, arguments=protom_args)
+                else:
+                    dmfiles.init().protom(out_o=sc_proto, rotmod_p=clean_rotmod, arguments=protom_args)
+
+            cmd.copy(in_i=sc_proto, out_o=clean_out)
+            return clean_out
+
+        # Direct EXTRA cell translation workflow
+        if method_p == 'extra':
+            sc_extra = sc.temp(suffix='extra')
+            extra_args = f" 'XC = XC + {clean_dx}' 'YC = YC + {clean_dy}' 'ZC = ZC + {clean_dz}' 'GO' "
+            cmd.extra(in_i=clean_model, out_o=sc_extra, arguments=extra_args)
+            cmd.copy(in_i=sc_extra, out_o=clean_out)
+            return clean_out
+
+        # Block model transformation workflow (COPYMOD)
+        modtype = kwargs.pop('modtype_p', None) or kwargs.pop('modtype', None)
+        if modtype is None:
+            modtype = 2 if clean_rotmod == 1 else 1
+        else:
+            modtype = int(modtype)
+
+        cm_tokens = [
+            f"@xneworig={new_x}",
+            f"@yneworig={new_y}",
+            f"@zneworig={new_z}",
+        ]
+        if clean_rotmod == 1 or modtype in (2, 4):
+            cm_tokens.append(f"@angle1={clean_angle1}")
+            cm_tokens.append(f"@axis1={axis_p}")
+            if clean_angle2 != 0.0:
+                cm_tokens.append(f"@angle2={clean_angle2}")
+                cm_tokens.append(f"@axis2={axis2_p}")
+            if clean_angle3 != 0.0:
+                cm_tokens.append(f"@angle3={clean_angle3}")
+                cm_tokens.append(f"@axis3={axis3_p}")
+
+        cm_args = " " + " ".join(cm_tokens)
+
+        sc_trans = sc.temp(suffix='copymod')
+        cmd.copymod(
+            modelin_i=clean_model,
+            modelout_o=sc_trans,
+            xworld_f=xworld_f if xworld_f is not None else 'optional',
+            yworld_f=yworld_f if yworld_f is not None else 'optional',
+            zworld_f=zworld_f if zworld_f is not None else 'optional',
+            modtype_p=modtype,
+            arguments=cm_args,
+        )
+
+        curr = sc_trans
+
+        # If adjust_cells is requested, chain EXTRA to update cell coordinates
+        if adjust_cells_p:
+            sc_extra = sc.temp(suffix='extra')
+            extra_args = f" 'XC = XC + {clean_dx}' 'YC = YC + {clean_dy}' 'ZC = ZC + {clean_dz}' 'GO' "
+            cmd.extra(in_i=curr, out_o=sc_extra, arguments=extra_args)
+            curr = sc_extra
+
+        cmd.copy(in_i=curr, out_o=clean_out)
+        return clean_out
+
+
+# Backward compatibility and semantic aliases
+transform_block_model = transform_model
+coordinate_transform = transform_model
 

@@ -29,6 +29,9 @@ try:
         scratch_context,
         ScratchManager,
         batch_append,
+        transform_model,
+        transform_block_model,
+        coordinate_transform,
     )
     from dmstudio.agent import (
         read_datamine_header as agent_read_header,
@@ -38,6 +41,9 @@ try:
         scratch_context as agent_scratch_context,
         ScratchManager as AgentScratchManager,
         batch_append as agent_batch_append,
+        transform_model as agent_transform_model,
+        transform_block_model as agent_transform_block_model,
+        coordinate_transform as agent_coordinate_transform,
     )
     print(f"  dmstudio version: {version.__version__}")
     print("  All imports OK")

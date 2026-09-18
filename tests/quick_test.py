@@ -51,20 +51,20 @@ try:
     )
     assert read_datamine is agent_read_datamine
     assert to_datamine is agent_to_datamine
-    assert not hasattr(initialize, 'dmFile'), "initialize.dmFile should be removed"
+    assert not hasattr(initialize, 'dmFile'), 'initialize.dmFile should be removed'
 
     import dmstudio
-    assert hasattr(dmstudio, '__all__'), "dmstudio.__all__ must be declared"
-    assert isinstance(dmstudio.__all__, (list, tuple)), "dmstudio.__all__ must be a list or tuple"
+    assert hasattr(dmstudio, '__all__'), 'dmstudio.__all__ must be declared'
+    assert isinstance(dmstudio.__all__, (list, tuple)), 'dmstudio.__all__ must be a list or tuple'
     for expected in (
         'read_datamine', 'to_datamine', 'read_datamine_header', 'read_datamine_summary',
         'read_dm_header', 'read_dm_summary', 'resolve_table_path', 'patch_dataframe',
         'scratch_context', 'ScratchManager', 'batch_append', 'transform_model',
         'dmcommands', 'dmfiles', 'initialize', 'dm_io', 'command_registry',
     ):
-        assert expected in dmstudio.__all__, f"{expected} must be in dmstudio.__all__"
+        assert expected in dmstudio.__all__, f'{expected} must be in dmstudio.__all__'
     for name in dmstudio.__all__:
-        assert hasattr(dmstudio, name), f"Missing attribute {name} declared in __all__"
+        assert hasattr(dmstudio, name), f'Missing attribute {name} declared in __all__'
 
     print(f"  dmstudio version: {version.__version__}")
     print("  All imports OK")

@@ -40,7 +40,7 @@ User-facing install and quick start: **[README.md](README.md)**. Domain vocabula
 ```
 dmstudio-rm/                      ← Project root
 ├── dmstudio/                     ← Python package source
-│   ├── __init__.py               ← Exports submodules; download_tutorials shortcut
+│   ├── __init__.py               ← Canonical package root exports and __all__
 │   ├── version.py                ← Version string ('2.0.0b4')
 │   ├── initialize.py             ← COM init; StudioRM3.x dynamic resolution
 │   ├── dmcommands.py             ← ~268 process command wrappers

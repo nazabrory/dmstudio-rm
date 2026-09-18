@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.0b14 - 2026-09-18
+
+- **Pre-Flight Command Validator**: Introduced `dmstudio.validator` (`validate_command`, `lint_command`) for pre-flight syntax and schema validation before passing commands to COM `Parsecommand()`.
+- **Lightweight Table Inspection**: Added `read_dm_header`, `read_dm_summary`, `read_datamine_header`, and `read_datamine_summary` to inspect binary Datamine tables, schemas, and 0-record prototypes without reading entire records into memory.
+- **Centralized Table Path Resolution**: Added `resolve_table_path` seam to automatically map relative and logical Datamine table names to the active Studio RM project directory.
+- **Managed Scratch Context**: Added `scratch_context` and `ScratchManager` to manage in-memory scratch tables and prevent memory leaks and dangling temporary tables.
+- **Multi-Table Batch Append**: Added `batch_append` superprocess to reliably append multiple tables in sequence with automatic schema verification and error recovery.
+- **Block Model Coordinate Transformation**: Added `transform_model`, `transform_block_model`, and `coordinate_transform` superprocesses for coordinate frame translation and rotation.
+- **Surface Unification**: Unified package root public exports under `dmstudio` with comprehensive `__all__` declarations and maintained backward-compatibility aliases in `dmstudio.agent`.
+
 ## 2.0.0b13 - 2026-09-16
 
 - **Dual-Mode Parameter Resolution**: Added dual-mode parameter resolution across all sequential command wrappers. Commands with sequential CLI parameters (e.g. `fields_f`, `keys_f`, `inmods_i`, `samples_i`) now support both canonical list arguments and legacy individual keyword arguments (`f1_f`, `f2_f`, `key1_f`, etc.) via dynamic `**kwargs` resolution.

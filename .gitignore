@@ -127,10 +127,11 @@ datamine_help/
 /Database/
 
 # ---------------------------------------------------------------------------
-# Allow committing tutorial database files
+# Allow committing tutorial database files (excluding runtime .dm conversions)
 # ---------------------------------------------------------------------------
 !/tutorials/Database/
 !/tutorials/Database/**
+tutorials/Database/**/*.dm
 
 # ---------------------------------------------------------------------------
 # dmstudio — temporary test notebook outputs
@@ -168,13 +169,15 @@ celerybeat-schedule
 
 # Allow committing tutorial/case-study files
 !/tutorials/**/*.rmproj
-!/tutorials/**/*.dm
 !/tutorials/**/*.dmx
 !/tutorials/**/*.dat
 
 # Exclude local developer scratchpads and session files
 promptlist
 **/dmstusub.dat
+scratch/
+test_hybrid_workflow.ipynb
+demo.png
 
 # ---------------------------------------------------------------------------
 # dmstudio — Test runner sandbox & results

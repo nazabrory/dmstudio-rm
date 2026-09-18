@@ -170,6 +170,45 @@ except Exception as e:
     import traceback; traceback.print_exc()
 
 # ---------------------------------------------------------------------------
+# Test 6: Package Root Surface Unification & Canonical Exports
+# ---------------------------------------------------------------------------
+print('\n[6] Package Root Surface Unification & Canonical Exports...')
+try:
+    import dmstudio
+    from dmstudio import read_datamine, to_datamine
+    from dmstudio.agent import read_datamine as agent_read_datamine, to_datamine as agent_to_datamine
+
+    assert callable(read_datamine), "read_datamine must be callable"
+    assert callable(to_datamine), "to_datamine must be callable"
+    assert read_datamine is agent_read_datamine, "agent.read_datamine must match canonical read_datamine"
+    assert to_datamine is agent_to_datamine, "agent.to_datamine must match canonical to_datamine"
+
+    assert hasattr(dmstudio, '__all__'), "dmstudio.__all__ must be defined"
+    assert isinstance(dmstudio.__all__, (list, tuple)), "dmstudio.__all__ must be list or tuple"
+
+    canonical_check = [
+        'read_datamine', 'to_datamine', 'read_datamine_header', 'read_datamine_summary',
+        'read_dm_header', 'read_dm_summary', 'resolve_table_path', 'patch_dataframe',
+        'scratch_context', 'ScratchManager', 'batch_append', 'transform_model',
+        'dmcommands', 'dmfiles', 'initialize', 'dm_io', 'command_registry',
+    ]
+    for sym in canonical_check:
+        assert sym in dmstudio.__all__, f"{sym} missing from dmstudio.__all__"
+
+    for member in dmstudio.__all__:
+        assert hasattr(dmstudio, member), f"Attribute {member} declared in __all__ not found on dmstudio"
+
+    assert not hasattr(dmstudio.initialize, 'dmFile'), "initialize.dmFile should be removed"
+
+    print('  OK - read_datamine and to_datamine imported successfully from package root')
+    print(f'  OK - __all__ verified with {len(dmstudio.__all__)} canonical public symbols')
+    print('  OK - initialize.dmFile removed and agent compat layer intact')
+except Exception as e:
+    print('  FAIL:', e)
+    import traceback; traceback.print_exc()
+    sys.exit(1)
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 print('\n' + '=' * 60)

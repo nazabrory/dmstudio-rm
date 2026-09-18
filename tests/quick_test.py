@@ -22,6 +22,8 @@ try:
     from dmstudio import dmcommands, dmfiles, initialize, special
     from dmstudio import version
     from dmstudio import (
+        read_datamine,
+        to_datamine,
         read_datamine_header,
         read_datamine_summary,
         read_dm_header,
@@ -34,6 +36,8 @@ try:
         coordinate_transform,
     )
     from dmstudio.agent import (
+        read_datamine as agent_read_datamine,
+        to_datamine as agent_to_datamine,
         read_datamine_header as agent_read_header,
         read_datamine_summary as agent_read_summary,
         read_dm_header as agent_read_dm_header,
@@ -45,6 +49,23 @@ try:
         transform_block_model as agent_transform_block_model,
         coordinate_transform as agent_coordinate_transform,
     )
+    assert read_datamine is agent_read_datamine
+    assert to_datamine is agent_to_datamine
+    assert not hasattr(initialize, 'dmFile'), "initialize.dmFile should be removed"
+
+    import dmstudio
+    assert hasattr(dmstudio, '__all__'), "dmstudio.__all__ must be declared"
+    assert isinstance(dmstudio.__all__, (list, tuple)), "dmstudio.__all__ must be a list or tuple"
+    for expected in (
+        'read_datamine', 'to_datamine', 'read_datamine_header', 'read_datamine_summary',
+        'read_dm_header', 'read_dm_summary', 'resolve_table_path', 'patch_dataframe',
+        'scratch_context', 'ScratchManager', 'batch_append', 'transform_model',
+        'dmcommands', 'dmfiles', 'initialize', 'dm_io', 'command_registry',
+    ):
+        assert expected in dmstudio.__all__, f"{expected} must be in dmstudio.__all__"
+    for name in dmstudio.__all__:
+        assert hasattr(dmstudio, name), f"Missing attribute {name} declared in __all__"
+
     print(f"  dmstudio version: {version.__version__}")
     print("  All imports OK")
 except Exception as e:

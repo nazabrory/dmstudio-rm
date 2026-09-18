@@ -97,11 +97,6 @@ class StudioCOMWrapper(object):
     def __setattr__(self, name, value):
         setattr(self._obj, name, value)
 
-def dmFile():
-
-    print("here")
-    # assert oDmFile = _scriptinit("DmFile.DmTableADO"), "Could not initialize dmTableADO"
-
 
 def _make_dmdir():
     

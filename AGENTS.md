@@ -106,7 +106,7 @@ To maintain codebase simplicity and a clean experience for the user:
 |--------|------|---------|
 | `dmcommands` | Process command wrappers | `dmcommands.init()` |
 | `dmfiles` | File-generation wrappers | `dmfiles.init()` |
-| `initialize` | COM / Studio / DmFile bootstrap | `studio()`, `dmFile()` |
+| `initialize` | COM / Studio bootstrap | `studio()` |
 | `command_registry` | Discovery without side effects of full agent import | `list_commands()`, `get_command_schema()`, `search_commands()` |
 | `dm_io` | Binary table I/O via `DmFile.DmTableADO` | `read_datamine()`, `read_datamine_header()`, `read_datamine_summary()`, `to_datamine()`, `patch_dataframe()` |
 | `dialog` | Opt-in modal dismissal | `dialog_dismiss_context()` |

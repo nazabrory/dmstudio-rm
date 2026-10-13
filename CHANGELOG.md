@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.0b15 - 2026-10-13
+
+- **Sequential Keys & Singular Alias Resolution**: Added `keys_f` support and sequential resolution (up to 30 keys) to `JOIN` wrapper, and enabled intuitive singular aliases (`key_f`) across sequential key commands.
+- **Generator Range Pattern Parsing**: Updated wrapper generator in `tests/generate_wrappers.py` to recognize `to` range syntax (e.g. `KEY1 to 30`) and preserve validator pre-flight checks.
+- **Defensive Sandbox File Copying**: Added `_safe_copy` in `dmstudio.sandbox` to gracefully handle `WinError 32 PermissionError` file locks when datasets or notebook assets are already open in active Studio RM COM sessions.
+- **Alphabetical Test Queue Filtering**: Added `--start` and `--end` alphabetical range filtering support in `run_tests.ipynb` to facilitate partitioned batch verification.
+
 ## 2.0.0b14 - 2026-09-18
 
 - **Pre-Flight Command Validator**: Introduced `dmstudio.validator` (`validate_command`, `lint_command`) for pre-flight syntax and schema validation before passing commands to COM `Parsecommand()`.

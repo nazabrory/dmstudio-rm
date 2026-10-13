@@ -41,6 +41,23 @@ def _find_tutorials_parent(start_dir):
     return None
 
 
+def _safe_copy(src, dst, label):
+    '''
+    Safely copy src to dst. If dst already exists and is locked by a running
+    Studio RM COM process, log a notice and continue rather than crashing
+    with WinError 32 PermissionError.
+    '''
+    try:
+        shutil.copy2(src, dst)
+        return True
+    except (PermissionError, OSError) as e:
+        is_locked = getattr(e, 'winerror', None) == 32 or isinstance(e, PermissionError)
+        if is_locked and os.path.exists(dst) and os.path.getsize(dst) > 0:
+            print('Notice: {} already exists and is locked by active session; using existing file.'.format(label))
+            return False
+        raise
+
+
 def copy_database_files(files_to_copy, target_dir=None):
     '''
     copy_database_files
@@ -84,8 +101,8 @@ def copy_database_files(files_to_copy, target_dir=None):
                 dst_name = src_name
         dst = os.path.join(target_dir, dst_name)
         if os.path.exists(src):
-            shutil.copy2(src, dst)
-            print('Initialized database dataset: {}'.format(dst_name))
+            if _safe_copy(src, dst, dst_name):
+                print('Initialized database dataset: {}'.format(dst_name))
         else:
             print('Warning: Source {} not found in database at {}.'.format(src_name, help_db))
 
@@ -186,8 +203,8 @@ def initialize_sandbox(notebook_folder=None, files_to_copy=None):
             src_file = os.path.join(notebook_folder, filename)
             if os.path.isfile(src_file):
                 dst_file = os.path.join(active_folder, filename)
-                shutil.copy2(src_file, dst_file)
-                print('Copied local notebook asset: {}'.format(filename))
+                if _safe_copy(src_file, dst_file, filename):
+                    print('Copied local notebook asset: {}'.format(filename))
 
     # 8. Copy database files if requested
     if files_to_copy:

@@ -54,9 +54,11 @@ class init(object):
             If True, raises ValueError on syntax errors or unsafe patterns.
             If None (default), uses the instance's self.strict setting.
         '''
+
         if strict is None:
             strict = getattr(self, 'strict', False)
         validator.validate_command(command, strict=strict)
+
         self.oScript.Parsecommand(command)
 
         # update the dmdir.py file containing list of .dm files in current directory
@@ -104,11 +106,14 @@ class init(object):
     def _resolve_sequential_param(self, list_name, prefix, list_val, max_fields, suffix, kwargs):
         '''
         Resolves a sequential parameter by checking both the canonical list value
-        and any individual keyword arguments passed in kwargs (e.g. f1_f, f2_f or key1_f, key2_f).
+        and any individual keyword arguments passed in kwargs (e.g. f1_f, f2_f or key1_f, key2_f),
+        as well as singular aliases (e.g. key_f).
         Enforces strict contiguous index ordering (no gaps) and prevents passing both.
         '''
         pat = re.compile(rf'^{prefix}(\d+)(?:_{suffix})?$', re.IGNORECASE)
+        pat_singular = re.compile(rf'^{prefix}(?:_{suffix})?$', re.IGNORECASE)
         numbered = {}
+        singular = {}
         keys_to_remove = []
         for k, v in kwargs.items():
             m = pat.match(k)
@@ -118,9 +123,28 @@ class init(object):
                     raise ValueError(f"Duplicate sequential argument provided for '{prefix}{idx}'.")
                 numbered[idx] = v
                 keys_to_remove.append(k)
+            elif pat_singular.match(k):
+                singular[k] = v
+                keys_to_remove.append(k)
 
         for k in keys_to_remove:
             del kwargs[k]
+
+        if singular:
+            if len(singular) > 1:
+                raise ValueError(f"Duplicate singular alias arguments provided for '{prefix}': {list(singular.keys())}")
+            singular_k, singular_v = next(iter(singular.items()))
+            if list_val != ['optional']:
+                raise ValueError(f"Cannot specify both canonical list '{list_name}' and singular alias '{singular_k}'.")
+            if numbered:
+                raise ValueError(f"Cannot specify both individual keyword arguments and singular alias '{singular_k}' for '{prefix}'.")
+            if singular_v == "optional" or singular_v is None:
+                return ['optional']
+            if isinstance(singular_v, (list, tuple)):
+                if len(singular_v) > max_fields:
+                    raise ValueError(f"Maximum allowed fields for '{prefix}' is {max_fields}, but {len(singular_v)} were provided.")
+                return list(singular_v)
+            return [str(singular_v)]
 
         if numbered:
             if list_val != ['optional']:
@@ -21614,6 +21638,7 @@ Note: Scaling is fully automatic in this process.
     def join(self,
                 inmods_i=['optional'],
                 out_o="required",
+                keys_f=['optional'],
                 subsetr_p=0,
                 subsetf_p=0,
                 cartjoin_p=0,
@@ -21666,6 +21691,11 @@ Both input files must be sorted in the order of the key fields before they can b
         Fields:
         -------
 
+        keys: Undefined : Undefined
+            Keyfields for matching. Up to 30 keyfields can be specified.
+            Default=Undefined
+            Required=No
+
         Parameters:
         -----------
 
@@ -21717,6 +21747,7 @@ Both input files must be sorted in the order of the key fields before they can b
 
         """
         inmods_i = self._resolve_sequential_param("inmods_i", "in", inmods_i, 2, "i", kwargs)
+        keys_f = self._resolve_sequential_param("keys_f", "key", keys_f, 30, "f", kwargs)
         if kwargs:
             raise TypeError(f"join() got an unexpected keyword argument '{next(iter(kwargs))}'")
 
@@ -21730,6 +21761,9 @@ Both input files must be sorted in the order of the key fields before they can b
 
         if inmods_i and inmods_i[0] != "optional":
             command += self.parse_infields_list("in", inmods_i, 2, "&")
+
+        if keys_f and keys_f[0] != "optional":
+            command += self.parse_infields_list("key", keys_f, 30, "*")
 
         if subsetr_p != "optional":
             try:
@@ -23392,10 +23426,12 @@ The main output from MIKEST is the grade above a cutoff of zero, i.e. the indica
     def mikscell(self,
                 modelin_i="required",
                 modelout_o="required",
+                fields_f=['optional'],
                 minvol_p=0,
                 tolernce_p=0.0001,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -23434,6 +23470,11 @@ The output model includes field **INTERVAL**. This is set to 1 for the subcell t
         Fields:
         -------
 
+        fields: Undefined : Undefined
+            Grade fields in input model. Will be copied to the output model.
+            Default=Undefined
+            Required=No
+
         Parameters:
         -----------
 
@@ -23459,6 +23500,10 @@ The output model includes field **INTERVAL**. This is set to 1 for the subcell t
         import warnings
         warnings.warn("`mikscell` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        fields_f = self._resolve_sequential_param("fields_f", "f", fields_f, 10, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"mikscell() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "mikscell "
 
         if modelin_i == "required":
@@ -23472,6 +23517,9 @@ The output model includes field **INTERVAL**. This is set to 1 for the subcell t
 
         if modelout_o != "optional":
             command += " &modelout=" + modelout_o
+
+        if fields_f and fields_f[0] != "optional":
+            command += self.parse_infields_list("f", fields_f, 10, "*")
 
         if minvol_p != "optional":
             command += " @minvol=" + str(minvol_p)
@@ -26288,6 +26336,8 @@ Otherwise, the model is read once for each set of perimeters (multiple passes). 
                 fullmod_o="optional",
                 zone_f="optional",
                 mined_f="optional",
+                addfs_f=['optional'],
+                avgfs_f=['optional'],
                 density_f="optional",
                 modltype_p="required",
                 zone_p=0,
@@ -26303,7 +26353,8 @@ Otherwise, the model is read once for each set of perimeters (multiple passes). 
                 usezone_p="optional",
                 tolernce_p=0.001,
                 arguments="optional",
-                retrieval="optional"):
+                retrieval="optional",
+                **kwargs):
 
         r"""
         .. warning::
@@ -26366,6 +26417,16 @@ If both the input model file and the input wireframe triangle file include field
             Optional field to be added to the output full model. Cells constrained by the
             wireframes will have a value of 1, cells outside or not constrained by the wireframes
             will have a value of zero
+            Default=Undefined
+            Required=No
+
+        addfs: Undefined : Undefined
+            Field(s) to be treated as additive(s) e.g. cost and revenue values.
+            Default=Undefined
+            Required=No
+
+        avgfs: Undefined : Undefined
+            **MODSPLIT** has the option to adjust the grades in the output model cells to be the average grade within each wireframe zone. To output average grades the fields * **AVGF1** to * **AVGF9** can be specified. The calculation of average grades within cells that are not constrained by the wireframes is controlled by the @**DEFGRADE** parameter.
             Default=Undefined
             Required=No
 
@@ -26492,6 +26553,11 @@ If both the input model file and the input wireframe triangle file include field
         import warnings
         warnings.warn("`modsplit` is an experimental, unverified command wrapper.", category=UserWarning, stacklevel=2)
 
+        addfs_f = self._resolve_sequential_param("addfs_f", "addf", addfs_f, 9, "f", kwargs)
+        avgfs_f = self._resolve_sequential_param("avgfs_f", "avgf", avgfs_f, 9, "f", kwargs)
+        if kwargs:
+            raise TypeError(f"modsplit() got an unexpected keyword argument '{next(iter(kwargs))}'")
+
         command = "modsplit "
 
         if modelin_i == "required":
@@ -26526,6 +26592,12 @@ If both the input model file and the input wireframe triangle file include field
 
         if density_f != "optional":
             command += " *density=" + density_f
+
+        if addfs_f and addfs_f[0] != "optional":
+            command += self.parse_infields_list("addf", addfs_f, 9, "*")
+
+        if avgfs_f and avgfs_f[0] != "optional":
+            command += self.parse_infields_list("avgf", avgfs_f, 9, "*")
 
         if modltype_p == "required":
             raise ValueError("modltype_p is required.")

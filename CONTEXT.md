@@ -55,7 +55,7 @@ The primary Python parameter representing a sequential CLI sequence as a list of
 _Avoid_: multi-field string
 
 **Dual-mode parameter resolution**:
-The adapter layer in command wrappers allowing callers to provide either the canonical list parameter or individual numbered keyword arguments (`f1_f`, `f2_f`, `key1_f`, etc.), automatically packing them into sequential order without gaps.
+The adapter layer in command wrappers allowing callers to provide either the canonical list parameter, individual numbered keyword arguments (`f1_f`, `f2_f`, `key1_f`, etc.), or intuitive singular aliases (`key_f`), automatically packing them into sequential order without gaps.
 _Avoid_: raw kwargs passthrough
 
 

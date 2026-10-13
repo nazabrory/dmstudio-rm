@@ -11,6 +11,9 @@ def is_valid_name(name):
     name = name.strip()
     if not name:
         return False
+    # Check for range pattern like KEY1 to 30, F1 to F10, etc.
+    if re.match(r'^[A-Z][A-Za-z0-9_]*\d+\s+(?:to|-)\s+(?:[A-Z][A-Za-z0-9_]*)?\d+$', name, re.IGNORECASE):
+        return True
     # Must start with an uppercase letter, and contain only uppercase, digits, hyphens, underscores, parentheses, or spaces
     return bool(re.match(r'^[A-Z][A-Z0-9_\-\(\)\s]*$', name))
 
@@ -30,15 +33,15 @@ def expand_wildcard_names(items):
     expanded = []
     for item in items:
         name = item.get('name', '').strip()
-        # Matches e.g. IN3 - 20, F3 - 10, F2-F25, F1 - F20, F2-F30
-        m = re.match(r'^([A-Za-z_]+)(\d+)\s*-\s*(?:[A-Za-z_]+)?(\d+)$', name)
+        # Matches e.g. IN3 - 20, F3 - 10, F2-F25, F1 - F20, F2-F30, KEY1 to 30, F1 to F10
+        m = re.match(r'^([A-Za-z_]+)(\d+)\s*(?:-|\bto\b)\s*(?:[A-Za-z_]+)?(\d+)$', name, re.IGNORECASE)
         if m:
             prefix, start_num, end_num = m.groups()
             start = int(start_num)
             end = int(end_num)
             for k in range(start, end + 1):
                 new_item = item.copy()
-                new_item['name'] = f"{prefix}{k}"
+                new_item['name'] = f"{prefix.upper()}{k}"
                 expanded.append(new_item)
         else:
             expanded.append(item)
@@ -850,50 +853,11 @@ EXCLUDED_COMMANDS = {
     'EXTNDF'
 }
 
-commands_funcs = []
-files_funcs = []
-
-for filepath in files:
-    info = parse_markdown_file(filepath)
-    if not info:
-        continue
-        
-    if info['name'].upper() in EXCLUDED_COMMANDS:
-        continue
-    
-    has_inputs = len(info['input_files']) > 0
-    
-    if info['name'].upper() == 'BACKTR':
-        for f in info['input_files']:
-            if f['name'].upper() == 'IN1':
-                f['name'] = 'IN'
-    elif info['name'].upper() == 'CHECKIT':
-        info['output_files'].append({
-            'name': 'OUT',
-            'description': 'Output string file.',
-            'required': 'Yes',
-            'type': 'String File',
-            'default': 'required'
-        })
-        
-    name_lower = info['name'].lower()
-    is_verified = name_lower in VERIFIED_COMMANDS
-    func_code = generate_python_function(info, is_verified=is_verified)
-    
-    if has_inputs:
-        commands_funcs.append((info['name'], func_code))
-    else:
-        files_funcs.append((info['name'], func_code))
-
-# Sort alphabetically by process name
-commands_funcs.sort(key=lambda x: x[0])
-files_funcs.sort(key=lambda x: x[0])
-
-
 # Boilerplate templates
 commands_boilerplate = """import re
 
 import dmstudio.initialize
+from dmstudio import validator
 
 
 # constant to avoid redundant COM connections which slows down processing
@@ -901,7 +865,7 @@ OSCRIPTCON = None
 
 class init(object):
 
-    def __init__(self, version=None):
+    def __init__(self, version=None, strict=False):
 
         '''
         commands.__init__
@@ -917,27 +881,39 @@ class init(object):
         version: str
             optional datamine studio versions ('Studio3', 'StudioRM', 'StudioRM3.1', 'StudioRM3.2', 'StudioEM') If no version given, the initializtion
             will try different versions starting with StudioRM then Studio3 and finally StudioEM.
+        strict: bool, optional
+            If True, enables strict command validation raising ValueError on syntax errors or unsafe patterns.
+            Default is False (emits warnings).
 
         '''
         self.oScript = OSCRIPTCON
         self.version = version
+        self.strict = strict
         if self.oScript is None:
             self.oScript = dmstudio.initialize.studio(self.version)
 
-    def run_command(self, command):
+    def run_command(self, command, strict=None):
 
         '''
         run_command
         -----------
 
-        Uses the studio Parsecommand method to execute a datamine script.
+        Uses the studio Parsecommand method to execute a datamine script with
+        pre-flight command validation.
 
         Parameters:
         -----------
 
         command: str
             Datamine command string to be parsed
+        strict: bool, optional
+            If True, raises ValueError on syntax errors or unsafe patterns.
+            If None (default), uses the instance's self.strict setting.
         '''
+
+        if strict is None:
+            strict = getattr(self, 'strict', False)
+        validator.validate_command(command, strict=strict)
 
         self.oScript.Parsecommand(command)
 
@@ -986,11 +962,14 @@ class init(object):
     def _resolve_sequential_param(self, list_name, prefix, list_val, max_fields, suffix, kwargs):
         '''
         Resolves a sequential parameter by checking both the canonical list value
-        and any individual keyword arguments passed in kwargs (e.g. f1_f, f2_f or key1_f, key2_f).
+        and any individual keyword arguments passed in kwargs (e.g. f1_f, f2_f or key1_f, key2_f),
+        as well as singular aliases (e.g. key_f).
         Enforces strict contiguous index ordering (no gaps) and prevents passing both.
         '''
         pat = re.compile(rf'^{prefix}(\\d+)(?:_{suffix})?$', re.IGNORECASE)
+        pat_singular = re.compile(rf'^{prefix}(?:_{suffix})?$', re.IGNORECASE)
         numbered = {}
+        singular = {}
         keys_to_remove = []
         for k, v in kwargs.items():
             m = pat.match(k)
@@ -1000,9 +979,28 @@ class init(object):
                     raise ValueError(f"Duplicate sequential argument provided for '{prefix}{idx}'.")
                 numbered[idx] = v
                 keys_to_remove.append(k)
+            elif pat_singular.match(k):
+                singular[k] = v
+                keys_to_remove.append(k)
 
         for k in keys_to_remove:
             del kwargs[k]
+
+        if singular:
+            if len(singular) > 1:
+                raise ValueError(f"Duplicate singular alias arguments provided for '{prefix}': {list(singular.keys())}")
+            singular_k, singular_v = next(iter(singular.items()))
+            if list_val != ['optional']:
+                raise ValueError(f"Cannot specify both canonical list '{list_name}' and singular alias '{singular_k}'.")
+            if numbered:
+                raise ValueError(f"Cannot specify both individual keyword arguments and singular alias '{singular_k}' for '{prefix}'.")
+            if singular_v == "optional" or singular_v is None:
+                return ['optional']
+            if isinstance(singular_v, (list, tuple)):
+                if len(singular_v) > max_fields:
+                    raise ValueError(f"Maximum allowed fields for '{prefix}' is {max_fields}, but {len(singular_v)} were provided.")
+                return list(singular_v)
+            return [str(singular_v)]
 
         if numbered:
             if list_val != ['optional']:
@@ -1036,6 +1034,7 @@ To do:
 import re
 
 import dmstudio.initialize
+from dmstudio import validator
 
 # constant to avoid redundant COM connections which slows down processing
 
@@ -1043,7 +1042,7 @@ OSCRIPTCON = None
 
 class init(object):
 
-    def __init__(self, version=None):
+    def __init__(self, version=None, strict=False):
 
         '''
         commands.__init__
@@ -1059,26 +1058,38 @@ class init(object):
         version: str
             optional datamine studio versions ('Studio3', 'StudioRM', 'StudioRM3.1', 'StudioRM3.2', 'StudioEM') If no version given, the initializtion
             will try different versions starting with StudioRM then Studio3 and finally StudioEM.
+        strict: bool, optional
+            If True, enables strict command validation raising ValueError on syntax errors or unsafe patterns.
+            Default is False (emits warnings).
 
         '''
         self.oScript = OSCRIPTCON
         self.version = version
+        self.strict = strict
         if self.oScript is None:
             self.oScript = dmstudio.initialize.studio(self.version)
 
-    def run_command(self, command):
+    def run_command(self, command, strict=None):
         '''
         run_command
         -----------
 
-        Uses the studio Parsecommand method to execute a datamine script.
+        Uses the studio Parsecommand method to execute a datamine script with
+        pre-flight command validation.
 
         Parameters:
         -----------
 
         command: str
             datamine command string to be parsed
+        strict: bool, optional
+            If True, raises ValueError on syntax errors or unsafe patterns.
+            If None (default), uses the instance's self.strict setting.
         '''
+
+        if strict is None:
+            strict = getattr(self, 'strict', False)
+        validator.validate_command(command, strict=strict)
 
         try:
             self.oScript.Parsecommand(command)
@@ -1125,11 +1136,14 @@ class init(object):
     def _resolve_sequential_param(self, list_name, prefix, list_val, max_fields, suffix, kwargs):
         '''
         Resolves a sequential parameter by checking both the canonical list value
-        and any individual keyword arguments passed in kwargs (e.g. f1_f, f2_f or key1_f, key2_f).
+        and any individual keyword arguments passed in kwargs (e.g. f1_f, f2_f or key1_f, key2_f),
+        as well as singular aliases (e.g. key_f).
         Enforces strict contiguous index ordering (no gaps) and prevents passing both.
         '''
         pat = re.compile(rf'^{prefix}(\\d+)(?:_{suffix})?$', re.IGNORECASE)
+        pat_singular = re.compile(rf'^{prefix}(?:_{suffix})?$', re.IGNORECASE)
         numbered = {}
+        singular = {}
         keys_to_remove = []
         for k, v in kwargs.items():
             m = pat.match(k)
@@ -1139,9 +1153,28 @@ class init(object):
                     raise ValueError(f"Duplicate sequential argument provided for '{prefix}{idx}'.")
                 numbered[idx] = v
                 keys_to_remove.append(k)
+            elif pat_singular.match(k):
+                singular[k] = v
+                keys_to_remove.append(k)
 
         for k in keys_to_remove:
             del kwargs[k]
+
+        if singular:
+            if len(singular) > 1:
+                raise ValueError(f"Duplicate singular alias arguments provided for '{prefix}': {list(singular.keys())}")
+            singular_k, singular_v = next(iter(singular.items()))
+            if list_val != ['optional']:
+                raise ValueError(f"Cannot specify both canonical list '{list_name}' and singular alias '{singular_k}'.")
+            if numbered:
+                raise ValueError(f"Cannot specify both individual keyword arguments and singular alias '{singular_k}' for '{prefix}'.")
+            if singular_v == "optional" or singular_v is None:
+                return ['optional']
+            if isinstance(singular_v, (list, tuple)):
+                if len(singular_v) > max_fields:
+                    raise ValueError(f"Maximum allowed fields for '{prefix}' is {max_fields}, but {len(singular_v)} were provided.")
+                return list(singular_v)
+            return [str(singular_v)]
 
         if numbered:
             if list_val != ['optional']:
@@ -1158,24 +1191,68 @@ class init(object):
         return list_val
 """
 
-# Write verified files
-commands_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dmstudio", "dmcommands.py")
-with open(commands_path, "w", encoding="utf-8") as f:
-    f.write(commands_boilerplate)
-    f.write("\n")
-    for name, code in commands_funcs:
-        f.write(code)
-        f.write("\n")
+def generate():
+    commands_funcs = []
+    files_funcs = []
 
-files_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dmstudio", "dmfiles.py")
-with open(files_path, "w", encoding="utf-8") as f:
-    f.write(files_boilerplate)
-    f.write("\n")
-    for name, code in files_funcs:
-        f.write(code)
-        f.write("\n")
+    for filepath in files:
+        info = parse_markdown_file(filepath)
+        if not info:
+            continue
+            
+        if info['name'].upper() in EXCLUDED_COMMANDS:
+            continue
+        
+        has_inputs = len(info['input_files']) > 0
+        
+        if info['name'].upper() == 'BACKTR':
+            for f in info['input_files']:
+                if f['name'].upper() == 'IN1':
+                    f['name'] = 'IN'
+        elif info['name'].upper() == 'CHECKIT':
+            info['output_files'].append({
+                'name': 'OUT',
+                'description': 'Output string file.',
+                'required': 'Yes',
+                'type': 'String File',
+                'default': 'required'
+            })
+            
+        name_lower = info['name'].lower()
+        is_verified = name_lower in VERIFIED_COMMANDS
+        func_code = generate_python_function(info, is_verified=is_verified)
+        
+        if has_inputs:
+            commands_funcs.append((info['name'], func_code))
+        else:
+            files_funcs.append((info['name'], func_code))
 
-print(f"Generated:")
-print(f" - {len(commands_funcs)} processes in dmcommands.py")
-print(f" - {len(files_funcs)} files in dmfiles.py")
+    # Sort alphabetically by process name
+    commands_funcs.sort(key=lambda x: x[0])
+    files_funcs.sort(key=lambda x: x[0])
+
+    # Write verified files
+    commands_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dmstudio", "dmcommands.py")
+    with open(commands_path, "w", encoding="utf-8") as f:
+        f.write(commands_boilerplate)
+        f.write("\n")
+        for name, code in commands_funcs:
+            f.write(code)
+            f.write("\n")
+
+    files_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dmstudio", "dmfiles.py")
+    with open(files_path, "w", encoding="utf-8") as f:
+        f.write(files_boilerplate)
+        f.write("\n")
+        for name, code in files_funcs:
+            f.write(code)
+            f.write("\n")
+
+    print(f"Generated:")
+    print(f" - {len(commands_funcs)} processes in dmcommands.py")
+    print(f" - {len(files_funcs)} files in dmfiles.py")
+
+
+if __name__ == '__main__':
+    generate()
 

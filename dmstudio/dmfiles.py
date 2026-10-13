@@ -67,9 +67,11 @@ class init(object):
             If True, raises ValueError on syntax errors or unsafe patterns.
             If None (default), uses the instance's self.strict setting.
         '''
+
         if strict is None:
             strict = getattr(self, 'strict', False)
         validator.validate_command(command, strict=strict)
+
         try:
             self.oScript.Parsecommand(command)
         except Exception as e:
@@ -115,11 +117,14 @@ class init(object):
     def _resolve_sequential_param(self, list_name, prefix, list_val, max_fields, suffix, kwargs):
         '''
         Resolves a sequential parameter by checking both the canonical list value
-        and any individual keyword arguments passed in kwargs (e.g. f1_f, f2_f or key1_f, key2_f).
+        and any individual keyword arguments passed in kwargs (e.g. f1_f, f2_f or key1_f, key2_f),
+        as well as singular aliases (e.g. key_f).
         Enforces strict contiguous index ordering (no gaps) and prevents passing both.
         '''
         pat = re.compile(rf'^{prefix}(\d+)(?:_{suffix})?$', re.IGNORECASE)
+        pat_singular = re.compile(rf'^{prefix}(?:_{suffix})?$', re.IGNORECASE)
         numbered = {}
+        singular = {}
         keys_to_remove = []
         for k, v in kwargs.items():
             m = pat.match(k)
@@ -129,9 +134,28 @@ class init(object):
                     raise ValueError(f"Duplicate sequential argument provided for '{prefix}{idx}'.")
                 numbered[idx] = v
                 keys_to_remove.append(k)
+            elif pat_singular.match(k):
+                singular[k] = v
+                keys_to_remove.append(k)
 
         for k in keys_to_remove:
             del kwargs[k]
+
+        if singular:
+            if len(singular) > 1:
+                raise ValueError(f"Duplicate singular alias arguments provided for '{prefix}': {list(singular.keys())}")
+            singular_k, singular_v = next(iter(singular.items()))
+            if list_val != ['optional']:
+                raise ValueError(f"Cannot specify both canonical list '{list_name}' and singular alias '{singular_k}'.")
+            if numbered:
+                raise ValueError(f"Cannot specify both individual keyword arguments and singular alias '{singular_k}' for '{prefix}'.")
+            if singular_v == "optional" or singular_v is None:
+                return ['optional']
+            if isinstance(singular_v, (list, tuple)):
+                if len(singular_v) > max_fields:
+                    raise ValueError(f"Maximum allowed fields for '{prefix}' is {max_fields}, but {len(singular_v)} were provided.")
+                return list(singular_v)
+            return [str(singular_v)]
 
         if numbered:
             if list_val != ['optional']:

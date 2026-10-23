@@ -3,7 +3,7 @@ import sys
 import glob
 import numpy as np
 
-def _scriptinit(dm_object):
+def _scriptinit(dm_object, attach_only=True):
     '''
     _scriptinit
     -----------
@@ -22,9 +22,27 @@ def _scriptinit(dm_object):
     ActiveX connection
     '''
 
-    return win32com.client.Dispatch(dm_object);
+    if attach_only:
+        try:
+            return win32com.client.GetActiveObject(dm_object)
+        except Exception:
+            try:
+                import psutil
+                process_names = ('studiorm.exe', 'studio3.exe', 'studioem.exe')
+                running = any(
+                    (p.info.get('name') or '').lower() in process_names
+                    for p in psutil.process_iter(['name'])
+                )
+                if not running:
+                    raise RuntimeError(
+                        f"Datamine Studio process is not running. Please start Studio interactively."
+                    )
+            except ImportError:
+                pass
 
-def studio(version):
+    return win32com.client.Dispatch(dm_object)
+
+def studio(version=None, make_dmdir=False, attach_only=True):
     '''
     studio
     ------
@@ -58,24 +76,25 @@ def studio(version):
 
     oScript = None
 
-    _make_dmdir()
+    if make_dmdir:
+        _make_dmdir()
 
     if version == 'StudioRM' or (isinstance(version, str) and version.startswith('StudioRM3.')):
-        oScript = _scriptinit("Datamine.StudioRM.Application")
+        oScript = _scriptinit("Datamine.StudioRM.Application", attach_only=attach_only)
     elif version == 'Studio3':
-        oScript = _scriptinit("Datamine.Studio.Application")
+        oScript = _scriptinit("Datamine.Studio.Application", attach_only=attach_only)
     elif version == 'StudioEM':
-        oScript = _scriptinit("Datamine.StudioEM.Application")
+        oScript = _scriptinit("Datamine.StudioEM.Application", attach_only=attach_only)
     else:
         # no version given, will try to find a valid version
         try:
-            oScript = _scriptinit("Datamine.StudioRM.Application")
+            oScript = _scriptinit("Datamine.StudioRM.Application", attach_only=attach_only)
         except Exception:
             try:
-                oScript = _scriptinit("Datamine.Studio.Application")
+                oScript = _scriptinit("Datamine.Studio.Application", attach_only=attach_only)
             except Exception:
                 try:
-                    oScript = _scriptinit("Datamine.StudioEM.Application")
+                    oScript = _scriptinit("Datamine.StudioEM.Application", attach_only=attach_only)
                 except Exception:
                     raise RuntimeError("No valid Studio version is active")
 

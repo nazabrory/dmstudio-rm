@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0b16 - 2026-10-23
+
+- **GetActiveObject-First COM Attachment**: `dmstudio.initialize._scriptinit()` now attempts `win32com.client.GetActiveObject("Datamine.StudioRM.Application")` first before falling back to `Dispatch`, eliminating unnecessary process spawns.
+- **Headless COM Process Spawning Protection**: Added `attach_only=True` parameter to `initialize.studio()`. When enabled (default), verifies `StudioRM.exe` is actively running in the Windows process table before issuing COM calls, preventing unintended headless background server processes.
+- **Opt-in `dmdir` Regeneration**: `_make_dmdir()` disk I/O on every import is now opt-in via `make_dmdir=False` by default in `initialize.studio()`.
+
 ## 2.0.0b15 - 2026-10-13
 
 - **Sequential Keys & Singular Alias Resolution**: Added `keys_f` support and sequential resolution (up to 30 keys) to `JOIN` wrapper, and enabled intuitive singular aliases (`key_f`) across sequential key commands.

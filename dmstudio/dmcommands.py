@@ -1,7 +1,9 @@
 import re
+import time
 
 import dmstudio.initialize
 from dmstudio import validator
+from dmstudio.output_capture import CommandLogCapture, classify_log_delta, ExecutionResult
 
 
 # constant to avoid redundant COM connections which slows down processing
@@ -35,6 +37,9 @@ class init(object):
         self.strict = strict
         if self.oScript is None:
             self.oScript = dmstudio.initialize.studio(self.version)
+        self.last_result = None
+        self.last_output = ''
+        self._capture = CommandLogCapture()
 
     def run_command(self, command, strict=None):
 
@@ -53,13 +58,41 @@ class init(object):
         strict: bool, optional
             If True, raises ValueError on syntax errors or unsafe patterns.
             If None (default), uses the instance's self.strict setting.
+
+        Returns:
+        --------
+        ExecutionResult
+            Structured diagnostic result with .success, .output, .duration, .errors, and .warnings.
         '''
 
         if strict is None:
             strict = getattr(self, 'strict', False)
         validator.validate_command(command, strict=strict)
 
+        capture = getattr(self, '_capture', None)
+        if capture is None:
+            capture = CommandLogCapture()
+            self._capture = capture
+
+        capture.mark()
+        start_time = time.time()
         self.oScript.Parsecommand(command)
+        duration = time.time() - start_time
+        delta = capture.get_delta()
+        success, errors, warnings = classify_log_delta(delta)
+
+        result = ExecutionResult(
+            success=success,
+            output=delta,
+            duration=duration,
+            errors=errors,
+            warnings=warnings,
+            command=command,
+        )
+        self.last_result = result
+        self.last_output = delta
+
+        return result
 
         # update the dmdir.py file containing list of .dm files in current directory
 

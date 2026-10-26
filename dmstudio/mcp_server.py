@@ -39,6 +39,8 @@ except ImportError:
 
 from dmstudio import command_registry
 from dmstudio.notebook_builder import NotebookBuilder
+from dmstudio.notebook_runner import run_and_diagnose_notebook as _run_nb
+from dmstudio.output_capture import CommandLogCapture
 
 mcp = FastMCP('dmstudio')
 
@@ -172,6 +174,73 @@ def create_jupyter_workflow(notebook_name: str, steps: list) -> str:
         }, indent=2)
     except Exception as e:
         return json.dumps({'error': str(e)})
+
+
+# ---------------------------------------------------------------------------
+# Tool: run_and_diagnose_notebook
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def run_and_diagnose_notebook(notebook_path: str, timeout: int = 120, sandbox_dir: str = '') -> str:
+    '''
+    Execute a Jupyter Notebook headlessly against the active Datamine Studio RM session,
+    monitoring each cell's Python traceback and pairing it with real-time Command.log output.
+
+    If any cell fails (due to a Python exception or Datamine syntax/field error), execution
+    halts and returns a Cell-Paired Diagnostic Bundle detailing the exact failing cell,
+    code, error type, and Datamine Command Window output delta.
+
+    Args:
+        notebook_path: Path to the .ipynb file.
+        timeout: Maximum execution timeout in seconds (default 120).
+        sandbox_dir: Optional sandbox working directory (e.g. "tutorials/test_sandbox").
+
+    Returns:
+        JSON object with 'success', 'total_cells', 'failed_cell_index', 'failed_cell_code',
+        'error_type', 'error_message', 'command_log_delta', and 'summary'.
+    '''
+    sbox = sandbox_dir if sandbox_dir.strip() else None
+    report = _run_nb(notebook_path=notebook_path, timeout=timeout, sandbox_dir=sbox)
+    return json.dumps(report, indent=2)
+
+
+# ---------------------------------------------------------------------------
+# Tool: read_recent_command_log
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def read_recent_command_log(lines: int = 50) -> str:
+    '''
+    Read the most recent lines from Datamine Studio RM's native Command.log file
+    located in %APPDATA%/Datamine/StudioRM/Command.log.
+
+    Allows the AI agent to inspect recent Datamine CLI diagnostic messages and
+    execution output without attaching to COM.
+
+    Args:
+        lines: Number of trailing log lines to retrieve (default 50).
+
+    Returns:
+        JSON object with 'log_path', 'line_count', and 'content'.
+    '''
+    log_path = CommandLogCapture.default_log_path()
+    if not os.path.exists(log_path):
+        return json.dumps({
+            'error': f'Command.log not found at {log_path}',
+            'log_path': log_path,
+        }, indent=2)
+
+    try:
+        with open(log_path, 'r', encoding='utf-8', errors='replace') as f:
+            all_lines = f.readlines()
+        tail = all_lines[-lines:] if len(all_lines) > lines else all_lines
+        return json.dumps({
+            'log_path': log_path,
+            'line_count': len(tail),
+            'content': ''.join(tail),
+        }, indent=2)
+    except Exception as e:
+        return json.dumps({'error': str(e), 'log_path': log_path}, indent=2)
 
 
 # ---------------------------------------------------------------------------

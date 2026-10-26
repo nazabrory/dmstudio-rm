@@ -41,6 +41,8 @@ from dmstudio import bootstrap
 from dmstudio import validator
 from dmstudio import scratch
 from dmstudio import command_registry
+from dmstudio import output_capture
+from dmstudio import notebook_runner
 
 # Shortcuts
 from dmstudio.superprocess import batch_append, transform_model, transform_block_model, coordinate_transform
@@ -51,6 +53,13 @@ from dmstudio.dialog import dialog_dismiss_context
 from dmstudio.notebook_builder import NotebookBuilder
 from dmstudio.sandbox import copy_database_files, initialize_sandbox
 from dmstudio.command_registry import list_commands, get_command_schema, search_commands
+from dmstudio.output_capture import (
+    CommandLogCapture,
+    ExecutionResult,
+    classify_log_delta,
+    command_capture,
+)
+from dmstudio.notebook_runner import run_and_diagnose_notebook
 from dmstudio.dm_io import (
     read_datamine,
     to_datamine,
@@ -73,11 +82,19 @@ __all__ = [
     'dmfiles',
     'initialize',
     'notebook_builder',
+    'notebook_runner',
+    'output_capture',
     'sandbox',
     'scratch',
     'special',
     'superprocess',
     'validator',
+    # Command output capture & diagnostics
+    'CommandLogCapture',
+    'ExecutionResult',
+    'classify_log_delta',
+    'command_capture',
+    'run_and_diagnose_notebook',
     # Datamine binary table I/O
     'read_datamine',
     'to_datamine',

@@ -158,17 +158,20 @@ Or run the server directly (stdio transport):
 .venv\Scripts\python -m dmstudio.mcp_server
 ```
 
-MCP tools (via `command_registry` and `NotebookBuilder`):
+MCP tools (via `command_registry`, `NotebookBuilder`, `output_capture`, and `notebook_runner`):
 
 - `list_commands`
 - `get_command_schema(command_name)`
 - `search_commands(query)`
 - `create_jupyter_workflow(notebook_name, steps)`
+- `run_and_diagnose_notebook(notebook_path, timeout=120, sandbox_dir="")`
+- `read_recent_command_log(lines=50)`
 
 #### COM Isolation Policy (CRITICAL)
 To prevent lock conflicts and application crashes, the MCP server is completely decoupled from active COM sessions.
-- **NO Direct COM Executions**: The server has no COM dependencies.
-- **Workflow-Driven Design**: The AI's job is solely to construct Jupyter Notebook workflows (`.ipynb`) using `create_jupyter_workflow`, which the user will run themselves inside Datamine Studio RM.
+- **NO Direct COM Executions**: The server has no in-process COM dependencies.
+- **Out-of-Process Execution**: Automated notebook verification (`run_and_diagnose_notebook`) spawns a dedicated, isolated subprocess with modal auto-dismissal guards and timeouts, ensuring the MCP server never hangs on COM modals.
+- **Workflow-Driven Design**: The AI's job is to construct, test, and refine Jupyter Notebook workflows (`.ipynb`), delivering green verified notebooks to the user.
 
 #### Claude Desktop (`%APPDATA%\Claude\claude_desktop_config.json`)
 Automatically configured using the `--install` CLI argument. It will register:

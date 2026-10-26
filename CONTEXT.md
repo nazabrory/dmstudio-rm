@@ -99,3 +99,25 @@ _Avoid_: CSV export fallback, pandas export
 Direct interrogation of Datamine binary table schemas, field types, character widths, record counts, and global block model attributes (e.g. `XMORIG`, `YMORIG`, `ZMORIG`, cell increments) via `read_datamine_header` and `read_datamine_summary` using underlying COM ADO objects without materializing records into memory or invoking `STATS`.
 _Avoid_: table scan, full read inspection
 
+
+### Command Execution & Output Capture
+
+**Command output stream**:
+The real-time log of process diagnostics, record counts, and execution summaries written by Studio RM to `%APPDATA%\Datamine\StudioRM\Command.log`, mirroring the text displayed in the interactive Command Window.
+_Avoid_: console stdout, terminal redirect
+
+**Session log delta**:
+The slice of text appended to `Command.log` between the start and completion of a `Parsecommand` invocation, capturing the specific output of that command.
+_Avoid_: full log dump
+
+**Output control bar**:
+The Studio RM GUI docking window hosting the Command, Output, and Desurvey tabs. Exposed via COM as `IDmOutputControlBar`, which is strictly write-only for scripts.
+_Avoid_: terminal buffer, command line reader
+
+**Headless notebook runner**:
+A subprocess coordinator that executes a Jupyter Notebook against the active Studio RM session, wrapped in modal dialog dismissal and timeout guards, without attaching direct COM handles to the MCP server.
+_Avoid_: interactive kernel, manual notebook run
+
+**Cell-paired diagnostic bundle**:
+A structured error payload grouping a failing notebook cell's source code, Python exception traceback, and the exact session log delta produced during that specific cell's execution.
+_Avoid_: full notebook log dump

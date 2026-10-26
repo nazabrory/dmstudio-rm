@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.0b17 - 2026-10-26
+
+- **Command Output Stream Capture**: Real-time byte-delta tracking of `%APPDATA%\Datamine\StudioRM\Command.log` in `dmstudio.output_capture` (`CommandLogCapture`, `ExecutionResult`, `classify_log_delta`).
+- **Core Execution Result Integration**: Updated `dmstudio.dmcommands.init.run_command` to automatically intercept command execution, classify success/failure signatures, and populate `last_result` and `last_output`.
+- **Headless Notebook Runner & Diagnostics**: Added `dmstudio.notebook_runner` (`run_and_diagnose_notebook`) to headlessly execute `.ipynb` workflows out-of-process with modal auto-dismissal (`dialog_dismiss_context`) and cell-paired diagnostic bundles.
+- **MCP Server Diagnostic Tools**: Exposed `run_and_diagnose_notebook` and `read_recent_command_log` in `dmstudio.mcp_server` (`dmstudio-mcp`) while maintaining COM isolation policy.
+- **Architectural Documentation**: Added ADR-0002 (`docs/adr/0002-command-output-capture-and-headless-notebook-diagnostics.md`) and expanded domain vocabulary in `CONTEXT.md`.
+
 ## 2.0.0b16 - 2026-10-23
 
 - **GetActiveObject-First COM Attachment**: `dmstudio.initialize._scriptinit()` now attempts `win32com.client.GetActiveObject("Datamine.StudioRM.Application")` first before falling back to `Dispatch`, eliminating unnecessary process spawns.

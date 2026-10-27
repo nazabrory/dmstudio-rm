@@ -2,6 +2,7 @@ import json
 import os
 import tempfile
 import unittest
+from unittest.mock import MagicMock, patch
 
 class TestNotebookRunner(unittest.TestCase):
 
@@ -85,6 +86,80 @@ with open(r'{custom_log}', 'a', encoding='utf-8') as f:
         self.assertEqual(report["failed_cell_index"], 1)
         self.assertEqual(report["error_type"], "DATAMINE_ERROR")
         self.assertIn("FIELD NOT FOUND", report["error_message"])
+
+    def test_clean_cell_code_and_magics_execution(self):
+        from dmstudio.notebook_runner import _clean_cell_code, run_and_diagnose_notebook
+
+        # Unit test _clean_cell_code directly
+        raw = "%%time\n%matplotlib inline\n!pip list\n?func\nx = 10"
+        cleaned = _clean_cell_code(raw)
+        self.assertIn("# [IPython magic stripped] %%time", cleaned)
+        self.assertIn("# [IPython magic stripped] %matplotlib inline", cleaned)
+        self.assertIn("# [Shell/Help stripped] !pip list", cleaned)
+        self.assertIn("# [Shell/Help stripped] ?func", cleaned)
+        self.assertIn("x = 10", cleaned)
+        self.assertEqual(len(raw.splitlines()), len(cleaned.splitlines()))
+
+        # End-to-end execution of cell magics in runner subprocess
+        nb_path = self._create_notebook([
+            "%%time\nx = 10\ny = 20",
+            "%matplotlib inline\nz = x + y",
+            "!pip --version\nassert z == 30",
+        ])
+        report = run_and_diagnose_notebook(nb_path, timeout=30)
+        self.assertTrue(report["success"], msg=report.get("error_message"))
+        self.assertEqual(report["total_cells"], 3)
+
+    def test_plt_show_does_not_block(self):
+        from dmstudio.notebook_runner import run_and_diagnose_notebook
+
+        nb_path = self._create_notebook([
+            "import matplotlib.pyplot as plt\nfig, ax = plt.subplots()\nax.plot([1, 2], [3, 4])\nplt.show()\nx = 42",
+            "assert x == 42",
+        ])
+        report = run_and_diagnose_notebook(nb_path, timeout=30)
+        self.assertTrue(report["success"], msg=report.get("error_message"))
+        self.assertEqual(report["total_cells"], 2)
+
+    def test_utf8_emoji_output_and_stdout_mixing(self):
+        from dmstudio.notebook_runner import run_and_diagnose_notebook
+
+        nb_path = self._create_notebook([
+            "print('✅ Compositing complete! 🚀 Processed 12,500 intervals ⚡')\nval = 100",
+            "print('🎉 Capping finished: 99.5% percentile applied 💎')\nassert val == 100",
+        ])
+        report = run_and_diagnose_notebook(nb_path, timeout=30)
+        self.assertTrue(report["success"], msg=report.get("error_message"))
+        self.assertEqual(report["total_cells"], 2)
+
+    def test_attach_only_never_dispatches(self):
+        from dmstudio import initialize
+
+        # Scenario 1: Studio RM process is running, but ROT attachment fails
+        mock_proc = MagicMock()
+        mock_proc.info = {'name': 'studiorm.exe'}
+        with patch('win32com.client.GetActiveObject', side_effect=Exception('ROT lookup failed')):
+            with patch('psutil.process_iter', return_value=[mock_proc]):
+                with patch('win32com.client.Dispatch') as mock_dispatch:
+                    with self.assertRaises(RuntimeError) as ctx:
+                        initialize.studio('StudioRM', attach_only=True)
+                    self.assertIn("running, but failed to attach via COM Running Object Table", str(ctx.exception))
+                    mock_dispatch.assert_not_called()
+
+        # Scenario 2: Studio RM process is NOT running
+        with patch('win32com.client.GetActiveObject', side_effect=Exception('ROT lookup failed')):
+            with patch('psutil.process_iter', return_value=[]):
+                with patch('win32com.client.Dispatch') as mock_dispatch:
+                    with self.assertRaises(RuntimeError) as ctx:
+                        initialize.studio('StudioRM', attach_only=True)
+                    self.assertIn("process is not running", str(ctx.exception))
+                    mock_dispatch.assert_not_called()
+
+        # Scenario 3: attach_only=False falls back to Dispatch
+        with patch('win32com.client.GetActiveObject', side_effect=Exception('ROT lookup failed')):
+            with patch('win32com.client.Dispatch', return_value='mock_com_obj') as mock_dispatch:
+                res = initialize.studio('StudioRM', attach_only=False)
+                mock_dispatch.assert_called_once_with('Datamine.StudioRM.Application')
 
 
 if __name__ == "__main__":

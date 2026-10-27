@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.0b18 - 2026-10-27
+
+- **Strict COM Single-Instance & ROT Guard**: `initialize._scriptinit()` with `attach_only=True` (default) strictly verifies attachment to an active Studio RM session via COM Running Object Table (ROT) and will never fall back to `win32com.client.Dispatch()`, preventing accidental headless background process spawns (`StudioRM.exe -Embedding`). Descriptive errors distinguish between inactive processes vs ROT registration/elevation mismatches.
+- **Headless Matplotlib Enforcement**: `notebook_runner` automatically configures `matplotlib.use('Agg')`, calls `plt.ioff()`, and no-ops `plt.show()` during notebook cell execution, preventing blocking GUI windows during automated diagnosis.
+- **IPython Magics Pre-Compilation Sanitizer**: Added `_clean_cell_code()` in `notebook_runner` to comment out IPython cell magics (`%%time`, `%matplotlib inline`) and shell commands (`!`, `?`) without altering line numbers, preventing Python `SyntaxError` during headless execution.
+- **UTF-8 Output & Sentinel-Isolated JSON Parsing**: Configured UTF-8 encoding and environment flags (`PYTHONUTF8=1`, `PYTHONIOENCODING=utf-8`) in notebook runner subprocesses to prevent Windows CP1252 `UnicodeDecodeError` on emoji/unicode logs, and wrapped diagnostic payloads in explicit sentinels (`===DMSTUDIO_RUNNER_JSON_START===` / `===DMSTUDIO_RUNNER_JSON_END===`) to prevent cell stdout print mixing.
+
 ## 2.0.0b17 - 2026-10-26
 
 - **Command Output Stream Capture**: Real-time byte-delta tracking of `%APPDATA%\Datamine\StudioRM\Command.log` in `dmstudio.output_capture` (`CommandLogCapture`, `ExecutionResult`, `classify_log_delta`).

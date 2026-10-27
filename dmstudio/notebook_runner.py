@@ -8,6 +8,9 @@ from typing import Any, Dict, Optional
 
 from dmstudio.output_capture import CommandLogCapture, classify_log_delta
 
+JSON_START_SENTINEL = '===DMSTUDIO_RUNNER_JSON_START==='
+JSON_END_SENTINEL = '===DMSTUDIO_RUNNER_JSON_END==='
+
 
 @contextmanager
 def _safe_dialog():
@@ -17,6 +20,25 @@ def _safe_dialog():
             yield
     except Exception:
         yield
+
+
+def _clean_cell_code(cell_code: str) -> str:
+    '''
+    Strips or comments out IPython-specific syntax (magics, shell escapes)
+    so standard Python compile() does not fail with SyntaxError.
+    Preserves line count and line structure for accurate traceback mapping.
+    '''
+    lines = cell_code.splitlines()
+    cleaned = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith('%%') or stripped.startswith('%'):
+            cleaned.append('# [IPython magic stripped] ' + line)
+        elif stripped.startswith('!') or stripped.startswith('?'):
+            cleaned.append('# [Shell/Help stripped] ' + line)
+        else:
+            cleaned.append(line)
+    return '\n'.join(cleaned)
 
 
 def _execute_cells(notebook_path: str, custom_log_path: Optional[str] = None) -> Dict[str, Any]:
@@ -31,6 +53,17 @@ def _execute_cells(notebook_path: str, custom_log_path: Optional[str] = None) ->
 
     capture = CommandLogCapture(log_path=custom_log_path)
     globals_dict: Dict[str, Any] = {'__name__': '__main__'}
+
+    # Configure non-interactive matplotlib to prevent plt.show() from blocking
+    try:
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        plt.ioff()
+        plt.show = lambda *args, **kwargs: None
+        globals_dict['plt'] = plt
+    except ImportError:
+        pass
 
     accumulated_log = []
     executed_code_cells = 0
@@ -55,7 +88,8 @@ def _execute_cells(notebook_path: str, custom_log_path: Optional[str] = None) ->
             tb_str = ''
 
             try:
-                compiled = compile(cell_code, f'<cell_{idx}>', 'exec')
+                cleaned_code = _clean_cell_code(cell_code)
+                compiled = compile(cleaned_code, f'<cell_{idx}>', 'exec')
                 exec(compiled, globals_dict)
             except Exception as e:
                 py_exc = e
@@ -158,13 +192,20 @@ def run_and_diagnose_notebook(
     if custom_log_path:
         cmd.extend(['--log-path', custom_log_path])
 
+    env = os.environ.copy()
+    env['PYTHONUTF8'] = '1'
+    env['PYTHONIOENCODING'] = 'utf-8'
+
     try:
         proc = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
+            encoding='utf-8',
+            errors='replace',
             timeout=timeout,
             cwd=cwd,
+            env=env,
         )
     except subprocess.TimeoutExpired:
         return {
@@ -186,8 +227,17 @@ def run_and_diagnose_notebook(
             'summary': f'Runner crashed with code {proc.returncode}: {proc.stderr}',
         }
 
+    raw_stdout = proc.stdout
+    start_idx = raw_stdout.find(JSON_START_SENTINEL)
+    end_idx = raw_stdout.rfind(JSON_END_SENTINEL)
+
+    if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+        payload = raw_stdout[start_idx + len(JSON_START_SENTINEL):end_idx].strip()
+    else:
+        payload = raw_stdout.strip()
+
     try:
-        report = json.loads(proc.stdout.strip())
+        report = json.loads(payload)
         return report
     except json.JSONDecodeError:
         return {
@@ -198,6 +248,11 @@ def run_and_diagnose_notebook(
 
 
 if __name__ == '__main__':
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    if hasattr(sys.stderr, 'reconfigure'):
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
     import argparse
     parser = argparse.ArgumentParser(description='Headless Datamine Notebook Runner')
     parser.add_argument('notebook', help='Path to notebook file')
@@ -205,4 +260,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     result = _execute_cells(args.notebook, custom_log_path=args.log_path)
-    print(json.dumps(result))
+    print(f"{JSON_START_SENTINEL}\n{json.dumps(result)}\n{JSON_END_SENTINEL}")

@@ -13,8 +13,13 @@ def _scriptinit(dm_object, attach_only=True):
     Parameters:
     -----------
 
-    studio_object: str
+    dm_object: str
         Datamine studio COM object to initialize
+
+    attach_only: bool
+        If True (default), attaches to an existing running Studio instance via COM
+        Running Object Table (ROT). Never calls Dispatch() to launch a new headless process.
+        If False, attempts GetActiveObject() first and falls back to Dispatch() if attachment fails.
 
     Returns:
     --------
@@ -25,7 +30,7 @@ def _scriptinit(dm_object, attach_only=True):
     if attach_only:
         try:
             return win32com.client.GetActiveObject(dm_object)
-        except Exception:
+        except Exception as e:
             try:
                 import psutil
                 process_names = ('studiorm.exe', 'studio3.exe', 'studioem.exe')
@@ -33,12 +38,24 @@ def _scriptinit(dm_object, attach_only=True):
                     (p.info.get('name') or '').lower() in process_names
                     for p in psutil.process_iter(['name'])
                 )
-                if not running:
+                if running:
                     raise RuntimeError(
-                        f"Datamine Studio process is not running. Please start Studio interactively."
-                    )
+                        f"Datamine Studio process is running, but failed to attach via COM Running Object Table (ROT). "
+                        f"Ensure Studio RM is running in the same user session and elevation level as Python. ({e})"
+                    ) from e
+                else:
+                    raise RuntimeError(
+                        "Datamine Studio process is not running. Please start Studio interactively."
+                    ) from e
             except ImportError:
-                pass
+                raise RuntimeError(
+                    f"Could not attach to active Datamine Studio object ({dm_object}). Ensure Studio is running. ({e})"
+                ) from e
+
+    try:
+        return win32com.client.GetActiveObject(dm_object)
+    except Exception:
+        pass
 
     return win32com.client.Dispatch(dm_object)
 
@@ -87,16 +104,18 @@ def studio(version=None, make_dmdir=False, attach_only=True):
         oScript = _scriptinit("Datamine.StudioEM.Application", attach_only=attach_only)
     else:
         # no version given, will try to find a valid version
-        try:
-            oScript = _scriptinit("Datamine.StudioRM.Application", attach_only=attach_only)
-        except Exception:
+        last_err = None
+        for prog_id in ("Datamine.StudioRM.Application", "Datamine.Studio.Application", "Datamine.StudioEM.Application"):
             try:
-                oScript = _scriptinit("Datamine.Studio.Application", attach_only=attach_only)
-            except Exception:
-                try:
-                    oScript = _scriptinit("Datamine.StudioEM.Application", attach_only=attach_only)
-                except Exception:
-                    raise RuntimeError("No valid Studio version is active")
+                oScript = _scriptinit(prog_id, attach_only=attach_only)
+                if oScript is not None:
+                    break
+            except Exception as e:
+                last_err = e
+        if oScript is None:
+            if last_err and "running, but failed to attach" in str(last_err):
+                raise last_err
+            raise RuntimeError("No valid Studio version is active")
 
     return StudioCOMWrapper(oScript) if oScript is not None else None
 
@@ -176,6 +195,3 @@ def _make_dmdir():
         dmdir_f.write('_'+ outname + "_='" + outname + "'\n")
 
     dmdir_f.close()
-
-
-

@@ -15479,6 +15479,16 @@ See [EXTRA examples](<../COMMON/Expression%20Translator%20Examples.md>).
             command += " @print=" + str(print_p)
 
         if arguments != "optional":
+            if isinstance(arguments, str) and not re.search(r'\bGO\b', arguments, re.IGNORECASE):
+                trimmed = arguments.rstrip()
+                if trimmed.endswith("'"):
+                    prefix = trimmed[:-1].rstrip()
+                    arguments = prefix + " GO'"
+                elif trimmed.endswith('"'):
+                    prefix = trimmed[:-1].rstrip()
+                    arguments = prefix + ' GO"'
+                else:
+                    arguments = arguments + " GO"
             command += " " + arguments
 
         if retrieval != "optional":

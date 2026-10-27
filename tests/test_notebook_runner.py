@@ -162,5 +162,43 @@ with open(r'{custom_log}', 'a', encoding='utf-8') as f:
                 mock_dispatch.assert_called_once_with('Datamine.StudioRM.Application')
 
 
+    def test_extra_auto_appends_go(self):
+        from dmstudio.dmcommands import init
+
+        mock_com = MagicMock()
+        captured_commands = []
+        mock_com.Parsecommand = lambda cmd: captured_commands.append(cmd)
+
+        dmc = init.__new__(init)
+        dmc.oScript = mock_com
+        dmc.version = "MockVersion"
+        dmc.strict = False
+        dmc._capture = MagicMock()
+        dmc._capture.mark = lambda: None
+        dmc._capture.get_delta = lambda: ""
+
+        # Case 1: Single quoted expression without GO -> inserts GO before closing quote
+        dmc.extra(in_i="f_in", out_o="f_out", arguments="'BHID=100;'")
+        self.assertIn("'BHID=100; GO'", captured_commands[-1])
+
+        # Case 2: Double quoted expression without GO -> inserts GO before closing quote
+        dmc.extra(in_i="f_in", out_o="f_out", arguments='"BHID=100;"')
+        self.assertIn('"BHID=100; GO"', captured_commands[-1])
+
+        # Case 3: Unquoted expression without GO -> appends GO
+        dmc.extra(in_i="f_in", out_o="f_out", arguments="BHID=100;")
+        self.assertIn("BHID=100; GO", captured_commands[-1])
+
+        # Case 4: Expression already containing GO -> does not duplicate
+        dmc.extra(in_i="f_in", out_o="f_out", arguments="'BHID=100; GO'")
+        self.assertIn("'BHID=100; GO'", captured_commands[-1])
+        self.assertNotIn("GO GO", captured_commands[-1])
+
+        # Case 5: Case-insensitive 'go' -> does not duplicate
+        dmc.extra(in_i="f_in", out_o="f_out", arguments="'BHID=100; go'")
+        self.assertIn("'BHID=100; go'", captured_commands[-1])
+        self.assertNotIn("go GO", captured_commands[-1])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -61,6 +61,7 @@ def _execute_cells(notebook_path: str, custom_log_path: Optional[str] = None) ->
         import matplotlib.pyplot as plt
         plt.ioff()
         plt.show = lambda *args, **kwargs: None
+        globals_dict['matplotlib'] = matplotlib
         globals_dict['plt'] = plt
     except ImportError:
         pass
@@ -195,6 +196,9 @@ def run_and_diagnose_notebook(
     env = os.environ.copy()
     env['PYTHONUTF8'] = '1'
     env['PYTHONIOENCODING'] = 'utf-8'
+    pkg_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    existing_pythonpath = env.get('PYTHONPATH', '')
+    env['PYTHONPATH'] = f"{pkg_dir}{os.pathsep}{existing_pythonpath}" if existing_pythonpath else pkg_dir
 
     try:
         proc = subprocess.run(
@@ -234,6 +238,12 @@ def run_and_diagnose_notebook(
     if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
         payload = raw_stdout[start_idx + len(JSON_START_SENTINEL):end_idx].strip()
     else:
+        if proc.returncode != 0:
+            return {
+                'success': False,
+                'error_type': 'SUBPROCESS_CRASH',
+                'summary': f'Runner crashed with code {proc.returncode}: {proc.stderr or proc.stdout}',
+            }
         payload = raw_stdout.strip()
 
     try:

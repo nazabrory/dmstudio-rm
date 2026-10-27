@@ -6,6 +6,7 @@
 - **Headless Matplotlib Enforcement**: `notebook_runner` automatically configures `matplotlib.use('Agg')`, calls `plt.ioff()`, and no-ops `plt.show()` during notebook cell execution, preventing blocking GUI windows during automated diagnosis.
 - **IPython Magics Pre-Compilation Sanitizer**: Added `_clean_cell_code()` in `notebook_runner` to comment out IPython cell magics (`%%time`, `%matplotlib inline`) and shell commands (`!`, `?`) without altering line numbers, preventing Python `SyntaxError` during headless execution.
 - **UTF-8 Output & Sentinel-Isolated JSON Parsing**: Configured UTF-8 encoding and environment flags (`PYTHONUTF8=1`, `PYTHONIOENCODING=utf-8`) in notebook runner subprocesses to prevent Windows CP1252 `UnicodeDecodeError` on emoji/unicode logs, and wrapped diagnostic payloads in explicit sentinels (`===DMSTUDIO_RUNNER_JSON_START===` / `===DMSTUDIO_RUNNER_JSON_END===`) to prevent cell stdout print mixing.
+- **Datamine EXTRA Mandatory Termination Guard**: In `dmcommands.init.extra()`, automatically detects missing Datamine `GO` terminators in `arguments` and appends `GO` (or inserts `GO` before closing quotes) to prevent command interpreter stalls.
 
 ## 2.0.0b17 - 2026-10-26
 

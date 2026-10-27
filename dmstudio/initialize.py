@@ -31,6 +31,7 @@ def _scriptinit(dm_object, attach_only=True):
         try:
             return win32com.client.GetActiveObject(dm_object)
         except Exception as e:
+            running = False
             try:
                 import psutil
                 process_names = ('studiorm.exe', 'studio3.exe', 'studioem.exe')
@@ -38,18 +39,19 @@ def _scriptinit(dm_object, attach_only=True):
                     (p.info.get('name') or '').lower() in process_names
                     for p in psutil.process_iter(['name'])
                 )
-                if running:
-                    raise RuntimeError(
-                        f"Datamine Studio process is running, but failed to attach via COM Running Object Table (ROT). "
-                        f"Ensure Studio RM is running in the same user session and elevation level as Python. ({e})"
-                    ) from e
-                else:
-                    raise RuntimeError(
-                        "Datamine Studio process is not running. Please start Studio interactively."
-                    ) from e
-            except ImportError:
+            except Exception:
+                pass
+
+            if running:
                 raise RuntimeError(
-                    f"Could not attach to active Datamine Studio object ({dm_object}). Ensure Studio is running. ({e})"
+                    f"attach_only=True: Datamine Studio RM is not registered in ROT or not running. "
+                    f"Datamine Studio process is running, but failed to attach via COM Running Object Table (ROT). "
+                    f"Ensure Studio RM is running in the same user session and elevation level as Python. ({e})"
+                ) from e
+            else:
+                raise RuntimeError(
+                    f"attach_only=True: Datamine Studio RM is not registered in ROT or not running. "
+                    f"Datamine Studio process is not running. Please start Studio interactively. ({e})"
                 ) from e
 
     try:
@@ -113,7 +115,7 @@ def studio(version=None, make_dmdir=False, attach_only=True):
             except Exception as e:
                 last_err = e
         if oScript is None:
-            if last_err and "running, but failed to attach" in str(last_err):
+            if last_err and ("running, but failed to attach" in str(last_err) or "attach_only=True" in str(last_err)):
                 raise last_err
             raise RuntimeError("No valid Studio version is active")
 
